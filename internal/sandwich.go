@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
@@ -22,7 +23,7 @@ type Sandwich struct {
 	sandwichClient protobuf.SandwichClient
 }
 
-func NewSandwich(ctx context.Context, conn *grpc.ClientConn) (s *Sandwich) {
+func NewSandwich(ctx context.Context, conn grpc.ClientConnInterface) (s *Sandwich) {
 	s = &Sandwich{
 		botsMu: sync.RWMutex{},
 		Bots:   make(map[string]*Bot),
@@ -34,6 +35,26 @@ func NewSandwich(ctx context.Context, conn *grpc.ClientConn) (s *Sandwich) {
 	}
 
 	return
+}
+
+func (s *Sandwich) DispatchSandwichPayload(payload structs.SandwichPayload) (err error) {
+	s.botsMu.RLock()
+	b, ok := s.Bots[payload.Metadata.Identifier]
+	s.botsMu.RUnlock()
+
+	if !ok {
+		return xerrors.New("No identifier")
+	}
+
+	return b.Dispatch(&Context{
+		Sandwich: s,
+	}, payload)
+}
+
+func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
+	s.botsMu.Lock()
+	s.Bots[identifier] = bot
+	s.botsMu.Unlock()
 }
 
 func (s *Sandwich) FetchIdentifiers(ctx context.Context) (identifiers *Identifiers, err error) {
@@ -75,6 +96,12 @@ type Context struct {
 	Guild *Guild
 }
 
+func (ctx *Context) wrapFuncType(err error) {
+	if err != nil {
+		fmt.Printf("We errored: %v", err)
+	}
+}
+
 func (ctx *Context) decodeContent(msg structs.SandwichPayload, out interface{}) (err error) {
 	err = jsoniter.Unmarshal(msg.Data, &out)
 	if err != nil {
@@ -87,7 +114,16 @@ func (ctx *Context) decodeContent(msg structs.SandwichPayload, out interface{}) 
 func (ctx *Context) decodeExtra(msg structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
 	val, ok := msg.Extra[key]
 	if ok {
+		if len(val) == 0 {
+			ok = false
+
+			return
+		}
+
 		err = jsoniter.Unmarshal(val, &out)
+		if err != nil {
+			return ok, xerrors.Errorf("Failed to unmarshal extra: %v", err)
+		}
 	}
 
 	return

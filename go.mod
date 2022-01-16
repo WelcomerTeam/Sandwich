@@ -3,9 +3,9 @@ module github.com/WelcomerTeam/Sandwich
 go 1.16
 
 require (
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220105214552-96a8475d786b
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220110213647-cdb442467493
 	github.com/go-redis/redis/v8 v8.11.4
-	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats.go v1.13.0
 	github.com/nats-io/stan.go v0.10.2
 	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899

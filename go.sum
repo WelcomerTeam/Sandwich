@@ -37,10 +37,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/WelcomerTeam/RealRock v0.0.0-20210907123922-8bdb1f691d11/go.mod h1:GstUihsC3fhjBQvacUZ9AC4SWysOCw73kNEjItrPl74=
-github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220104221358-a6359522a0c3 h1:Ga52afVdWtHk+Cfwifpu76q4DWV3ekatlEZtR6VUGNA=
-github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220104221358-a6359522a0c3/go.mod h1:KAVXGTHIc62sWM7GcYjIDQdNhhMEE3+tiZTBZVvNY2Q=
-github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220105214552-96a8475d786b h1:sYT7uBG9vUh9gTXX9iISAD2xKTg6dtVGXjSWWA7ysqw=
-github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220105214552-96a8475d786b/go.mod h1:KAVXGTHIc62sWM7GcYjIDQdNhhMEE3+tiZTBZVvNY2Q=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220110213647-cdb442467493 h1:G5/t0wRMoMuXmctXFqh69sdOdpsWiC4Hc0FlIPVzW9s=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220110213647-cdb442467493/go.mod h1:KAVXGTHIc62sWM7GcYjIDQdNhhMEE3+tiZTBZVvNY2Q=
 github.com/WelcomerTeam/czlib v0.0.0-20210907121728-d7ed7721c904/go.mod h1:rCfCrg0xPnEoVKPXk+GNyHgzTWMzJjhnPaAfDe7UPJE=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

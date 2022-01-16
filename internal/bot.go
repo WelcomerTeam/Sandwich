@@ -1,5 +1,15 @@
 package internal
 
 type Bot struct {
-	Commands *Commandable
+	*Commandable
+	*Handlers
+}
+
+func NewBot() (b *Bot) {
+	b = &Bot{
+		Commandable: NewCommandable(nil),
+		Handlers:    NewHandlers(),
+	}
+
+	return b
 }
