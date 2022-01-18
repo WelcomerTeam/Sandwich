@@ -8,6 +8,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats.go v1.13.0
 	github.com/nats-io/stan.go v0.10.2
+	github.com/rs/zerolog v1.26.1
 	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899
 	github.com/segmentio/kafka-go v0.4.25
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1

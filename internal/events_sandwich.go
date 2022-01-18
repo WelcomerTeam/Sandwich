@@ -1,5 +1,7 @@
 package internal
 
+// Discord Events.
+
 // RegisterOnReadyEvent adds a new event handler for the READY event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnReadyEvent(event OnReadyFuncType) {
@@ -732,7 +734,67 @@ func (h *Handlers) RegisterOnGuildLeaveEvent(event OnGuildLeaveFuncType) {
 // RegisterOnGuildUnavailableEvent adds a new event handler for the GUILD_UNAVAILABLE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildUnavailableEvent(event OnGuildUnavailableFuncType) {
-	eventName := "}"
+	eventName := "GUILD_UNAVAILABLE"
+
+	h.eventHandlersMu.RLock()
+	eh := h.EventHandlers[eventName]
+	h.eventHandlersMu.RUnlock()
+
+	eh.eventsMu.Lock()
+	eh.Events = append(eh.Events, event)
+	eh.eventsMu.Unlock()
+}
+
+// Sandwich Events.
+
+// RegisterOnSandwichConfigurationReload adds a new event handler for the SW_CONFIGURATION_RELOAD event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnSandwichConfigurationReload(event OnSandwichConfigurationReloadFuncType) {
+	eventName := "SW_CONFIGURATION_RELOAD"
+
+	h.eventHandlersMu.RLock()
+	eh := h.EventHandlers[eventName]
+	h.eventHandlersMu.RUnlock()
+
+	eh.eventsMu.Lock()
+	eh.Events = append(eh.Events, event)
+	eh.eventsMu.Unlock()
+}
+
+// RegisterOnSandwichShardStatusUpdate adds a new event handler for the SW_SHARD_STATUS_UPDATE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnSandwichShardStatusUpdate(event OnSandwichShardStatusUpdateFuncType) {
+	eventName := "SW_SHARD_STATUS_UPDATE"
+
+	h.eventHandlersMu.RLock()
+	eh := h.EventHandlers[eventName]
+	h.eventHandlersMu.RUnlock()
+
+	eh.eventsMu.Lock()
+	eh.Events = append(eh.Events, event)
+	eh.eventsMu.Unlock()
+}
+
+// RegisterOnSandwichShardGroupStatusUpdate adds a new event handler for the SW_SHARD_GROUP_STATUS_UPDATE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnSandwichShardGroupStatusUpdate(event OnSandwichShardGroupStatusUpdateFuncType) {
+	eventName := "SW_SHARD_GROUP_STATUS_UPDATE"
+
+	h.eventHandlersMu.RLock()
+	eh := h.EventHandlers[eventName]
+	h.eventHandlersMu.RUnlock()
+
+	eh.eventsMu.Lock()
+	eh.Events = append(eh.Events, event)
+	eh.eventsMu.Unlock()
+}
+
+// Generic Events.
+
+// RegisterOnError registers a handler when events raise an error.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnError(event OnErrorFuncType) {
+	eventName := "ERROR"
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]

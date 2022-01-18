@@ -8,7 +8,7 @@ type Bot struct {
 func NewBot() (b *Bot) {
 	b = &Bot{
 		Commandable: NewCommandable(nil),
-		Handlers:    NewHandlers(),
+		Handlers:    NewDiscordHandlers(),
 	}
 
 	return b

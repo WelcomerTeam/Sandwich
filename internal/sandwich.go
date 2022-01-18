@@ -3,38 +3,66 @@ package internal
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"io"
 	"sync"
+	"time"
 
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	"github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 )
 
+var (
+	LastRequestTimeout = time.Minute * 60
+)
+
 type Sandwich struct {
+	Logger zerolog.Logger
+
 	botsMu sync.RWMutex
 	Bots   map[string]*Bot
+
+	SandwichEvents *Handlers
 
 	identifiersMu sync.RWMutex
 	Identifiers   map[string]*Identifier
 
+	lastIdentifierRequestMu sync.RWMutex
+	LastIdentifierRequest   map[string]time.Time
+
 	sandwichClient protobuf.SandwichClient
 }
 
-func NewSandwich(ctx context.Context, conn grpc.ClientConnInterface) (s *Sandwich) {
+func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) {
 	s = &Sandwich{
+		Logger: zerolog.New(logger).With().Timestamp().Logger(),
+
 		botsMu: sync.RWMutex{},
 		Bots:   make(map[string]*Bot),
 
+		SandwichEvents: NewSandwichHandlers(),
+
 		identifiersMu: sync.RWMutex{},
 		Identifiers:   make(map[string]*Identifier),
+
+		lastIdentifierRequestMu: sync.RWMutex{},
+		LastIdentifierRequest:   make(map[string]time.Time),
 
 		sandwichClient: protobuf.NewSandwichClient(conn),
 	}
 
 	return
+}
+
+func (s *Sandwich) DispatchGRPCPayload(payload structs.SandwichPayload) (err error) {
+	return s.SandwichEvents.Dispatch(&Context{
+		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
+		Sandwich: s,
+		Handlers: s.SandwichEvents,
+	}, payload)
 }
 
 func (s *Sandwich) DispatchSandwichPayload(payload structs.SandwichPayload) (err error) {
@@ -43,11 +71,13 @@ func (s *Sandwich) DispatchSandwichPayload(payload structs.SandwichPayload) (err
 	s.botsMu.RUnlock()
 
 	if !ok {
-		return xerrors.New("No identifier")
+		return ErrInvalidIdentifier
 	}
 
 	return b.Dispatch(&Context{
+		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
 		Sandwich: s,
+		Handlers: b.Handlers,
 	}, payload)
 }
 
@@ -57,7 +87,44 @@ func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
 	s.botsMu.Unlock()
 }
 
-func (s *Sandwich) FetchIdentifiers(ctx context.Context) (identifiers *Identifiers, err error) {
+func (s *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *Identifier, ok bool, err error) {
+	s.identifiersMu.RLock()
+	identifier, ok = s.Identifiers[applicationName]
+	s.identifiersMu.RUnlock()
+
+	if !ok {
+		s.lastIdentifierRequestMu.RLock()
+		lastRequest, ok := s.LastIdentifierRequest[applicationName]
+		s.lastIdentifierRequestMu.RUnlock()
+
+		if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
+			identifiers, err := s.FetchAllIdentifiers(ctx)
+			if err != nil {
+				return nil, false, err
+			}
+
+			s.identifiersMu.Lock()
+			s.Identifiers = map[string]*Identifier{}
+
+			for k := range identifiers.Identifiers {
+				v := identifiers.Identifiers[k]
+				s.Identifiers[k] = &v
+			}
+			s.identifiersMu.Unlock()
+
+			identifier, ok = s.Identifiers[applicationName]
+			if !ok {
+				return nil, false, ErrInvalidApplication
+			}
+		} else {
+			return nil, false, ErrInvalidApplication
+		}
+	}
+
+	return identifier, true, nil
+}
+
+func (s *Sandwich) FetchAllIdentifiers(ctx context.Context) (identifiers *Identifiers, err error) {
 	res, err := s.sandwichClient.FetchConsumerConfiguration(ctx, &protobuf.FetchConsumerConfigurationRequest{})
 	if err != nil {
 		return identifiers, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
@@ -87,19 +154,19 @@ type Identifier struct {
 // Context is extra data passed to event handlers.
 // This is not the same as a command's context.
 type Context struct {
+	context.Context
+
+	Logger zerolog.Logger
+
 	Sandwich *Sandwich
 
 	// Filled in on dispatch
 	EventHandler *EventHandler
 	Handlers     *Handlers
 
-	Guild *Guild
-}
+	Identifier *Identifier
 
-func (ctx *Context) wrapFuncType(err error) {
-	if err != nil {
-		fmt.Printf("We errored: %v", err)
-	}
+	Guild *Guild
 }
 
 func (ctx *Context) decodeContent(msg structs.SandwichPayload, out interface{}) (err error) {
