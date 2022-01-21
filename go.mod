@@ -3,7 +3,7 @@ module github.com/WelcomerTeam/Sandwich
 go 1.16
 
 require (
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220110213647-cdb442467493
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220120155450-7ec24d841d8b
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/json-iterator/go v1.1.12
 	github.com/nats-io/nats.go v1.13.0
@@ -13,5 +13,4 @@ require (
 	github.com/segmentio/kafka-go v0.4.25
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/grpc v1.43.0
-	google.golang.org/protobuf v1.27.1
 )

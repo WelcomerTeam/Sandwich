@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
 	"golang.org/x/xerrors"
 )

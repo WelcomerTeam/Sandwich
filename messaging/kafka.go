@@ -2,10 +2,9 @@ package mqclients
 
 import (
 	"context"
-	"io"
-
 	"github.com/segmentio/kafka-go"
 	"golang.org/x/xerrors"
+	"io"
 )
 
 func init() {

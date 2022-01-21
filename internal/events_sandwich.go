@@ -1,11 +1,13 @@
 package internal
 
+import "github.com/WelcomerTeam/Sandwich-Daemon/structs"
+
 // Discord Events.
 
 // RegisterOnReadyEvent adds a new event handler for the READY event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnReadyEvent(event OnReadyFuncType) {
-	eventName := "READY"
+	eventName := structs.DiscordEventReady
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -19,7 +21,7 @@ func (h *Handlers) RegisterOnReadyEvent(event OnReadyFuncType) {
 // RegisterOnResumedEvent adds a new event handler for the RESUMED event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnResumedEvent(event OnResumedFuncType) {
-	eventName := "RESUMED"
+	eventName := structs.DiscordEventResumed
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -33,7 +35,7 @@ func (h *Handlers) RegisterOnResumedEvent(event OnResumedFuncType) {
 // RegisterOnApplicationCommandCreateEvent adds a new event handler for the APPLICATION_COMMAND_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnApplicationCommandCreateEvent(event OnApplicationCommandCreateFuncType) {
-	eventName := "APPLICATION_COMMAND_CREATE"
+	eventName := structs.DiscordEventApplicationCommandCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -47,7 +49,7 @@ func (h *Handlers) RegisterOnApplicationCommandCreateEvent(event OnApplicationCo
 // RegisterOnApplicationCommandUpdateEvent adds a new event handler for the APPLICATION_COMMAND_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnApplicationCommandUpdateEvent(event OnApplicationCommandUpdateFuncType) {
-	eventName := "APPLICATION_COMMAND_UPDATE"
+	eventName := structs.DiscordEventApplicationCommandUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -61,7 +63,7 @@ func (h *Handlers) RegisterOnApplicationCommandUpdateEvent(event OnApplicationCo
 // RegisterOnApplicationCommandDeleteEvent adds a new event handler for the APPLICATION_COMMAND_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnApplicationCommandDeleteEvent(event OnApplicationCommandDeleteFuncType) {
-	eventName := "APPLICATION_COMMAND_DELETE"
+	eventName := structs.DiscordEventApplicationCommandDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -75,7 +77,7 @@ func (h *Handlers) RegisterOnApplicationCommandDeleteEvent(event OnApplicationCo
 // RegisterOnChannelCreateEvent adds a new event handler for the CHANNEL_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnChannelCreateEvent(event OnChannelCreateFuncType) {
-	eventName := "CHANNEL_CREATE"
+	eventName := structs.DiscordEventChannelCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -89,7 +91,7 @@ func (h *Handlers) RegisterOnChannelCreateEvent(event OnChannelCreateFuncType) {
 // RegisterOnChannelUpdateEvent adds a new event handler for the CHANNEL_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnChannelUpdateEvent(event OnChannelUpdateFuncType) {
-	eventName := "CHANNEL_UPDATE"
+	eventName := structs.DiscordEventChannelUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -103,7 +105,7 @@ func (h *Handlers) RegisterOnChannelUpdateEvent(event OnChannelUpdateFuncType) {
 // RegisterOnChannelDeleteEvent adds a new event handler for the CHANNEL_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnChannelDeleteEvent(event OnChannelDeleteFuncType) {
-	eventName := "CHANNEL_DELETE"
+	eventName := structs.DiscordEventChannelDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -117,7 +119,7 @@ func (h *Handlers) RegisterOnChannelDeleteEvent(event OnChannelDeleteFuncType) {
 // RegisterOnChannelPinsUpdateEvent adds a new event handler for the CHANNEL_PINS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnChannelPinsUpdateEvent(event OnChannelPinsUpdateFuncType) {
-	eventName := "CHANNEL_PINS_UPDATE"
+	eventName := structs.DiscordEventChannelPinsUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -131,7 +133,7 @@ func (h *Handlers) RegisterOnChannelPinsUpdateEvent(event OnChannelPinsUpdateFun
 // RegisterOnThreadCreateEvent adds a new event handler for the THREAD_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadCreateEvent(event OnThreadCreateFuncType) {
-	eventName := "THREAD_CREATE"
+	eventName := structs.DiscordEventThreadCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -145,7 +147,7 @@ func (h *Handlers) RegisterOnThreadCreateEvent(event OnThreadCreateFuncType) {
 // RegisterOnThreadUpdateEvent adds a new event handler for the THREAD_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadUpdateEvent(event OnThreadUpdateFuncType) {
-	eventName := "THREAD_UPDATE"
+	eventName := structs.DiscordEventThreadUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -159,7 +161,7 @@ func (h *Handlers) RegisterOnThreadUpdateEvent(event OnThreadUpdateFuncType) {
 // RegisterOnThreadDeleteEvent adds a new event handler for the THREAD_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadDeleteEvent(event OnThreadDeleteFuncType) {
-	eventName := "THREAD_DELETE"
+	eventName := structs.DiscordEventThreadDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -173,7 +175,7 @@ func (h *Handlers) RegisterOnThreadDeleteEvent(event OnThreadDeleteFuncType) {
 // RegisterOnThreadMemberUpdateEvent adds a new event handler for the THREAD_MEMBER_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadMemberUpdateEvent(event OnThreadMemberUpdateFuncType) {
-	eventName := "THREAD_MEMBER_UPDATE"
+	eventName := structs.DiscordEventThreadMemberUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -187,7 +189,7 @@ func (h *Handlers) RegisterOnThreadMemberUpdateEvent(event OnThreadMemberUpdateF
 // RegisterOnThreadMembersUpdateEvent adds a new event handler for the THREAD_MEMBERS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadMembersUpdateEvent(event OnThreadMembersUpdateFuncType) {
-	eventName := "THREAD_MEMBERS_UPDATE"
+	eventName := structs.DiscordEventThreadMembersUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -201,7 +203,7 @@ func (h *Handlers) RegisterOnThreadMembersUpdateEvent(event OnThreadMembersUpdat
 // RegisterOnGuildUpdateEvent adds a new event handler for the GUILD_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildUpdateEvent(event OnGuildUpdateFuncType) {
-	eventName := "GUILD_UPDATE"
+	eventName := structs.DiscordEventGuildUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -215,7 +217,7 @@ func (h *Handlers) RegisterOnGuildUpdateEvent(event OnGuildUpdateFuncType) {
 // RegisterOnGuildBanAddEvent adds a new event handler for the GUILD_BAN_ADD event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildBanAddEvent(event OnGuildBanAddFuncType) {
-	eventName := "GUILD_BAN_ADD"
+	eventName := structs.DiscordEventGuildBanAdd
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -229,7 +231,7 @@ func (h *Handlers) RegisterOnGuildBanAddEvent(event OnGuildBanAddFuncType) {
 // RegisterOnGuildBanRemoveEvent adds a new event handler for the GUILD_BAN_REMOVE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildBanRemoveEvent(event OnGuildBanRemoveFuncType) {
-	eventName := "GUILD_BAN_REMOVE"
+	eventName := structs.DiscordEventGuildBanRemove
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -243,7 +245,7 @@ func (h *Handlers) RegisterOnGuildBanRemoveEvent(event OnGuildBanRemoveFuncType)
 // RegisterOnGuildEmojisUpdateEvent adds a new event handler for the GUILD_EMOJIS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildEmojisUpdateEvent(event OnGuildEmojisUpdateFuncType) {
-	eventName := "GUILD_EMOJIS_UPDATE"
+	eventName := structs.DiscordEventGuildEmojisUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -257,7 +259,7 @@ func (h *Handlers) RegisterOnGuildEmojisUpdateEvent(event OnGuildEmojisUpdateFun
 // RegisterOnGuildStickersUpdateEvent adds a new event handler for the GUILD_STICKERS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildStickersUpdateEvent(event OnGuildStickersUpdateFuncType) {
-	eventName := "GUILD_STICKERS_UPDATE"
+	eventName := structs.DiscordEventGuildStickersUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -271,7 +273,7 @@ func (h *Handlers) RegisterOnGuildStickersUpdateEvent(event OnGuildStickersUpdat
 // RegisterOnGuildIntegrationsUpdateEvent adds a new event handler for the GUILD_INTEGRATIONS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildIntegrationsUpdateEvent(event OnGuildIntegrationsUpdateFuncType) {
-	eventName := "GUILD_INTEGRATIONS_UPDATE"
+	eventName := structs.DiscordEventGuildIntegrationsUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -285,7 +287,7 @@ func (h *Handlers) RegisterOnGuildIntegrationsUpdateEvent(event OnGuildIntegrati
 // RegisterOnGuildMemberAddEvent adds a new event handler for the GUILD_MEMBER_ADD event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildMemberAddEvent(event OnGuildMemberAddFuncType) {
-	eventName := "GUILD_MEMBER_ADD"
+	eventName := structs.DiscordEventGuildMemberAdd
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -299,7 +301,7 @@ func (h *Handlers) RegisterOnGuildMemberAddEvent(event OnGuildMemberAddFuncType)
 // RegisterOnGuildMemberRemoveEvent adds a new event handler for the GUILD_MEMBER_REMOVE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildMemberRemoveEvent(event OnGuildMemberRemoveFuncType) {
-	eventName := "GUILD_MEMBER_REMOVE"
+	eventName := structs.DiscordEventGuildMemberRemove
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -313,7 +315,7 @@ func (h *Handlers) RegisterOnGuildMemberRemoveEvent(event OnGuildMemberRemoveFun
 // RegisterOnGuildMemberUpdateEvent adds a new event handler for the GUILD_MEMBER_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildMemberUpdateEvent(event OnGuildMemberUpdateFuncType) {
-	eventName := "GUILD_MEMBER_UPDATE"
+	eventName := structs.DiscordEventGuildMemberUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -327,7 +329,7 @@ func (h *Handlers) RegisterOnGuildMemberUpdateEvent(event OnGuildMemberUpdateFun
 // RegisterOnGuildRoleCreateEvent adds a new event handler for the GUILD_ROLE_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildRoleCreateEvent(event OnGuildRoleCreateFuncType) {
-	eventName := "GUILD_ROLE_CREATE"
+	eventName := structs.DiscordEventGuildRoleCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -341,7 +343,7 @@ func (h *Handlers) RegisterOnGuildRoleCreateEvent(event OnGuildRoleCreateFuncTyp
 // RegisterOnGuildRoleUpdateEvent adds a new event handler for the GUILD_ROLE_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildRoleUpdateEvent(event OnGuildRoleUpdateFuncType) {
-	eventName := "GUILD_ROLE_UPDATE"
+	eventName := structs.DiscordEventGuildRoleUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -355,7 +357,7 @@ func (h *Handlers) RegisterOnGuildRoleUpdateEvent(event OnGuildRoleUpdateFuncTyp
 // RegisterOnGuildRoleDeleteEvent adds a new event handler for the GUILD_ROLE_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildRoleDeleteEvent(event OnGuildRoleDeleteFuncType) {
-	eventName := "GUILD_ROLE_DELETE"
+	eventName := structs.DiscordEventGuildRoleDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -369,7 +371,7 @@ func (h *Handlers) RegisterOnGuildRoleDeleteEvent(event OnGuildRoleDeleteFuncTyp
 // RegisterOnIntegrationCreateEvent adds a new event handler for the INTEGRATION_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnIntegrationCreateEvent(event OnIntegrationCreateFuncType) {
-	eventName := "INTEGRATION_CREATE"
+	eventName := structs.DiscordEventIntegrationCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -383,7 +385,7 @@ func (h *Handlers) RegisterOnIntegrationCreateEvent(event OnIntegrationCreateFun
 // RegisterOnIntegrationUpdateEvent adds a new event handler for the INTEGRATION_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnIntegrationUpdateEvent(event OnIntegrationUpdateFuncType) {
-	eventName := "INTEGRATION_UPDATE"
+	eventName := structs.DiscordEventIntegrationUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -397,7 +399,7 @@ func (h *Handlers) RegisterOnIntegrationUpdateEvent(event OnIntegrationUpdateFun
 // RegisterOnIntegrationDeleteEvent adds a new event handler for the INTEGRATION_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnIntegrationDeleteEvent(event OnIntegrationDeleteFuncType) {
-	eventName := "INTEGRATION_DELETE"
+	eventName := structs.DiscordEventIntegrationDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -411,7 +413,7 @@ func (h *Handlers) RegisterOnIntegrationDeleteEvent(event OnIntegrationDeleteFun
 // RegisterOnInteractionCreateEvent adds a new event handler for the INTERACTION_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnInteractionCreateEvent(event OnInteractionCreateFuncType) {
-	eventName := "INTERACTION_CREATE"
+	eventName := structs.DiscordEventInteractionCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -425,7 +427,7 @@ func (h *Handlers) RegisterOnInteractionCreateEvent(event OnInteractionCreateFun
 // RegisterOnInviteCreateEvent adds a new event handler for the INVITE_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnInviteCreateEvent(event OnInviteCreateFuncType) {
-	eventName := "INVITE_CREATE"
+	eventName := structs.DiscordEventInviteCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -439,7 +441,7 @@ func (h *Handlers) RegisterOnInviteCreateEvent(event OnInviteCreateFuncType) {
 // RegisterOnInviteDeleteEvent adds a new event handler for the INVITE_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnInviteDeleteEvent(event OnInviteDeleteFuncType) {
-	eventName := "INVITE_DELETE"
+	eventName := structs.DiscordEventInviteDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -453,7 +455,7 @@ func (h *Handlers) RegisterOnInviteDeleteEvent(event OnInviteDeleteFuncType) {
 // RegisterOnMessageCreateEvent adds a new event handler for the MESSAGE_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageCreateEvent(event OnMessageCreateFuncType) {
-	eventName := "MESSAGE_CREATE"
+	eventName := structs.DiscordEventMessageCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -467,7 +469,7 @@ func (h *Handlers) RegisterOnMessageCreateEvent(event OnMessageCreateFuncType) {
 // RegisterOnMessageUpdateEvent adds a new event handler for the MESSAGE_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageUpdateEvent(event OnMessageUpdateFuncType) {
-	eventName := "MESSAGE_UPDATE"
+	eventName := structs.DiscordEventMessageUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -481,7 +483,7 @@ func (h *Handlers) RegisterOnMessageUpdateEvent(event OnMessageUpdateFuncType) {
 // RegisterOnMessageDeleteEvent adds a new event handler for the MESSAGE_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageDeleteEvent(event OnMessageDeleteFuncType) {
-	eventName := "MESSAGE_DELETE"
+	eventName := structs.DiscordEventMessageDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -495,7 +497,7 @@ func (h *Handlers) RegisterOnMessageDeleteEvent(event OnMessageDeleteFuncType) {
 // RegisterOnMessageDeleteBulkEvent adds a new event handler for the MESSAGE_DELETE_BULK event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageDeleteBulkEvent(event OnMessageDeleteBulkFuncType) {
-	eventName := "MESSAGE_DELETE_BULK"
+	eventName := structs.DiscordEventMessageDeleteBulk
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -509,7 +511,7 @@ func (h *Handlers) RegisterOnMessageDeleteBulkEvent(event OnMessageDeleteBulkFun
 // RegisterOnMessageReactionAddEvent adds a new event handler for the MESSAGE_REACTION_ADD event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageReactionAddEvent(event OnMessageReactionAddFuncType) {
-	eventName := "MESSAGE_REACTION_ADD"
+	eventName := structs.DiscordEventMessageReactionAdd
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -523,7 +525,7 @@ func (h *Handlers) RegisterOnMessageReactionAddEvent(event OnMessageReactionAddF
 // RegisterOnMessageReactionRemoveEvent adds a new event handler for the MESSAGE_REACTION_REMOVE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageReactionRemoveEvent(event OnMessageReactionRemoveFuncType) {
-	eventName := "MESSAGE_REACTION_REMOVE"
+	eventName := structs.DiscordEventMessageReactionRemove
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -537,7 +539,7 @@ func (h *Handlers) RegisterOnMessageReactionRemoveEvent(event OnMessageReactionR
 // RegisterOnMessageReactionRemoveAllEvent adds a new event handler for the MESSAGE_REACTION_REMOVE_ALL event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageReactionRemoveAllEvent(event OnMessageReactionRemoveAllFuncType) {
-	eventName := "MESSAGE_REACTION_REMOVE_ALL"
+	eventName := structs.DiscordEventMessageReactionRemoveAll
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -551,7 +553,7 @@ func (h *Handlers) RegisterOnMessageReactionRemoveAllEvent(event OnMessageReacti
 // RegisterOnMessageReactionRemoveEmojiEvent adds a new event handler for the MESSAGE_REACTION_REMOVE_EMOJI event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnMessageReactionRemoveEmojiEvent(event OnMessageReactionRemoveEmojiFuncType) {
-	eventName := "MESSAGE_REACTION_REMOVE_EMOJI"
+	eventName := structs.DiscordEventMessageReactionRemoveEmoji
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -565,7 +567,7 @@ func (h *Handlers) RegisterOnMessageReactionRemoveEmojiEvent(event OnMessageReac
 // RegisterOnPresenceUpdateEvent adds a new event handler for the PRESENCE_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnPresenceUpdateEvent(event OnPresenceUpdateFuncType) {
-	eventName := "PRESENCE_UPDATE"
+	eventName := structs.DiscordEventPresenceUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -579,7 +581,7 @@ func (h *Handlers) RegisterOnPresenceUpdateEvent(event OnPresenceUpdateFuncType)
 // RegisterOnStageInstanceCreateEvent adds a new event handler for the STAGE_INSTANCE_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnStageInstanceCreateEvent(event OnStageInstanceCreateFuncType) {
-	eventName := "STAGE_INSTANCE_CREATE"
+	eventName := structs.DiscordEventStageInstanceCreate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -593,7 +595,7 @@ func (h *Handlers) RegisterOnStageInstanceCreateEvent(event OnStageInstanceCreat
 // RegisterOnStageInstanceUpdateEvent adds a new event handler for the STAGE_INSTANCE_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnStageInstanceUpdateEvent(event OnStageInstanceUpdateFuncType) {
-	eventName := "STAGE_INSTANCE_UPDATE"
+	eventName := structs.DiscordEventStageInstanceUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -607,7 +609,7 @@ func (h *Handlers) RegisterOnStageInstanceUpdateEvent(event OnStageInstanceUpdat
 // RegisterOnStageInstanceDeleteEvent adds a new event handler for the STAGE_INSTANCE_DELETE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnStageInstanceDeleteEvent(event OnStageInstanceDeleteFuncType) {
-	eventName := "STAGE_INSTANCE_DELETE"
+	eventName := structs.DiscordEventStageInstanceDelete
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -621,7 +623,7 @@ func (h *Handlers) RegisterOnStageInstanceDeleteEvent(event OnStageInstanceDelet
 // RegisterOnTypingStartEvent adds a new event handler for the TYPING_START event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnTypingStartEvent(event OnTypingStartFuncType) {
-	eventName := "TYPING_START"
+	eventName := structs.DiscordEventTypingStart
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -635,7 +637,7 @@ func (h *Handlers) RegisterOnTypingStartEvent(event OnTypingStartFuncType) {
 // RegisterOnUserUpdateEvent adds a new event handler for the USER_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnUserUpdateEvent(event OnUserUpdateFuncType) {
-	eventName := "USER_UPDATE"
+	eventName := structs.DiscordEventUserUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -649,7 +651,7 @@ func (h *Handlers) RegisterOnUserUpdateEvent(event OnUserUpdateFuncType) {
 // RegisterOnVoiceStateUpdateEvent adds a new event handler for the VOICE_STATE_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnVoiceStateUpdateEvent(event OnVoiceStateUpdateFuncType) {
-	eventName := "VOICE_STATE_UPDATE"
+	eventName := structs.DiscordEventVoiceStateUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -663,7 +665,7 @@ func (h *Handlers) RegisterOnVoiceStateUpdateEvent(event OnVoiceStateUpdateFuncT
 // RegisterOnVoiceServerUpdateEvent adds a new event handler for the VOICE_SERVER_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnVoiceServerUpdateEvent(event OnVoiceServerUpdateFuncType) {
-	eventName := "VOICE_SERVER_UPDATE"
+	eventName := structs.DiscordEventVoiceServerUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -677,7 +679,7 @@ func (h *Handlers) RegisterOnVoiceServerUpdateEvent(event OnVoiceServerUpdateFun
 // RegisterOnWebhookUpdateEvent adds a new event handler for the WEBHOOKS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnWebhookUpdateEvent(event OnWebhookUpdateFuncType) {
-	eventName := "WEBHOOKS_UPDATE"
+	eventName := structs.DiscordEventWebhookUpdate
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -691,7 +693,7 @@ func (h *Handlers) RegisterOnWebhookUpdateEvent(event OnWebhookUpdateFuncType) {
 // RegisterOnGuildJoinEvent adds a new event handler for the GUILD_JOIN event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildJoinEvent(event OnGuildJoinFuncType) {
-	eventName := "GUILD_JOIN"
+	eventName := structs.DiscordEventGuildJoin
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -705,7 +707,7 @@ func (h *Handlers) RegisterOnGuildJoinEvent(event OnGuildJoinFuncType) {
 // RegisterOnGuildAvailableEvent adds a new event handler for the GUILD_AVAILABLE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildAvailableEvent(event OnGuildAvailableFuncType) {
-	eventName := "GUILD_AVAILABLE"
+	eventName := structs.DiscordEventGuildAvailable
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -719,7 +721,7 @@ func (h *Handlers) RegisterOnGuildAvailableEvent(event OnGuildAvailableFuncType)
 // RegisterOnGuildLeaveEvent adds a new event handler for the GUILD_LEAVE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildLeaveEvent(event OnGuildLeaveFuncType) {
-	eventName := "GUILD_LEAVE"
+	eventName := structs.DiscordEventGuildLeave
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
@@ -734,7 +736,7 @@ func (h *Handlers) RegisterOnGuildLeaveEvent(event OnGuildLeaveFuncType) {
 // RegisterOnGuildUnavailableEvent adds a new event handler for the GUILD_UNAVAILABLE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildUnavailableEvent(event OnGuildUnavailableFuncType) {
-	eventName := "GUILD_UNAVAILABLE"
+	eventName := structs.DiscordEventGuildUnavailable
 
 	h.eventHandlersMu.RLock()
 	eh := h.EventHandlers[eventName]
