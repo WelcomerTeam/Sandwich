@@ -72,7 +72,7 @@ func (s *StringView) Current() (current string, ok bool) {
 		return "", false
 	}
 
-	return string(s.buffer[s.index]), ok
+	return string(s.buffer[s.index]), true
 }
 
 func (s *StringView) EOF() bool {

@@ -9,6 +9,8 @@ type Bot struct {
 	*Commandable
 	*Handlers
 
+	Converters *Converters
+
 	Prefix PrefixCheckFuncType
 }
 
@@ -20,8 +22,9 @@ type CommandCheckFuncType func(commandCtx *CommandContext) (canRun bool, err err
 
 func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 	b = &Bot{
-		Commandable: NewCommandable(nil, nil, false, ""),
+		Commandable: setupCommandable(&Commandable{}),
 		Handlers:    NewDiscordHandlers(),
+		Converters:  NewDefaultConverters(),
 		Prefix:      prefix,
 	}
 
@@ -39,8 +42,8 @@ func StaticPrefixCheck(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 	return func(eventCtx *EventContext, message Message) (prefixes []string, err error) {
 		prefixes = append(prefixes, passedPrefixes...)
-		prefixes = append(prefixes, "<@"+strconv.FormatInt(eventCtx.Identifier.ID, 10)+">")
-		prefixes = append(prefixes, "<@!"+strconv.FormatInt(eventCtx.Identifier.ID, 10)+">")
+		prefixes = append(prefixes, "<@"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
+		prefixes = append(prefixes, "<@!"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
 
 		return prefixes, nil
 	}
@@ -79,7 +82,7 @@ func (b *Bot) ProcessCommands(eventCtx *EventContext, message Message) (err erro
 		return nil
 	}
 
-	if message.Author.Bot != nil && *message.Author.Bot {
+	if message.Author.Bot {
 		return nil
 	}
 
@@ -130,9 +133,7 @@ func (b *Bot) GetContext(eventCtx *EventContext, message Message) (commandContex
 
 	eventCtx.Logger.Debug().Str("invoker", invoker).Str("prefix", invokedPrefix).Msg("Created context")
 
-	b.commandsMu.RLock()
 	command := b.GetCommand(invoker)
-	b.commandsMu.RUnlock()
 
 	commandContext.InvokedWith = invoker
 	commandContext.Prefix = invokedPrefix

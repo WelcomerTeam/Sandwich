@@ -30,85 +30,44 @@ func main() {
 
 	sandwichClient := sandwich.NewSandwich(conn, writer)
 
-	welcomerBot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
+	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
 
-	welcomerGroup, err := welcomerBot.AddGroup(true, "welcomer")
-	if err != nil {
-		panic(err)
-	}
-
-	command, _ := welcomerBot.AddCommand(func(ctx *sandwich.CommandContext) (err error) {
-		println("Arguments test ran!")
-
-		println(ctx.Guild)
-		println(ctx.Author)
-		println(ctx.Content)
-
-		for k, v := range ctx.Arguments {
-			println(k, v.ArgumentType)
-		}
-
-		return nil
-	}, "argumentstest")
-	command.AddArguments(
-		sandwich.ArgumentParameter{
-			Required:     false,
-			ArgumentType: sandwich.ArgumentTypeString,
-			Name:         "test",
+	bot.MustAddCommand(&sandwich.Commandable{
+		Name: "argumenttest",
+		ArgumentParameters: []sandwich.ArgumentParameter{
+			{
+				Required:     false,
+				ArgumentType: sandwich.ArgumentTypeTextChannel,
+				Name:         "test",
+			},
 		},
-		sandwich.ArgumentParameter{
-			Required:     false,
-			ArgumentType: sandwich.ArgumentTypeString,
-			Name:         "test2",
+		Handler: func(ctx *sandwich.CommandContext) (err error) {
+			val := ctx.MustGetArgument("test").MustChannel()
+
+			if val != nil {
+				println("Got channel", val.Name)
+			} else {
+				println("No channel was found...")
+			}
+
+			return nil
 		},
-	)
-
-	welcomerGroup.SetHandler(func(ctx *sandwich.CommandContext) (err error) {
-		if ctx.InvokedSubcommand != nil {
-			ctx.EventContext.Logger.Info().Str("subcommand", ctx.InvokedSubcommand.Name).Msg("welcomer group was ran.")
-		} else {
-			ctx.EventContext.Logger.Info().Msg("welcomer group was ran.")
-		}
-
-		return nil
 	})
 
-	welcomerGroup.AddCommand(func(ctx *sandwich.CommandContext) (err error) {
-		ctx.EventContext.Logger.Info().Msg("welcomer test ran")
-
-		return nil
-	}, "test")
-
-	welcomerGroup.AddCommand(func(ctx *sandwich.CommandContext) (err error) {
-		ctx.EventContext.Logger.Info().Msg("welcomer add ran")
-
-		return nil
-	}, "add")
-
-	welcomerGroup.AddCommand(func(ctx *sandwich.CommandContext) (err error) {
-		ctx.EventContext.Logger.Info().Msg("welcomer error ran")
-
-		return xerrors.New("Random error")
-	}, "error")
-
-	welcomerBot.AddCommand(func(ctx *sandwich.CommandContext) (err error) {
-		ctx.EventContext.Logger.Info().Msg("test ran successfuly")
-
-		return nil
-	}, "test", "alias", "testme")
-
-	welcomerBot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message sandwich.Message) (err error) {
-		err = welcomerBot.ProcessCommands(ctx, message)
+	bot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message sandwich.Message) (err error) {
+		err = bot.ProcessCommands(ctx, message)
 		if err != nil {
 			ctx.Logger.Warn().Err(err).Str("content", message.Content).Msg("Failed to process command")
+
+			return xerrors.Errorf("Failed to process command: %v", err)
 		}
 
-		return err
+		return nil
 	})
 
-	sandwichClient.RegisterBot("welcomer", welcomerBot)
+	sandwichClient.RegisterBot("welcomer", bot)
 
-	ctx := context.TODO()
+	ctx := context.Background()
 
 	mqC := messaging.NewStanMQClient()
 	err = mqC.Connect(ctx, "sdc", map[string]interface{}{
@@ -135,10 +94,7 @@ func main() {
 		select {
 		case m := <-c:
 			if err := jsoniter.Unmarshal(m, &p); err == nil {
-				err = sandwichClient.DispatchSandwichPayload(p)
-				if err != nil {
-					println(err.Error(), string(m))
-				}
+				sandwichClient.DispatchSandwichPayload(ctx, p)
 			} else {
 				println(err.Error(), string(m))
 			}

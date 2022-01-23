@@ -2,16 +2,17 @@ package internal
 
 import (
 	"context"
-	"encoding/json"
+	"io"
+	"runtime/debug"
+	"sync"
+	"time"
+
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	"github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
-	"io"
-	"sync"
-	"time"
 )
 
 var LastRequestTimeout = time.Minute * 60
@@ -25,12 +26,13 @@ type Sandwich struct {
 	SandwichEvents *Handlers
 
 	identifiersMu sync.RWMutex
-	Identifiers   map[string]*Identifier
+	Identifiers   map[string]*structs.ManagerConsumerConfiguration
 
 	lastIdentifierRequestMu sync.RWMutex
 	LastIdentifierRequest   map[string]time.Time
 
 	sandwichClient protobuf.SandwichClient
+	grpcInterface  GRPC
 }
 
 func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) {
@@ -43,26 +45,28 @@ func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) 
 		SandwichEvents: NewSandwichHandlers(),
 
 		identifiersMu: sync.RWMutex{},
-		Identifiers:   make(map[string]*Identifier),
+		Identifiers:   make(map[string]*structs.ManagerConsumerConfiguration),
 
 		lastIdentifierRequestMu: sync.RWMutex{},
 		LastIdentifierRequest:   make(map[string]time.Time),
 
 		sandwichClient: protobuf.NewSandwichClient(conn),
+		grpcInterface:  NewDefaultGRPCClient(),
 	}
 
 	return
 }
 
-func (s *Sandwich) DispatchGRPCPayload(payload structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload structs.SandwichPayload) (err error) {
 	return s.SandwichEvents.Dispatch(&EventContext{
 		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
 		Sandwich: s,
 		Handlers: s.SandwichEvents,
+		Context:  context,
 	}, payload)
 }
 
-func (s *Sandwich) DispatchSandwichPayload(payload structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload structs.SandwichPayload) (err error) {
 	s.botsMu.RLock()
 	b, ok := s.Bots[payload.Metadata.Identifier]
 	s.botsMu.RUnlock()
@@ -75,6 +79,7 @@ func (s *Sandwich) DispatchSandwichPayload(payload structs.SandwichPayload) (err
 		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
 		Sandwich: s,
 		Handlers: b.Handlers,
+		Context:  context,
 	}, payload)
 }
 
@@ -84,68 +89,51 @@ func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
 	s.botsMu.Unlock()
 }
 
-func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName string) (identifier *Identifier, ok bool, err error) {
+func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload structs.SandwichPayload) {
+	s.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
+	println(string(debug.Stack()))
+}
+
+func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName string) (identifier *structs.ManagerConsumerConfiguration, ok bool, err error) {
 	s.identifiersMu.RLock()
 	identifier, ok = s.Identifiers[applicationName]
 	s.identifiersMu.RUnlock()
 
-	if !ok {
-		s.lastIdentifierRequestMu.RLock()
-		lastRequest, ok := s.LastIdentifierRequest[applicationName]
-		s.lastIdentifierRequestMu.RUnlock()
+	if ok {
+		return identifier, true, nil
+	}
 
-		if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
-			identifiers, err := s.FetchAllIdentifiers(eventCtx)
-			if err != nil {
-				return nil, false, err
-			}
+	s.lastIdentifierRequestMu.RLock()
+	lastRequest, ok := s.LastIdentifierRequest[applicationName]
+	s.lastIdentifierRequestMu.RUnlock()
 
-			s.identifiersMu.Lock()
-			s.Identifiers = map[string]*Identifier{}
+	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
+		identifiers, err := s.grpcInterface.FetchConsumerConfiguration(&EventContext{
+			Sandwich: s,
+			Context:  eventCtx,
+		}, "")
+		if err != nil {
+			return nil, false, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
+		}
 
-			for k := range identifiers.Identifiers {
-				v := identifiers.Identifiers[k]
-				s.Identifiers[k] = &v
-			}
-			s.identifiersMu.Unlock()
+		s.identifiersMu.Lock()
+		s.Identifiers = map[string]*structs.ManagerConsumerConfiguration{}
 
-			identifier, ok = s.Identifiers[applicationName]
-			if !ok {
-				return nil, false, ErrInvalidApplication
-			}
-		} else {
+		for k := range identifiers.Identifiers {
+			v := identifiers.Identifiers[k]
+			s.Identifiers[k] = &v
+		}
+		s.identifiersMu.Unlock()
+
+		identifier, ok = s.Identifiers[applicationName]
+		if !ok {
 			return nil, false, ErrInvalidApplication
 		}
+	} else {
+		return nil, false, ErrInvalidApplication
 	}
 
 	return identifier, true, nil
-}
-
-func (s *Sandwich) FetchAllIdentifiers(eventCtx context.Context) (identifiers *Identifiers, err error) {
-	res, err := s.sandwichClient.FetchConsumerConfiguration(eventCtx, &protobuf.FetchConsumerConfigurationRequest{})
-	if err != nil {
-		return identifiers, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
-	}
-
-	identifiers = &Identifiers{}
-
-	err = json.Unmarshal(res.File, &identifiers)
-	if err != nil {
-		return identifiers, xerrors.Errorf("Failed to unmarshal consumer configuration: %v", err)
-	}
-
-	return identifiers, nil
-}
-
-type Identifiers struct {
-	Version     string                `json:"v"`
-	Identifiers map[string]Identifier `json:"identifiers"`
-}
-
-type Identifier struct {
-	Token string `json:"token"`
-	ID    int64  `json:"id"`
-	User  User   `json:"user"`
 }
 
 // EventContext is extra data passed to event handlers.
@@ -161,7 +149,7 @@ type EventContext struct {
 	EventHandler *EventHandler
 	Handlers     *Handlers
 
-	Identifier *Identifier
+	Identifier *structs.ManagerConsumerConfiguration
 
 	Guild *Guild
 }

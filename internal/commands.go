@@ -1,8 +1,8 @@
 package internal
 
 import (
+	"fmt"
 	"strings"
-	"sync"
 )
 
 type ArgumentType uint16
@@ -13,11 +13,11 @@ const (
 	ArgumentTypeUser
 	ArgumentTypeMessage
 	ArgumentTypePartialMessage
-	ArgumentTypeTextchannel
+	ArgumentTypeTextChannel
 	ArgumentTypeInvite
 	ArgumentTypeGuild
 	ArgumentTypeRole
-	ArgumentTypeGame
+	ArgumentTypeActivity
 	ArgumentTypeColour
 	ArgumentTypeVoiceChannel
 	ArgumentTypeStageChannel
@@ -36,120 +36,59 @@ const (
 )
 
 type Commandable struct {
-	commandsMu sync.RWMutex
-	commands   map[string]*Commandable
-
 	Name    string
 	Aliases []string
 
-	Checks []CommandCheckFuncType
-
+	Checks             []CommandCheckFuncType
 	ArgumentParameters []ArgumentParameter
-	Command            *CommandHandler
+
+	Handler CommandHandler
 
 	InvokeWithoutCommand bool
 
-	Parent *Commandable
+	commands map[string]*Commandable
+	parent   *Commandable
 }
 
-func NewCommandable(handler *CommandHandler, parent *Commandable, invokeWithoutCommand bool, commandName string, commandAliases ...string) (c *Commandable) {
-	c = &Commandable{
-		commandsMu: sync.RWMutex{},
-		commands:   make(map[string]*Commandable),
+type CommandHandler func(ctx *CommandContext) (err error)
 
-		Name:    commandName,
-		Aliases: commandAliases,
-
-		Checks: make([]CommandCheckFuncType, 0),
-
-		ArgumentParameters: make([]ArgumentParameter, 0),
-		Command:            nil,
-
-		InvokeWithoutCommand: invokeWithoutCommand,
-
-		Parent: nil,
+func (c *Commandable) MustAddCommand(commandable *Commandable) (cc *Commandable) {
+	cc, err := c.AddCommand(commandable)
+	if err != nil {
+		panic(fmt.Sprintf(`sandwich: AddCommand(%v): %v`, commandable, err.Error()))
 	}
 
-	if handler != nil {
-		c.Command = handler
-	}
-
-	if parent != nil {
-		c.Parent = parent
-	}
-
-	return c
+	return cc
 }
 
-func (c *Commandable) getCommand(name string) (commandable *Commandable, ok bool) {
-	commandable, ok = c.commands[strings.ToLower(name)]
-
-	return
-}
-
-func (c *Commandable) deleteCommand(name string) {
-	delete(c.commands, strings.ToLower(name))
-}
-
-func (c *Commandable) setCommand(name string, commandable *Commandable) {
-	c.commands[strings.ToLower(name)] = commandable
-}
-
-func (c *Commandable) AddGroup(invokeWithoutCommand bool, groupName string, groupAliases ...string) (cc *Commandable, err error) {
-	c.commandsMu.Lock()
-	defer c.commandsMu.Unlock()
-
-	for _, commandName := range append(groupAliases, groupName) {
+func (c *Commandable) AddCommand(commandable *Commandable) (cc *Commandable, err error) {
+	for _, commandName := range append(commandable.Aliases, commandable.Name) {
 		commandName = strings.ToLower(commandName)
 		if _, ok := c.getCommand(commandName); ok {
 			err = ErrCommandAlreadyRegistered
 
-			return
+			return nil, err
 		}
 	}
 
-	cc = NewCommandable(nil, c, invokeWithoutCommand, groupName, groupAliases...)
+	commandable = setupCommandable(commandable)
+	commandable.parent = c
 
-	for _, commandName := range append(groupAliases, groupName) {
+	cc = commandable
+
+	for _, commandName := range append(commandable.Aliases, commandable.Name) {
 		c.setCommand(commandName, cc)
 	}
 
-	return
-}
-
-func (c *Commandable) AddCommand(handler CommandHandler, commandName string, commandAliases ...string) (cc *Commandable, err error) {
-	c.commandsMu.Lock()
-	defer c.commandsMu.Unlock()
-
-	for _, commandName := range append(commandAliases, commandName) {
-		commandName = strings.ToLower(commandName)
-		if _, ok := c.getCommand(commandName); ok {
-			err = ErrCommandAlreadyRegistered
-
-			return
-		}
-	}
-
-	cc = NewCommandable(&handler, c, false, commandName, commandAliases...)
-
-	for _, commandName := range append(commandAliases, commandName) {
-		c.setCommand(commandName, cc)
-	}
-
-	return
+	return cc, nil
 }
 
 func (c *Commandable) RemoveCommand(name string) (command *Commandable) {
-	c.commandsMu.RLock()
 	command, ok := c.getCommand(name)
-	c.commandsMu.RUnlock()
 
 	if !ok {
 		return nil
 	}
-
-	c.commandsMu.Lock()
-	defer c.commandsMu.Unlock()
 
 	c.deleteCommand(name)
 
@@ -172,6 +111,16 @@ func (c *Commandable) RemoveCommand(name string) (command *Commandable) {
 	return command
 }
 
+func (c *Commandable) RecursivelyRemoveAllCommands() {
+	for _, command := range c.commands {
+		if command.isGroup() {
+			command.RecursivelyRemoveAllCommands()
+		}
+
+		c.RemoveCommand(command.Name)
+	}
+}
+
 func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
 	if !strings.Contains(name, " ") {
 		commandable, _ = c.getCommand(name)
@@ -185,7 +134,7 @@ func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
 	}
 
 	commandable = c.GetCommand(names[0])
-	if !commandable.IsGroup() {
+	if !commandable.isGroup() {
 		return
 	}
 
@@ -201,46 +150,13 @@ func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
 	return commandable
 }
 
-func (c *Commandable) RecursivelyRemoveAllCommands() {
-	c.commandsMu.RLock()
-	defer c.commandsMu.RUnlock()
-
-	for _, command := range c.commands {
-		if command.IsGroup() {
-			command.RecursivelyRemoveAllCommands()
-		}
-
-		c.RemoveCommand(command.Name)
-	}
-}
-
-func (c *Commandable) SetHandler(handler CommandHandler) (cc *Commandable) {
-	c.Command = &handler
-
-	return cc
-}
-
-func (c *Commandable) AddChecks(checks ...CommandCheckFuncType) (cc *Commandable) {
-	c.Checks = append(c.Checks, checks...)
-
-	return c
-}
-
-func (c *Commandable) AddArguments(argumentParameters ...ArgumentParameter) (cc *Commandable) {
-	c.ArgumentParameters = append(c.ArgumentParameters, argumentParameters...)
-
-	return c
-}
-
-func (c *Commandable) IsGroup() bool {
-	c.commandsMu.RLock()
-	defer c.commandsMu.RUnlock()
-
+func (c *Commandable) isGroup() bool {
 	return len(c.commands) > 0
 }
 
+// Invoke handles the execution of a command or a group.
 func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
-	if c.IsGroup() {
+	if c.isGroup() {
 		ctx.InvokedSubcommand = nil
 		ctx.SubcommandPassed = nil
 
@@ -263,10 +179,8 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 		}
 
 		if earlyInvoke {
-			if c.Command != nil {
-				callback := *c.Command
-
-				err = callback(ctx)
+			if c.Handler != nil {
+				err = c.Handler(ctx)
 				if err != nil {
 					return err
 				}
@@ -286,12 +200,8 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 			view.index = previous
 			view.previous = previous
 
-			if c.Command != nil {
-				callback := *c.Command
-
-				println(c.Command, callback)
-
-				err = callback(ctx)
+			if c.Handler != nil {
+				err = c.Handler(ctx)
 				if err != nil {
 					return err
 				}
@@ -306,10 +216,8 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 		ctx.InvokedSubcommand = nil
 		ctx.SubcommandPassed = nil
 
-		if c.Command != nil {
-			callback := *c.Command
-
-			err = callback(ctx)
+		if c.Handler != nil {
+			err = c.Handler(ctx)
 			if err != nil {
 				return err
 			}
@@ -356,8 +264,9 @@ func (c *Commandable) prepare(ctx *CommandContext) (err error) {
 	return nil
 }
 
+// parseArguments generates the arguments for a command.
 func (c *Commandable) parseArguments(ctx *CommandContext) (err error) {
-	ctx.Arguments = map[string]Argument{}
+	ctx.Arguments = map[string]*Argument{}
 
 	for _, argumentParameter := range c.ArgumentParameters {
 		ctx.currentParameter = &argumentParameter
@@ -367,7 +276,7 @@ func (c *Commandable) parseArguments(ctx *CommandContext) (err error) {
 			return err
 		}
 
-		ctx.Arguments[argumentParameter.Name] = Argument{
+		ctx.Arguments[argumentParameter.Name] = &Argument{
 			ArgumentType: argumentParameter.ArgumentType,
 			value:        transformed,
 		}
@@ -376,11 +285,15 @@ func (c *Commandable) parseArguments(ctx *CommandContext) (err error) {
 	return nil
 }
 
+// transform returns a output value based on the argument parameter passed in.
 func (c *Commandable) transform(ctx *CommandContext, argumentParameter ArgumentParameter) (out interface{}, err error) {
 	required := argumentParameter.Required
 	consumeRestIsSpecial := argumentParameter.ArgumentType == ArgumentTypeFill
 
-	converter := getConverter(argumentParameter.ArgumentType)
+	converter := ctx.Bot.Converters.GetConverter(argumentParameter.ArgumentType)
+	if converter == nil {
+		return nil, ErrConverterNotFound
+	}
 
 	view := ctx.View
 	view.SkipWS()
@@ -389,6 +302,8 @@ func (c *Commandable) transform(ctx *CommandContext, argumentParameter ArgumentP
 		if required {
 			return nil, ErrMissingRequiredArgument
 		}
+
+		return converter.d, nil
 	}
 
 	previous := view.index
@@ -406,10 +321,8 @@ func (c *Commandable) transform(ctx *CommandContext, argumentParameter ArgumentP
 
 	view.previous = previous
 
-	return converter(ctx, argument)
+	return converter.f(ctx, argument)
 }
-
-type CommandHandler func(ctx *CommandContext) (err error)
 
 type CommandContext struct {
 	Bot          *Bot
@@ -432,15 +345,10 @@ type CommandContext struct {
 
 	currentParameter *ArgumentParameter
 
-	Arguments map[string]Argument
+	Arguments map[string]*Argument
 }
 
-func getConverter(converterType ArgumentType) ArgumentConverterType {
-	return func(ctx *CommandContext, argument string) (out interface{}, err error) {
-		return argument, nil
-	}
-}
-
+// NewCommandContext creates a new command context.
 func NewCommandContext(eventContext *EventContext, bot *Bot, message *Message, view *StringView) (commandContext *CommandContext) {
 	commandContext = &CommandContext{
 		Bot:          bot,
@@ -462,4 +370,59 @@ func NewCommandContext(eventContext *EventContext, bot *Bot, message *Message, v
 	}
 
 	return commandContext
+}
+
+// MustGetArgument returns an argument based on its name. Panics on error.
+func (ctx *CommandContext) MustGetArgument(name string) (a *Argument) {
+	arg, err := ctx.GetArgument(name)
+	if err != nil {
+		panic(fmt.Sprintf(`ctx: GetArgument(%s): %v`, name, err.Error()))
+	}
+
+	return arg
+}
+
+// GetArgument returns an argument based on its name.
+func (ctx *CommandContext) GetArgument(name string) (arg *Argument, err error) {
+	arg, ok := ctx.Arguments[name]
+	if !ok {
+		return nil, ErrArgumentNotFound
+	}
+
+	return arg, nil
+}
+
+// setupCommandable ensures all nullable variables are properly constructed.
+func setupCommandable(in *Commandable) (out *Commandable) {
+	if in.commands == nil {
+		in.commands = make(map[string]*Commandable)
+	}
+
+	if in.Aliases == nil {
+		in.Aliases = make([]string, 0)
+	}
+
+	if in.ArgumentParameters == nil {
+		in.ArgumentParameters = make([]ArgumentParameter, 0)
+	}
+
+	if in.Checks == nil {
+		in.Checks = make([]CommandCheckFuncType, 0)
+	}
+
+	return in
+}
+
+func (c *Commandable) getCommand(name string) (commandable *Commandable, ok bool) {
+	commandable, ok = c.commands[strings.ToLower(name)]
+
+	return
+}
+
+func (c *Commandable) deleteCommand(name string) {
+	delete(c.commands, strings.ToLower(name))
+}
+
+func (c *Commandable) setCommand(name string, commandable *Commandable) {
+	c.commands[strings.ToLower(name)] = commandable
 }

@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"strings"
 	"time"
 )
 
@@ -19,11 +18,12 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func rpartition(s string, sep string) (string, string, string) {
-	index := strings.LastIndex(s, sep)
-	if index == -1 {
-		return "", "", s
-	} else {
-		return s[:index], string(s[index]), s[index+1:]
+func argumentTypeIs(argumentType ArgumentType, argumentTypes ...ArgumentType) bool {
+	for _, aType := range argumentTypes {
+		if argumentType == aType {
+			return true
+		}
 	}
+
+	return false
 }
