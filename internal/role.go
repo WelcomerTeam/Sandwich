@@ -28,7 +28,11 @@ func (r *Role) Fetch(ctx *EventContext) (err error) {
 		return xerrors.Errorf("Failed to fetch role: %v", err)
 	}
 
-	*r = *role
+	if role != nil {
+		*r = *role
+	} else {
+		return ErrRoleNotFound
+	}
 
 	return
 }

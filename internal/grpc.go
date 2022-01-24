@@ -115,6 +115,8 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *EventContext, q
 	for _, grpcGuild := range guildsResponse.Guilds {
 		sandwichGuild, err := protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
+
 			continue
 		}
 
@@ -160,6 +162,8 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *EventContext,
 	for _, grpcChannel := range channelsResponse.GuildChannels {
 		sandwichChannel, err := protobuf.GRPCToChannel(grpcChannel)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Channel to Channel")
+
 			continue
 		}
 
@@ -171,6 +175,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *EventContext,
 
 func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *EventContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *Role, err error) {
 	rolesResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildRoles(eventCtx.Context, &protobuf.FetchGuildRolesRequest{
+		GuildID: int64(guildID),
 		RoleIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
@@ -192,7 +197,8 @@ func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *EventContext, guild
 
 func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *EventContext, guildID discord.Snowflake, query string) (roles []*Role, err error) {
 	rolesResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildRoles(eventCtx.Context, &protobuf.FetchGuildRolesRequest{
-		Query: query,
+		GuildID: int64(guildID),
+		Query:   query,
 	})
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to fetch roles: %v", err)
@@ -203,6 +209,8 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *EventContext, gu
 	for _, grpcRole := range rolesResponse.GuildRoles {
 		sandwichRole, err := protobuf.GRPCToRole(grpcRole)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Role to Role")
+
 			continue
 		}
 
@@ -248,6 +256,8 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *EventContext, g
 	for _, grpcEmoji := range emojisResponse.GuildEmojis {
 		sandwichEmoji, err := protobuf.GRPCToEmoji(grpcEmoji)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Emoji to Emoji")
+
 			continue
 		}
 
@@ -293,6 +303,8 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *EventContext, 
 	for _, grpcMember := range membersResponse.GuildMembers {
 		sandwichMember, err := protobuf.GRPCToGuildMember(grpcMember)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.GuildMember to GuildMember")
+
 			continue
 		}
 
@@ -340,6 +352,8 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *EventContext, que
 	for _, grpcUser := range usersResponse.Users {
 		sandwichUser, err := protobuf.GRPCToUser(grpcUser)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.User to User")
+
 			continue
 		}
 
@@ -381,6 +395,8 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *EventContext, u
 	for _, grpcGuild := range mutualGuilds.Guilds {
 		sandwichGuild, err := protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
+
 			continue
 		}
 

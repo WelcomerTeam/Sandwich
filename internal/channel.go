@@ -28,7 +28,11 @@ func (c *Channel) Fetch(ctx *EventContext) (err error) {
 		return xerrors.Errorf("Failed to fetch channel: %v", err)
 	}
 
-	*c = *channel
+	if channel != nil {
+		*c = *channel
+	} else {
+		return ErrChannelNotFound
+	}
 
 	return
 }

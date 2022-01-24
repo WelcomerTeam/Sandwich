@@ -28,7 +28,11 @@ func (e *Emoji) Fetch(ctx *EventContext) (err error) {
 		return xerrors.Errorf("Failed to fetch emoji: %v", err)
 	}
 
-	*e = *emoji
+	if emoji != nil {
+		*e = *emoji
+	} else {
+		return ErrEmojiNotFound
+	}
 
 	return
 }

@@ -23,7 +23,11 @@ func (g *Guild) Fetch(ctx *EventContext) (err error) {
 		return xerrors.Errorf("Failed to fetch guild: %v", err)
 	}
 
-	*g = *guild
+	if guild != nil {
+		*g = *guild
+	} else {
+		return ErrGuildNotFound
+	}
 
 	return nil
 }
@@ -55,7 +59,11 @@ func (gm *GuildMember) Fetch(ctx *EventContext) (err error) {
 		return xerrors.Errorf("Failed to fetch member: %v", err)
 	}
 
-	*gm = *guildMember
+	if guildMember != nil {
+		*gm = *guildMember
+	} else {
+		return ErrMemberNotFound
+	}
 
 	return
 }

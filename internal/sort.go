@@ -9,7 +9,7 @@ import (
 // sortGuilds returns Guilds in order of most similar to the query passed.
 func sortGuilds(source []*Guild, query string) (sorted []*Guild) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks
@@ -34,13 +34,13 @@ func sortGuilds(source []*Guild, query string) (sorted []*Guild) {
 // sortChannels returns Channels in order of most similar to the query passed.
 func sortChannels(source []*Channel, query string) (sorted []*Channel) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks
 
-	for index, source := range source {
-		rank := accurateString(query, source.Name)
+	for index, channel := range source {
+		rank := accurateString(query, channel.Name)
 		rank.OriginalIndex = index
 		ranks = append(ranks, rank)
 	}
@@ -59,7 +59,7 @@ func sortChannels(source []*Channel, query string) (sorted []*Channel) {
 // sortRoles returns Roles in order of most similar to the query passed.
 func sortRoles(source []*Role, query string) (sorted []*Role) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks
@@ -84,7 +84,7 @@ func sortRoles(source []*Role, query string) (sorted []*Role) {
 // sortEmojis returns Emojis in order of most similar to the query passed.
 func sortEmojis(source []*Emoji, query string) (sorted []*Emoji) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks
@@ -109,7 +109,7 @@ func sortEmojis(source []*Emoji, query string) (sorted []*Emoji) {
 // sortMembers returns Members in order of most similar to the query passed.
 func sortMembers(source []*GuildMember, query string) (sorted []*GuildMember) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks
@@ -134,7 +134,7 @@ func sortMembers(source []*GuildMember, query string) (sorted []*GuildMember) {
 // sortUsers returns Users in order of most similar to the query passed.
 func sortUsers(source []*User, query string) (sorted []*User) {
 	if len(source) < 2 {
-		return sorted
+		return source
 	}
 
 	var ranks fuzzy.Ranks

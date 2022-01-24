@@ -19,6 +19,7 @@ var (
 	ChannelMentionRegex = regexp.MustCompile("<#([0-9]{15,20})>")
 	RoleMentionRegex    = regexp.MustCompile("<@&([0-9]{15,20})>$")
 	EmojiRegex          = regexp.MustCompile("<a?:[a-zA-Z0-9_]{1,32}:([0-9]{15,20})>$")
+	PartialEmojiRegex   = regexp.MustCompile("<(a?):([a-zA-Z0-9_]{1,32}):([0-9]{15,20})>$")
 )
 
 var (
@@ -117,8 +118,8 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 	match := IDRegex.FindString(argument)
 	if match == "" {
 		matches := UserMentionRegex.FindStringSubmatch(argument)
-		if len(matches) > 0 {
-			match = matches[0]
+		if len(matches) > 1 {
+			match = matches[1]
 		}
 	}
 
@@ -138,10 +139,10 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 	} else {
 		userID, _ := strconv.ParseInt(match, 10, 64)
 
-		result := NewGuildMember(ctx.EventContext, ctx.GuildID, discord.Snowflake(userID))
+		result = NewGuildMember(ctx.EventContext, ctx.GuildID, discord.Snowflake(userID))
 
 		err := result.Fetch(ctx.EventContext)
-		if err != nil {
+		if err != nil && !xerrors.Is(err, ErrMemberNotFound) {
 			return nil, err
 		}
 	}
@@ -182,7 +183,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 			result = NewUser(ctx.EventContext, discord.Snowflake(userID))
 
 			err = result.Fetch(ctx.EventContext, false)
-			if err != nil {
+			if err != nil && !xerrors.Is(err, ErrUserNotFound) {
 				return nil, err
 			}
 		}
@@ -253,7 +254,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.C
 		result := NewChannel(ctx.EventContext, ctx.GuildID, discord.Snowflake(channelID))
 
 		err = result.Fetch(ctx.EventContext)
-		if err != nil {
+		if err != nil && !xerrors.Is(err, ErrChannelNotFound) {
 			return nil, err
 		}
 
@@ -314,10 +315,10 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 	} else {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
 
-		result := NewGuild(ctx.EventContext, discord.Snowflake(guildID))
+		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
 
 		err := result.Fetch(ctx.EventContext)
-		if err != nil {
+		if err != nil && !xerrors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
 	}
@@ -357,10 +358,10 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 	} else {
 		roleID, _ := strconv.ParseInt(match, 10, 64)
 
-		result := NewRole(ctx.EventContext, ctx.GuildID, discord.Snowflake(roleID))
+		result = NewRole(ctx.EventContext, ctx.GuildID, discord.Snowflake(roleID))
 
 		err := result.Fetch(ctx.EventContext)
-		if err != nil {
+		if err != nil && !xerrors.Is(err, ErrRoleNotFound) {
 			return nil, err
 		}
 	}
@@ -403,6 +404,11 @@ func HandleArgumentTypeColour(ctx *CommandContext, argument string) (out interfa
 		}
 
 		result = intToColour(hexNum)
+	} else {
+		hexNum, err := parseHexNumber(argument)
+		if err == nil {
+			result = intToColour(hexNum)
+		}
 	}
 
 	if result == nil {
@@ -413,7 +419,7 @@ func HandleArgumentTypeColour(ctx *CommandContext, argument string) (out interfa
 }
 
 func parseHexNumber(arg string) (out uint64, err error) {
-	return strconv.ParseUint(arg, 16, 8)
+	return strconv.ParseUint(arg, 16, 64)
 }
 
 func intToColour(val uint64) (out *color.RGBA) {
@@ -488,7 +494,7 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 		result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
 
 		err = result.Fetch(ctx.EventContext)
-		if err != nil {
+		if err != nil && !xerrors.Is(err, ErrEmojiNotFound) {
 			return nil, err
 		}
 	}
@@ -504,27 +510,22 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
 func HandleArgumentTypePartialEmoji(ctx *CommandContext, argument string) (out interface{}, err error) {
-	match := EmojiRegex.FindStringSubmatch(argument)
+	matches := PartialEmojiRegex.FindStringSubmatch(argument)
 
 	var result *Emoji
 
-	if len(match) >= 3 {
-		animated, _ := strconv.ParseBool(match[0])
-		id, _ := strconv.ParseInt(match[2], 10, 64)
+	if len(matches) >= 3 {
+		animated, _ := strconv.ParseBool(matches[0])
+		id, _ := strconv.ParseInt(matches[2], 10, 64)
 
 		result = &Emoji{
 			Animated: animated,
-			Name:     match[1],
+			Name:     matches[1],
 			ID:       discord.Snowflake(id),
 		}
 	}
 
-	err = result.Fetch(ctx.EventContext)
-	if err != nil {
-		return nil, err
-	}
-
-	return argument, nil
+	return result, nil
 }
 
 // HandleArgumentTypeCategoryChannel handles converting from a string
@@ -591,14 +592,6 @@ func HandleArgumentTypeGuildChannel(ctx *CommandContext, argument string) (out i
 
 	return results[0], nil
 }
-
-// // HandleArgumentTypeGuildSticker handles converting from a string
-// // argument into a GuildSticker type. Use .GuildSticker() within a command
-// // to get the proper type.
-// func HandleArgumentTypeGuildSticker(ctx *CommandContext, argument string) (out interface{}, err error) {
-// 	// TODO: Implement ArgumentTypeGuildSticker converter
-// 	return argument, nil
-// }
 
 // HandleArgumentTypeString handles converting from a string
 // argument into a String type. Use .String() within a command
@@ -714,29 +707,6 @@ func (a *Argument) MustUser() (value *User) {
 	value, err := a.User()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: User(): %v`, err.Error()))
-	}
-
-	return value
-}
-
-// Message returns an argument as the specified Type.
-// If the argument is not the right type for the converter
-// that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Message() (value *Message, err error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeMessage, ArgumentTypePartialMessage) {
-		value, _ = a.value.(*Message)
-
-		return
-	}
-
-	return nil, ErrInvalidArgumentType
-}
-
-// MustMessage will attempt to do Message() and will panic if not possible.
-func (a *Argument) MustMessage() (value *Message) {
-	value, err := a.Message()
-	if err != nil {
-		panic(fmt.Sprintf(`argument: Message(): %v`, err.Error()))
 	}
 
 	return value
@@ -1005,8 +975,6 @@ func NewDefaultConverters() (co *Converters) {
 	co.RegisterConverter(ArgumentTypeSnowflake, HandleArgumentTypeSnowflake, nil)
 	co.RegisterConverter(ArgumentTypeMember, HandleArgumentTypeMember, nil)
 	co.RegisterConverter(ArgumentTypeUser, HandleArgumentTypeUser, nil)
-	// co.RegisterConverter(ArgumentTypeMessage, HandleArgumentTypeMessage, nil)
-	// co.RegisterConverter(ArgumentTypePartialMessage, HandleArgumentTypePartialMessage, nil)
 	co.RegisterConverter(ArgumentTypeTextChannel, HandleArgumentTypeTextChannel, nil)
 	co.RegisterConverter(ArgumentTypeInvite, HandleArgumentTypeInvite, nil)
 	co.RegisterConverter(ArgumentTypeGuild, HandleArgumentTypeGuild, nil)
@@ -1021,7 +989,6 @@ func NewDefaultConverters() (co *Converters) {
 	co.RegisterConverter(ArgumentTypeStoreChannel, HandleArgumentTypeStoreChannel, nil)
 	co.RegisterConverter(ArgumentTypeThread, HandleArgumentTypeThread, nil)
 	co.RegisterConverter(ArgumentTypeGuildChannel, HandleArgumentTypeGuildChannel, nil)
-	// co.RegisterConverter(ArgumentTypeGuildSticker, HandleArgumentTypeGuildSticker, nil)
 	co.RegisterConverter(ArgumentTypeString, HandleArgumentTypeString, "")
 	co.RegisterConverter(ArgumentTypeBool, HandleArgumentTypeBool, false)
 	co.RegisterConverter(ArgumentTypeInt, HandleArgumentTypeInt, int64(0))

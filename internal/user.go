@@ -23,7 +23,11 @@ func (u *User) Fetch(ctx *EventContext, createDMChannel bool) (err error) {
 		return xerrors.Errorf("Failed to fetch user: %v", err)
 	}
 
-	*u = *user
+	if user != nil {
+		*u = *user
+	} else {
+		return ErrUserNotFound
+	}
 
 	return
 }

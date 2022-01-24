@@ -11,8 +11,8 @@ const (
 	ArgumentTypeSnowflake ArgumentType = iota + 1
 	ArgumentTypeMember
 	ArgumentTypeUser
-	ArgumentTypeMessage
-	ArgumentTypePartialMessage
+	_
+	_
 	ArgumentTypeTextChannel
 	ArgumentTypeInvite
 	ArgumentTypeGuild
@@ -27,7 +27,7 @@ const (
 	ArgumentTypeStoreChannel
 	ArgumentTypeThread
 	ArgumentTypeGuildChannel
-	ArgumentTypeGuildSticker
+	_
 	ArgumentTypeString
 	ArgumentTypeBool
 	ArgumentTypeInt
@@ -113,12 +113,27 @@ func (c *Commandable) RemoveCommand(name string) (command *Commandable) {
 
 func (c *Commandable) RecursivelyRemoveAllCommands() {
 	for _, command := range c.commands {
-		if command.isGroup() {
+		if command.IsGroup() {
 			command.RecursivelyRemoveAllCommands()
 		}
 
 		c.RemoveCommand(command.Name)
 	}
+}
+
+// GetAllCommands returns all commands and removes duplicates due to aliases.
+func (c *Commandable) GetAllCommands() (commandables []*Commandable) {
+	commandables = make([]*Commandable, 0)
+
+	for key, commandable := range c.commands {
+		// If the commandable's name is the same as it's key, it is safe to assume
+		// it is not an alias.
+		if strings.ToLower(commandable.Name) == strings.ToLower(key) {
+			commandables = append(commandables, commandable)
+		}
+	}
+
+	return commandables
 }
 
 func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
@@ -134,7 +149,7 @@ func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
 	}
 
 	commandable = c.GetCommand(names[0])
-	if !commandable.isGroup() {
+	if !commandable.IsGroup() {
 		return
 	}
 
@@ -150,13 +165,14 @@ func (c *Commandable) GetCommand(name string) (commandable *Commandable) {
 	return commandable
 }
 
-func (c *Commandable) isGroup() bool {
+// IsGroup returns true if the command contains other commands.
+func (c *Commandable) IsGroup() bool {
 	return len(c.commands) > 0
 }
 
 // Invoke handles the execution of a command or a group.
 func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
-	if c.isGroup() {
+	if c.IsGroup() {
 		ctx.InvokedSubcommand = nil
 		ctx.SubcommandPassed = nil
 
