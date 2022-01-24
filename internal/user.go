@@ -1,11 +1,12 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	"github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	"golang.org/x/xerrors"
 )
 
-type User discord.User
+type User discord_structs.User
 
 func NewUser(ctx *EventContext, userID discord.Snowflake) *User {
 	return &User{

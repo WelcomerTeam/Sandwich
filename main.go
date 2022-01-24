@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"net/url"
 	"os"
 	"time"
 
-	"github.com/WelcomerTeam/Sandwich-Daemon/structs"
-	sandwich "github.com/WelcomerTeam/Sandwich/internal"
+	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
+	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
@@ -28,7 +29,14 @@ func main() {
 	log := zerolog.New(writer).With().Timestamp().Logger()
 	log.Info().Msg("startup")
 
-	sandwichClient := sandwich.NewSandwich(conn, writer)
+	proxyURL, err := url.Parse("http://localhost:5001/")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	session := sandwich.NewTwilightProxy(*proxyURL)
+
+	sandwichClient := sandwich.NewSandwich(conn, session, writer)
 
 	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
 
@@ -417,7 +425,7 @@ func main() {
 
 	c := mqC.Chan()
 
-	var p structs.SandwichPayload
+	var p sandwich_structs.SandwichPayload
 
 	for {
 		select {

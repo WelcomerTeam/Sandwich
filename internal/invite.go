@@ -1,5 +1,7 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+import (
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+)
 
-type Invite discord.Invite
+type Invite discord_structs.Invite

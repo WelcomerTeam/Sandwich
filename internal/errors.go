@@ -5,6 +5,7 @@ import "golang.org/x/xerrors"
 var (
 	ErrInvalidIdentifier  = xerrors.New("Payload does not include a valid identifier")
 	ErrInvalidApplication = xerrors.New("Could not find identifier matching application")
+	ErrInvalidToken       = xerrors.Errorf("Invalid token was passed")
 	ErrUnknownEvent       = xerrors.New("Event type does not have a handler")
 	ErrUnknownGRPCError   = xerrors.New("GRPC returned unknown error")
 
@@ -33,9 +34,13 @@ var (
 	ErrRoleNotFound      = xerrors.New("Role provided was not found")
 	ErrEmojiNotFound     = xerrors.New("Emoji provided was not found")
 
-	ErrBadInviteArgument = xerrors.New("Invite provided was invalid or expired")
-	ErrBadColourArgument = xerrors.New("Colour provided was not in valid format")
-	ErrBadBoolArgument   = xerrors.New("Bool provided was not in valid format")
-	ErrBadIntArgument    = xerrors.New("Int provided was not in valid format")
-	ErrBadFloatArgument  = xerrors.New("Float provided was not in valid format")
+	ErrBadInviteArgument  = xerrors.New("Invite provided was invalid or expired")
+	ErrBadColourArgument  = xerrors.New("Colour provided was not in valid format")
+	ErrBadBoolArgument    = xerrors.New("Bool provided was not in valid format")
+	ErrBadIntArgument     = xerrors.New("Int provided was not in valid format")
+	ErrBadFloatArgument   = xerrors.New("Float provided was not in valid format")
+	ErrBadWebhookArgument = xerrors.New("Webhook url provided was not in valid format")
+
+	ErrWebhookMissingToken  = xerrors.New("Attempt to delete webhook but no token associated with it")
+	ErrUnsupportedImageType = xerrors.New("Unsupported image type given")
 )

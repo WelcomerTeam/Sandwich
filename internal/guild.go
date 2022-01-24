@@ -1,11 +1,13 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+
 	"golang.org/x/xerrors"
 )
 
-type Guild discord.Guild
+type Guild discord_structs.Guild
 
 func NewGuild(ctx *EventContext, guildID discord.Snowflake) *Guild {
 	return &Guild{
@@ -32,13 +34,13 @@ func (g *Guild) Fetch(ctx *EventContext) (err error) {
 	return nil
 }
 
-type UnavailableGuild discord.UnavailableGuild
+type UnavailableGuild discord_structs.UnavailableGuild
 
-type GuildMember discord.GuildMember
+type GuildMember discord_structs.GuildMember
 
 func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discord.Snowflake) *GuildMember {
 	return &GuildMember{
-		User: &discord.User{
+		User: &discord_structs.User{
 			ID: userID,
 		},
 		GuildID: guildID,
@@ -68,4 +70,4 @@ func (gm *GuildMember) Fetch(ctx *EventContext) (err error) {
 	return
 }
 
-type VoiceState discord.VoiceState
+type VoiceState discord_structs.VoiceState

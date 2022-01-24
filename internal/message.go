@@ -1,17 +1,19 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+import (
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+)
 
-type Message discord.Message
+type Message discord_structs.Message
 
-type MessageChannelMention discord.MessageChannelMention
+type MessageChannelMention discord_structs.MessageChannelMention
 
-type MessageReference discord.MessageReference
+type MessageReference discord_structs.MessageReference
 
-type MessageReaction discord.MessageReaction
+type MessageReaction discord_structs.MessageReaction
 
-type MessageAllowedMentions discord.MessageAllowedMentions
+type MessageAllowedMentions discord_structs.MessageAllowedMentions
 
-type MessageAttachment discord.MessageAttachment
+type MessageAttachment discord_structs.MessageAttachment
 
-type MessageActivity discord.MessageActivity
+type MessageActivity discord_structs.MessageActivity

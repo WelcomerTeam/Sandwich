@@ -8,12 +8,15 @@ import (
 	"time"
 
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
-	"github.com/WelcomerTeam/Sandwich-Daemon/structs"
+	structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 )
+
+// VERSION follows semantic versioning.
+const VERSION = "0.1"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -31,11 +34,13 @@ type Sandwich struct {
 	lastIdentifierRequestMu sync.RWMutex
 	LastIdentifierRequest   map[string]time.Time
 
+	HTTPSession HTTPSession
+
 	sandwichClient protobuf.SandwichClient
 	grpcInterface  GRPC
 }
 
-func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) {
+func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger io.Writer) (s *Sandwich) {
 	s = &Sandwich{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
@@ -50,6 +55,8 @@ func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) 
 		lastIdentifierRequestMu: sync.RWMutex{},
 		LastIdentifierRequest:   make(map[string]time.Time),
 
+		HTTPSession: httpSession,
+
 		sandwichClient: protobuf.NewSandwichClient(conn),
 		grpcInterface:  NewDefaultGRPCClient(),
 	}
@@ -59,10 +66,11 @@ func NewSandwich(conn grpc.ClientConnInterface, logger io.Writer) (s *Sandwich) 
 
 func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload structs.SandwichPayload) (err error) {
 	return s.SandwichEvents.Dispatch(&EventContext{
-		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
-		Sandwich: s,
-		Handlers: s.SandwichEvents,
-		Context:  context,
+		Logger:      s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
+		Sandwich:    s,
+		HTTPSession: s.HTTPSession,
+		Handlers:    s.SandwichEvents,
+		Context:     context,
 	}, payload)
 }
 
@@ -76,10 +84,11 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload stru
 	}
 
 	return b.Dispatch(&EventContext{
-		Logger:   s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
-		Sandwich: s,
-		Handlers: b.Handlers,
-		Context:  context,
+		Logger:      s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
+		Sandwich:    s,
+		HTTPSession: s.HTTPSession,
+		Handlers:    b.Handlers,
+		Context:     context,
 	}, payload)
 }
 
@@ -109,8 +118,9 @@ func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName str
 
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
 		identifiers, err := s.grpcInterface.FetchConsumerConfiguration(&EventContext{
-			Sandwich: s,
-			Context:  eventCtx,
+			Sandwich:    s,
+			HTTPSession: s.HTTPSession,
+			Context:     eventCtx,
 		}, "")
 		if err != nil {
 			return nil, false, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
@@ -144,6 +154,8 @@ type EventContext struct {
 	Logger zerolog.Logger
 
 	Sandwich *Sandwich
+
+	HTTPSession HTTPSession
 
 	// Filled in on dispatch
 	EventHandler *EventHandler

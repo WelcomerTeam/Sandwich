@@ -5,8 +5,9 @@ import (
 	"sync"
 	"time"
 
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
-	"github.com/WelcomerTeam/Sandwich-Daemon/structs"
+	"github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	"golang.org/x/xerrors"
 )
 
@@ -21,66 +22,66 @@ func NewDiscordHandlers() (h *Handlers) {
 		EventHandlers:   make(map[string]*EventHandler),
 	}
 
-	h.RegisterEventHandler(structs.DiscordEventReady, OnReady)
-	h.RegisterEventHandler(structs.DiscordEventResumed, OnResumed)
-	h.RegisterEventHandler(structs.DiscordEventApplicationCommandCreate, OnApplicationCommandCreate)
-	h.RegisterEventHandler(structs.DiscordEventApplicationCommandUpdate, OnApplicationCommandUpdate)
-	h.RegisterEventHandler(structs.DiscordEventApplicationCommandDelete, OnApplicationCommandDelete)
-	h.RegisterEventHandler(structs.DiscordEventChannelCreate, OnChannelCreate)
-	h.RegisterEventHandler(structs.DiscordEventChannelUpdate, OnChannelUpdate)
-	h.RegisterEventHandler(structs.DiscordEventChannelDelete, OnChannelDelete)
-	h.RegisterEventHandler(structs.DiscordEventChannelPinsUpdate, OnChannelPinsUpdate)
-	h.RegisterEventHandler(structs.DiscordEventThreadCreate, OnThreadCreate)
-	h.RegisterEventHandler(structs.DiscordEventThreadUpdate, OnThreadUpdate)
-	h.RegisterEventHandler(structs.DiscordEventThreadDelete, OnThreadDelete)
+	h.RegisterEventHandler(discord.DiscordEventReady, OnReady)
+	h.RegisterEventHandler(discord.DiscordEventResumed, OnResumed)
+	h.RegisterEventHandler(discord.DiscordEventApplicationCommandCreate, OnApplicationCommandCreate)
+	h.RegisterEventHandler(discord.DiscordEventApplicationCommandUpdate, OnApplicationCommandUpdate)
+	h.RegisterEventHandler(discord.DiscordEventApplicationCommandDelete, OnApplicationCommandDelete)
+	h.RegisterEventHandler(discord.DiscordEventChannelCreate, OnChannelCreate)
+	h.RegisterEventHandler(discord.DiscordEventChannelUpdate, OnChannelUpdate)
+	h.RegisterEventHandler(discord.DiscordEventChannelDelete, OnChannelDelete)
+	h.RegisterEventHandler(discord.DiscordEventChannelPinsUpdate, OnChannelPinsUpdate)
+	h.RegisterEventHandler(discord.DiscordEventThreadCreate, OnThreadCreate)
+	h.RegisterEventHandler(discord.DiscordEventThreadUpdate, OnThreadUpdate)
+	h.RegisterEventHandler(discord.DiscordEventThreadDelete, OnThreadDelete)
 	// h.NewEventHandler(structs.DiscordEventThreadListSync, OnThreadListSync)
-	h.RegisterEventHandler(structs.DiscordEventThreadMemberUpdate, OnThreadMemberUpdate)
-	h.RegisterEventHandler(structs.DiscordEventThreadMembersUpdate, OnThreadMembersUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildCreate, OnGuildCreate)
-	h.RegisterEventHandler(structs.DiscordEventGuildUpdate, OnGuildUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildDelete, OnGuildDelete)
-	h.RegisterEventHandler(structs.DiscordEventGuildBanAdd, OnGuildBanAdd)
-	h.RegisterEventHandler(structs.DiscordEventGuildBanRemove, OnGuildBanRemove)
-	h.RegisterEventHandler(structs.DiscordEventGuildEmojisUpdate, OnGuildEmojisUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildStickersUpdate, OnGuildStickersUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildIntegrationsUpdate, OnGuildIntegrationsUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildMemberAdd, OnGuildMemberAdd)
-	h.RegisterEventHandler(structs.DiscordEventGuildMemberRemove, OnGuildMemberRemove)
-	h.RegisterEventHandler(structs.DiscordEventGuildMemberUpdate, OnGuildMemberUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildRoleCreate, OnGuildRoleCreate)
-	h.RegisterEventHandler(structs.DiscordEventGuildRoleUpdate, OnGuildRoleUpdate)
-	h.RegisterEventHandler(structs.DiscordEventGuildRoleDelete, OnGuildRoleDelete)
-	h.RegisterEventHandler(structs.DiscordEventIntegrationCreate, OnIntegrationCreate)
-	h.RegisterEventHandler(structs.DiscordEventIntegrationUpdate, OnIntegrationUpdate)
-	h.RegisterEventHandler(structs.DiscordEventIntegrationDelete, OnIntegrationDelete)
-	h.RegisterEventHandler(structs.DiscordEventInteractionCreate, OnInteractionCreate)
-	h.RegisterEventHandler(structs.DiscordEventInviteCreate, OnInviteCreate)
-	h.RegisterEventHandler(structs.DiscordEventInviteDelete, OnInviteDelete)
-	h.RegisterEventHandler(structs.DiscordEventMessageCreate, OnMessageCreate)
-	h.RegisterEventHandler(structs.DiscordEventMessageUpdate, OnMessageUpdate)
-	h.RegisterEventHandler(structs.DiscordEventMessageDelete, OnMessageDelete)
-	h.RegisterEventHandler(structs.DiscordEventMessageDeleteBulk, OnMessageDeleteBulk)
-	h.RegisterEventHandler(structs.DiscordEventMessageReactionAdd, OnMessageReactionAdd)
-	h.RegisterEventHandler(structs.DiscordEventMessageReactionRemove, OnMessageReactionRemove)
-	h.RegisterEventHandler(structs.DiscordEventMessageReactionRemoveAll, OnMessageReactionRemoveAll)
-	h.RegisterEventHandler(structs.DiscordEventMessageReactionRemoveEmoji, OnMessageReactionRemoveEmoji)
-	h.RegisterEventHandler(structs.DiscordEventPresenceUpdate, OnPresenceUpdate)
-	h.RegisterEventHandler(structs.DiscordEventStageInstanceCreate, OnStageInstanceCreate)
-	h.RegisterEventHandler(structs.DiscordEventStageInstanceUpdate, OnStageInstanceUpdate)
-	h.RegisterEventHandler(structs.DiscordEventStageInstanceDelete, OnStageInstanceDelete)
-	h.RegisterEventHandler(structs.DiscordEventTypingStart, OnTypingStart)
-	h.RegisterEventHandler(structs.DiscordEventUserUpdate, OnUserUpdate)
-	h.RegisterEventHandler(structs.DiscordEventVoiceStateUpdate, OnVoiceStateUpdate)
-	h.RegisterEventHandler(structs.DiscordEventVoiceServerUpdate, OnVoiceServerUpdate)
-	h.RegisterEventHandler(structs.DiscordEventWebhookUpdate, OnWebhookUpdate)
+	h.RegisterEventHandler(discord.DiscordEventThreadMemberUpdate, OnThreadMemberUpdate)
+	h.RegisterEventHandler(discord.DiscordEventThreadMembersUpdate, OnThreadMembersUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildCreate, OnGuildCreate)
+	h.RegisterEventHandler(discord.DiscordEventGuildUpdate, OnGuildUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildDelete, OnGuildDelete)
+	h.RegisterEventHandler(discord.DiscordEventGuildBanAdd, OnGuildBanAdd)
+	h.RegisterEventHandler(discord.DiscordEventGuildBanRemove, OnGuildBanRemove)
+	h.RegisterEventHandler(discord.DiscordEventGuildEmojisUpdate, OnGuildEmojisUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildStickersUpdate, OnGuildStickersUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildIntegrationsUpdate, OnGuildIntegrationsUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildMemberAdd, OnGuildMemberAdd)
+	h.RegisterEventHandler(discord.DiscordEventGuildMemberRemove, OnGuildMemberRemove)
+	h.RegisterEventHandler(discord.DiscordEventGuildMemberUpdate, OnGuildMemberUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildRoleCreate, OnGuildRoleCreate)
+	h.RegisterEventHandler(discord.DiscordEventGuildRoleUpdate, OnGuildRoleUpdate)
+	h.RegisterEventHandler(discord.DiscordEventGuildRoleDelete, OnGuildRoleDelete)
+	h.RegisterEventHandler(discord.DiscordEventIntegrationCreate, OnIntegrationCreate)
+	h.RegisterEventHandler(discord.DiscordEventIntegrationUpdate, OnIntegrationUpdate)
+	h.RegisterEventHandler(discord.DiscordEventIntegrationDelete, OnIntegrationDelete)
+	h.RegisterEventHandler(discord.DiscordEventInteractionCreate, OnInteractionCreate)
+	h.RegisterEventHandler(discord.DiscordEventInviteCreate, OnInviteCreate)
+	h.RegisterEventHandler(discord.DiscordEventInviteDelete, OnInviteDelete)
+	h.RegisterEventHandler(discord.DiscordEventMessageCreate, OnMessageCreate)
+	h.RegisterEventHandler(discord.DiscordEventMessageUpdate, OnMessageUpdate)
+	h.RegisterEventHandler(discord.DiscordEventMessageDelete, OnMessageDelete)
+	h.RegisterEventHandler(discord.DiscordEventMessageDeleteBulk, OnMessageDeleteBulk)
+	h.RegisterEventHandler(discord.DiscordEventMessageReactionAdd, OnMessageReactionAdd)
+	h.RegisterEventHandler(discord.DiscordEventMessageReactionRemove, OnMessageReactionRemove)
+	h.RegisterEventHandler(discord.DiscordEventMessageReactionRemoveAll, OnMessageReactionRemoveAll)
+	h.RegisterEventHandler(discord.DiscordEventMessageReactionRemoveEmoji, OnMessageReactionRemoveEmoji)
+	h.RegisterEventHandler(discord.DiscordEventPresenceUpdate, OnPresenceUpdate)
+	h.RegisterEventHandler(discord.DiscordEventStageInstanceCreate, OnStageInstanceCreate)
+	h.RegisterEventHandler(discord.DiscordEventStageInstanceUpdate, OnStageInstanceUpdate)
+	h.RegisterEventHandler(discord.DiscordEventStageInstanceDelete, OnStageInstanceDelete)
+	h.RegisterEventHandler(discord.DiscordEventTypingStart, OnTypingStart)
+	h.RegisterEventHandler(discord.DiscordEventUserUpdate, OnUserUpdate)
+	h.RegisterEventHandler(discord.DiscordEventVoiceStateUpdate, OnVoiceStateUpdate)
+	h.RegisterEventHandler(discord.DiscordEventVoiceServerUpdate, OnVoiceServerUpdate)
+	h.RegisterEventHandler(discord.DiscordEventWebhookUpdate, OnWebhookUpdate)
 
 	// Custom Events.
-	h.RegisterEventHandler(structs.DiscordEventGuildJoin, OnGuildJoin)
-	h.RegisterEventHandler(structs.DiscordEventGuildAvailable, OnGuildAvailable)
+	h.RegisterEventHandler(discord.DiscordEventGuildJoin, OnGuildJoin)
+	h.RegisterEventHandler(discord.DiscordEventGuildAvailable, OnGuildAvailable)
+	h.RegisterEventHandler(discord.DiscordEventGuildLeave, OnGuildLeave)
+	h.RegisterEventHandler(discord.DiscordEventGuildUnavailable, OnGuildUnavailable)
 
-	h.RegisterEventHandler(structs.DiscordEventGuildLeave, OnGuildLeave)
-	h.RegisterEventHandler(structs.DiscordEventGuildUnavailable, OnGuildUnavailable)
-	h.RegisterEventHandler(structs.EventError, nil)
+	h.RegisterEventHandler(DiscordEventError, nil)
 
 	return h
 }
@@ -91,9 +92,9 @@ func NewSandwichHandlers() (h *Handlers) {
 		EventHandlers:   make(map[string]*EventHandler),
 	}
 
-	h.RegisterEventHandler(structs.SandwichEventConfigurationReload, OnSandwichConfigurationReload)
-	h.RegisterEventHandler(structs.SandwichEventShardStatusUpdate, OnSandwichShardStatusUpdate)
-	h.RegisterEventHandler(structs.SandwichEventShardGroupStatusUpdate, OnSandwichShardGroupStatusUpdate)
+	h.RegisterEventHandler(sandwich_structs.SandwichEventConfigurationReload, OnSandwichConfigurationReload)
+	h.RegisterEventHandler(sandwich_structs.SandwichEventShardStatusUpdate, OnSandwichShardStatusUpdate)
+	h.RegisterEventHandler(sandwich_structs.SandwichEventShardGroupStatusUpdate, OnSandwichShardGroupStatusUpdate)
 
 	// Register events that are handled by default.
 	h.RegisterOnSandwichConfigurationReload(func(eventCtx *EventContext) (err error) {
@@ -103,7 +104,7 @@ func NewSandwichHandlers() (h *Handlers) {
 		}
 
 		eventCtx.Sandwich.identifiersMu.Lock()
-		eventCtx.Sandwich.Identifiers = map[string]*structs.ManagerConsumerConfiguration{}
+		eventCtx.Sandwich.Identifiers = map[string]*sandwich_structs.ManagerConsumerConfiguration{}
 
 		for k := range identifiers.Identifiers {
 			v := identifiers.Identifiers[k]
@@ -128,7 +129,7 @@ type EventHandler struct {
 	_handlers *Handlers
 }
 
-type EventParser func(eventCtx *EventContext, payload structs.SandwichPayload) (err error)
+type EventParser func(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error)
 
 // Discord Events.
 
@@ -152,13 +153,13 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) (e
 }
 
 // Dispatch. dispatches a payload.
-func (h *Handlers) Dispatch(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
+func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
 	return h.DispatchType(eventCtx, payload.Type, payload)
 }
 
 // DispatchType. is similar to Dispatch however a custom event name
 // can. be passed, preserving the original payload.
-func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payload structs.SandwichPayload) (err error) {
+func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payload sandwich_structs.SandwichPayload) (err error) {
 	identifier, ok, err := eventCtx.Sandwich.FetchIdentifier(context.TODO(), payload.Metadata.Application)
 	if !ok || err != nil {
 		eventCtx.Logger.Warn().Err(err).Msg("Failed to fetch identifier for application")
@@ -207,8 +208,8 @@ func (h *Handlers) WrapFuncType(eventCtx *EventContext, funcTypeErr error) (err 
 }
 
 // OnReady.
-func OnReady(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var readyPayload discord.Ready
+func OnReady(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var readyPayload discord_structs.Ready
 	if err = eventCtx.decodeContent(payload, &readyPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -228,8 +229,8 @@ func OnReady(eventCtx *EventContext, payload structs.SandwichPayload) (err error
 type OnReadyFuncType func(eventCtx *EventContext) (err error)
 
 // OnResumed.
-func OnResumed(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var resumePayload discord.Resume
+func OnResumed(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var resumePayload discord_structs.Resume
 	if err = eventCtx.decodeContent(payload, &resumePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -249,8 +250,8 @@ func OnResumed(eventCtx *EventContext, payload structs.SandwichPayload) (err err
 type OnResumedFuncType func(eventCtx *EventContext) (err error)
 
 // OnApplicationCommandCreate.
-func OnApplicationCommandCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var applicationCommandCreatePayload discord.ApplicationCommandCreate
+func OnApplicationCommandCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var applicationCommandCreatePayload discord_structs.ApplicationCommandCreate
 	if err = eventCtx.decodeContent(payload, &applicationCommandCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -274,8 +275,8 @@ func OnApplicationCommandCreate(eventCtx *EventContext, payload structs.Sandwich
 type OnApplicationCommandCreateFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
 
 // OnApplicationCommandUpdate.
-func OnApplicationCommandUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var applicationCommandUpdatePayload discord.ApplicationCommandUpdate
+func OnApplicationCommandUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var applicationCommandUpdatePayload discord_structs.ApplicationCommandUpdate
 	if err = eventCtx.decodeContent(payload, &applicationCommandUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -299,8 +300,8 @@ func OnApplicationCommandUpdate(eventCtx *EventContext, payload structs.Sandwich
 type OnApplicationCommandUpdateFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
 
 // OnApplicationCommandDelete.
-func OnApplicationCommandDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var applicationCommandDeletePayload discord.ApplicationCommandDelete
+func OnApplicationCommandDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var applicationCommandDeletePayload discord_structs.ApplicationCommandDelete
 	if err = eventCtx.decodeContent(payload, &applicationCommandDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -324,8 +325,8 @@ func OnApplicationCommandDelete(eventCtx *EventContext, payload structs.Sandwich
 type OnApplicationCommandDeleteFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
 
 // OnChannelCreate.
-func OnChannelCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var channelCreatePayload discord.ChannelCreate
+func OnChannelCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var channelCreatePayload discord_structs.ChannelCreate
 	if err = eventCtx.decodeContent(payload, &channelCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -349,8 +350,8 @@ func OnChannelCreate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnChannelCreateFuncType func(eventCtx *EventContext, channel Channel) (err error)
 
 // OnChannelUpdate.
-func OnChannelUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var channelUpdatePayload discord.ChannelUpdate
+func OnChannelUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var channelUpdatePayload discord_structs.ChannelUpdate
 	if err = eventCtx.decodeContent(payload, &channelUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -359,7 +360,7 @@ func OnChannelUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 		eventCtx.Guild = NewGuild(eventCtx, *channelUpdatePayload.GuildID)
 	}
 
-	var beforeChannel discord.Channel
+	var beforeChannel discord_structs.Channel
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeChannel); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -379,8 +380,8 @@ func OnChannelUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnChannelUpdateFuncType func(eventCtx *EventContext, before Channel, after Channel) (err error)
 
 // OnChannelDelete.
-func OnChannelDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var channelDeletePayload discord.ChannelDelete
+func OnChannelDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var channelDeletePayload discord_structs.ChannelDelete
 	if err = eventCtx.decodeContent(payload, &channelDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -404,8 +405,8 @@ func OnChannelDelete(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnChannelDeleteFuncType func(eventCtx *EventContext, channel Channel) (err error)
 
 // OnChannelPinsUpdate.
-func OnChannelPinsUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var channelPinsUpdatePayload discord.ChannelPinsUpdate
+func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var channelPinsUpdatePayload discord_structs.ChannelPinsUpdate
 	if err = eventCtx.decodeContent(payload, &channelPinsUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -434,8 +435,8 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnChannelPinsUpdateFuncType func(eventCtx *EventContext, channel *Channel, lastPinTimestamp time.Time) (err error)
 
 // OnThreadCreate.
-func OnThreadCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var threadCreatePayload discord.ThreadCreate
+func OnThreadCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var threadCreatePayload discord_structs.ThreadCreate
 	if err = eventCtx.decodeContent(payload, &threadCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -459,8 +460,8 @@ func OnThreadCreate(eventCtx *EventContext, payload structs.SandwichPayload) (er
 type OnThreadCreateFuncType func(eventCtx *EventContext, thread Channel) (err error)
 
 // OnThreadUpdate.
-func OnThreadUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var threadUpdatePayload discord.ThreadUpdate
+func OnThreadUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var threadUpdatePayload discord_structs.ThreadUpdate
 	if err = eventCtx.decodeContent(payload, &threadUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -469,7 +470,7 @@ func OnThreadUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (er
 		eventCtx.Guild = NewGuild(eventCtx, *threadUpdatePayload.GuildID)
 	}
 
-	var beforeChannel discord.Channel
+	var beforeChannel discord_structs.Channel
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeChannel); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -489,8 +490,8 @@ func OnThreadUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (er
 type OnThreadUpdateFuncType func(eventCtx *EventContext, before Channel, after Channel) (err error)
 
 // OnThreadDelete.
-func OnThreadDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var threadDeletePayload discord.ThreadDelete
+func OnThreadDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var threadDeletePayload discord_structs.ThreadDelete
 	if err = eventCtx.decodeContent(payload, &threadDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -515,7 +516,7 @@ type OnThreadDeleteFuncType func(eventCtx *EventContext, thread Channel) (err er
 
 // // OnThreadListSync.
 // func. OnThreadListSync(eventCtx *Context, payload structs.SandwichPayload) (err error) {
-// 	var threadListSyncPayload discord.ThreadListSync
+// 	var threadListSyncPayload discord_structs.ThreadListSync
 // 	if err = eventCtx.decodeContent(payload, &threadListSyncPayload); err != nil {
 // 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 // 	}
@@ -532,8 +533,8 @@ type OnThreadDeleteFuncType func(eventCtx *EventContext, thread Channel) (err er
 // type. OnThreadListSyncFuncType func(eventCtx *Context, thread Channel) (err error)
 
 // OnThreadMemberUpdate.
-func OnThreadMemberUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var threadMemberUpdatePayload discord.ThreadMemberUpdate
+func OnThreadMemberUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var threadMemberUpdatePayload discord_structs.ThreadMemberUpdate
 	if err = eventCtx.decodeContent(payload, &threadMemberUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -559,8 +560,8 @@ func OnThreadMemberUpdate(eventCtx *EventContext, payload structs.SandwichPayloa
 type OnThreadMemberUpdateFuncType func(eventCtx *EventContext, thread *Channel, user ThreadMember) (err error)
 
 // OnThreadMembersUpdate.
-func OnThreadMembersUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var threadMembersUpdatePayload discord.ThreadMembersUpdate
+func OnThreadMembersUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var threadMembersUpdatePayload discord_structs.ThreadMembersUpdate
 	if err = eventCtx.decodeContent(payload, &threadMembersUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -594,8 +595,8 @@ func OnThreadMembersUpdate(eventCtx *EventContext, payload structs.SandwichPaylo
 type OnThreadMembersUpdateFuncType func(eventCtx *EventContext, thread *Channel, addedUsers []*User, removedUsers []*User) (err error)
 
 // OnGuildCreate.
-func OnGuildCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildCreatePayload discord.GuildCreate
+func OnGuildCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildCreatePayload discord_structs.GuildCreate
 	if err = eventCtx.decodeContent(payload, &guildCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -626,8 +627,8 @@ func OnGuildCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err
 }
 
 // OnGuildUpdate.
-func OnGuildUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildUpdatePayload discord.GuildUpdate
+func OnGuildUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildUpdatePayload discord_structs.GuildUpdate
 	if err = eventCtx.decodeContent(payload, &guildUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -635,7 +636,7 @@ func OnGuildUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err
 	guild := Guild(*guildUpdatePayload)
 	eventCtx.Guild = &guild
 
-	var beforeGuild discord.Guild
+	var beforeGuild discord_structs.Guild
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeGuild); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -655,8 +656,8 @@ func OnGuildUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err
 type OnGuildUpdateFuncType func(eventCtx *EventContext, before Guild, after Guild) (err error)
 
 // OnGuildDelete.
-func OnGuildDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildDeletePayload discord.GuildDelete
+func OnGuildDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildDeletePayload discord_structs.GuildDelete
 	if err = eventCtx.decodeContent(payload, &guildDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -671,8 +672,8 @@ func OnGuildDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err
 }
 
 // OnGuildBanAdd.
-func OnGuildBanAdd(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildBanAddPayload discord.GuildBanAdd
+func OnGuildBanAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildBanAddPayload discord_structs.GuildBanAdd
 	if err = eventCtx.decodeContent(payload, &guildBanAddPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -696,8 +697,8 @@ func OnGuildBanAdd(eventCtx *EventContext, payload structs.SandwichPayload) (err
 type OnGuildBanAddFuncType func(eventCtx *EventContext, user User) (err error)
 
 // OnGuildBanRemove.
-func OnGuildBanRemove(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildBanRemovePayload discord.GuildBanRemove
+func OnGuildBanRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildBanRemovePayload discord_structs.GuildBanRemove
 	if err = eventCtx.decodeContent(payload, &guildBanRemovePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -721,8 +722,8 @@ func OnGuildBanRemove(eventCtx *EventContext, payload structs.SandwichPayload) (
 type OnGuildBanRemoveFuncType func(eventCtx *EventContext, user User) (err error)
 
 // OnGuildEmojisUpdate.
-func OnGuildEmojisUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildEmojisUpdatePayload discord.GuildEmojisUpdate
+func OnGuildEmojisUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildEmojisUpdatePayload discord_structs.GuildEmojisUpdate
 	if err = eventCtx.decodeContent(payload, &guildEmojisUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -754,8 +755,8 @@ func OnGuildEmojisUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnGuildEmojisUpdateFuncType func(eventCtx *EventContext, before []Emoji, after []Emoji) (err error)
 
 // OnGuildStickersUpdate.
-func OnGuildStickersUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildStickersUpdatePayload discord.GuildStickersUpdate
+func OnGuildStickersUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildStickersUpdatePayload discord_structs.GuildStickersUpdate
 	if err = eventCtx.decodeContent(payload, &guildStickersUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -787,8 +788,8 @@ func OnGuildStickersUpdate(eventCtx *EventContext, payload structs.SandwichPaylo
 type OnGuildStickersUpdateFuncType func(eventCtx *EventContext, before []Sticker, after []Sticker) (err error)
 
 // OnGuildIntegrationsUpdate.
-func OnGuildIntegrationsUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildIntegrationsUpdatePayload discord.GuildIntegrationsUpdate
+func OnGuildIntegrationsUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildIntegrationsUpdatePayload discord_structs.GuildIntegrationsUpdate
 	if err = eventCtx.decodeContent(payload, &guildIntegrationsUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -810,8 +811,8 @@ func OnGuildIntegrationsUpdate(eventCtx *EventContext, payload structs.SandwichP
 type OnGuildIntegrationsUpdateFuncType func(eventCtx *EventContext) (err error)
 
 // OnGuildMemberAdd.
-func OnGuildMemberAdd(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildMemberAddPayload discord.GuildMemberAdd
+func OnGuildMemberAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildMemberAddPayload discord_structs.GuildMemberAdd
 	if err = eventCtx.decodeContent(payload, &guildMemberAddPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -833,8 +834,8 @@ func OnGuildMemberAdd(eventCtx *EventContext, payload structs.SandwichPayload) (
 type OnGuildMemberAddFuncType func(eventCtx *EventContext, member GuildMember) (err error)
 
 // OnGuildMemberRemove.
-func OnGuildMemberRemove(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildMemberRemovePayload discord.GuildMemberRemove
+func OnGuildMemberRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildMemberRemovePayload discord_structs.GuildMemberRemove
 	if err = eventCtx.decodeContent(payload, &guildMemberRemovePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -856,15 +857,15 @@ func OnGuildMemberRemove(eventCtx *EventContext, payload structs.SandwichPayload
 type OnGuildMemberRemoveFuncType func(eventCtx *EventContext, member User) (err error)
 
 // OnGuildMemberUpdate.
-func OnGuildMemberUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildMemberUpdatePayload discord.GuildMemberUpdate
+func OnGuildMemberUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildMemberUpdatePayload discord_structs.GuildMemberUpdate
 	if err = eventCtx.decodeContent(payload, &guildMemberUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
 	eventCtx.Guild = NewGuild(eventCtx, *guildMemberUpdatePayload.GuildID)
 
-	var beforeGuildMember discord.GuildMember
+	var beforeGuildMember discord_structs.GuildMember
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeGuildMember); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -884,8 +885,8 @@ func OnGuildMemberUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnGuildMemberUpdateFuncType func(eventCtx *EventContext, before GuildMember, after GuildMember) (err error)
 
 // OnGuildRoleCreate.
-func OnGuildRoleCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildRoleCreatePayload discord.GuildRoleCreate
+func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildRoleCreatePayload discord_structs.GuildRoleCreate
 	if err = eventCtx.decodeContent(payload, &guildRoleCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -909,8 +910,8 @@ func OnGuildRoleCreate(eventCtx *EventContext, payload structs.SandwichPayload) 
 type OnGuildRoleCreateFuncType func(eventCtx *EventContext, role Role) (err error)
 
 // OnGuildRoleUpdate.
-func OnGuildRoleUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildRoleUpdatePayload discord.GuildRoleUpdate
+func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildRoleUpdatePayload discord_structs.GuildRoleUpdate
 	if err = eventCtx.decodeContent(payload, &guildRoleUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -919,7 +920,7 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload structs.SandwichPayload) 
 		eventCtx.Guild = NewGuild(eventCtx, *guildRoleUpdatePayload.GuildID)
 	}
 
-	var beforeRole discord.Role
+	var beforeRole discord_structs.Role
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeRole); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -939,8 +940,8 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload structs.SandwichPayload) 
 type OnGuildRoleUpdateFuncType func(eventCtx *EventContext, before Role, after Role) (err error)
 
 // OnGuildRoleDelete.
-func OnGuildRoleDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildRoleDeletePayload discord.GuildRoleDelete
+func OnGuildRoleDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildRoleDeletePayload discord_structs.GuildRoleDelete
 	if err = eventCtx.decodeContent(payload, &guildRoleDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -962,8 +963,8 @@ func OnGuildRoleDelete(eventCtx *EventContext, payload structs.SandwichPayload) 
 type OnGuildRoleDeleteFuncType func(eventCtx *EventContext, roleID discord.Snowflake) (err error)
 
 // OnIntegrationCreate.
-func OnIntegrationCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var integrationCreatePayload discord.IntegrationCreate
+func OnIntegrationCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var integrationCreatePayload discord_structs.IntegrationCreate
 	if err = eventCtx.decodeContent(payload, &integrationCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -987,8 +988,8 @@ func OnIntegrationCreate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnIntegrationCreateFuncType func(eventCtx *EventContext, integration Integration) (err error)
 
 // OnIntegrationUpdate.
-func OnIntegrationUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var integrationUpdatePayload discord.IntegrationUpdate
+func OnIntegrationUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var integrationUpdatePayload discord_structs.IntegrationUpdate
 	if err = eventCtx.decodeContent(payload, &integrationUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -997,7 +998,7 @@ func OnIntegrationUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 		eventCtx.Guild = NewGuild(eventCtx, *integrationUpdatePayload.GuildID)
 	}
 
-	var beforeIntegration discord.Integration
+	var beforeIntegration discord_structs.Integration
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeIntegration); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -1017,8 +1018,8 @@ func OnIntegrationUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnIntegrationUpdateFuncType func(eventCtx *EventContext, before Integration, after Integration) (err error)
 
 // OnIntegrationDelete.
-func OnIntegrationDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var integrationDeletePayload discord.IntegrationDelete
+func OnIntegrationDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var integrationDeletePayload discord_structs.IntegrationDelete
 	if err = eventCtx.decodeContent(payload, &integrationDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1045,8 +1046,8 @@ func OnIntegrationDelete(eventCtx *EventContext, payload structs.SandwichPayload
 type OnIntegrationDeleteFuncType func(eventCtx *EventContext, integrationID discord.Snowflake, applicationID discord.Snowflake) (err error)
 
 // OnInteractionCreate.
-func OnInteractionCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var interactionCreatePayload discord.InteractionCreate
+func OnInteractionCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var interactionCreatePayload discord_structs.InteractionCreate
 	if err = eventCtx.decodeContent(payload, &interactionCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1070,8 +1071,8 @@ func OnInteractionCreate(eventCtx *EventContext, payload structs.SandwichPayload
 type OnInteractionCreateFuncType func(eventCtx *EventContext, interaction Interaction) (err error)
 
 // OnInviteCreate.
-func OnInviteCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var inviteCreatePayload discord.InviteCreate
+func OnInviteCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var inviteCreatePayload discord_structs.InviteCreate
 	if err = eventCtx.decodeContent(payload, &inviteCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1095,8 +1096,8 @@ func OnInviteCreate(eventCtx *EventContext, payload structs.SandwichPayload) (er
 type OnInviteCreateFuncType func(eventCtx *EventContext, invite Invite) (err error)
 
 // OnInviteDelete.
-func OnInviteDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var inviteDeletePayload discord.InviteDelete
+func OnInviteDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var inviteDeletePayload discord_structs.InviteDelete
 	if err = eventCtx.decodeContent(payload, &inviteDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1120,8 +1121,8 @@ func OnInviteDelete(eventCtx *EventContext, payload structs.SandwichPayload) (er
 type OnInviteDeleteFuncType func(eventCtx *EventContext, invite Invite) (err error)
 
 // OnMessageCreate.
-func OnMessageCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageCreatePayload discord.MessageCreate
+func OnMessageCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageCreatePayload discord_structs.MessageCreate
 	if err = eventCtx.decodeContent(payload, &messageCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1145,8 +1146,8 @@ func OnMessageCreate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnMessageCreateFuncType func(eventCtx *EventContext, message Message) (err error)
 
 // OnMessageUpdate.
-func OnMessageUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageUpdatePayload discord.MessageUpdate
+func OnMessageUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageUpdatePayload discord_structs.MessageUpdate
 	if err = eventCtx.decodeContent(payload, &messageUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1155,7 +1156,7 @@ func OnMessageUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 		eventCtx.Guild = NewGuild(eventCtx, *messageUpdatePayload.GuildID)
 	}
 
-	var beforeMessage discord.Message
+	var beforeMessage discord_structs.Message
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeMessage); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -1175,8 +1176,8 @@ func OnMessageUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnMessageUpdateFuncType func(eventCtx *EventContext, before Message, after Message) (err error)
 
 // OnMessageDelete.
-func OnMessageDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageDeletePayload discord.MessageDelete
+func OnMessageDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageDeletePayload discord_structs.MessageDelete
 	if err = eventCtx.decodeContent(payload, &messageDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1202,8 +1203,8 @@ func OnMessageDelete(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnMessageDeleteFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake) (err error)
 
 // OnMessageDeleteBulk.
-func OnMessageDeleteBulk(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageDeleteBulkPayload discord.MessageDeleteBulk
+func OnMessageDeleteBulk(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageDeleteBulkPayload discord_structs.MessageDeleteBulk
 	if err = eventCtx.decodeContent(payload, &messageDeleteBulkPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1229,8 +1230,8 @@ func OnMessageDeleteBulk(eventCtx *EventContext, payload structs.SandwichPayload
 type OnMessageDeleteBulkFuncType func(eventCtx *EventContext, channel *Channel, messageIDs []discord.Snowflake) (err error)
 
 // OnMessageReactionAdd.
-func OnMessageReactionAdd(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageReactionAddPayload discord.MessageReactionAdd
+func OnMessageReactionAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageReactionAddPayload discord_structs.MessageReactionAdd
 	if err = eventCtx.decodeContent(payload, &messageReactionAddPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1254,8 +1255,8 @@ func OnMessageReactionAdd(eventCtx *EventContext, payload structs.SandwichPayloa
 type OnMessageReactionAddFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji Emoji, guildMember GuildMember) (err error)
 
 // OnMessageReactionRemove.
-func OnMessageReactionRemove(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageReactionRemovePayload discord.MessageReactionRemove
+func OnMessageReactionRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageReactionRemovePayload discord_structs.MessageReactionRemove
 	if err = eventCtx.decodeContent(payload, &messageReactionRemovePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1283,8 +1284,8 @@ func OnMessageReactionRemove(eventCtx *EventContext, payload structs.SandwichPay
 type OnMessageReactionRemoveFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji *Emoji, user *User) (err error)
 
 // OnMessageReactionRemoveAll.
-func OnMessageReactionRemoveAll(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageReactionRemoveAllPayload discord.MessageReactionRemoveAll
+func OnMessageReactionRemoveAll(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageReactionRemoveAllPayload discord_structs.MessageReactionRemoveAll
 	if err = eventCtx.decodeContent(payload, &messageReactionRemoveAllPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1308,8 +1309,8 @@ func OnMessageReactionRemoveAll(eventCtx *EventContext, payload structs.Sandwich
 type OnMessageReactionRemoveAllFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake) (err error)
 
 // OnMessageReactionRemoveEmoji.
-func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var messageReactionRemoveEmojiPayload discord.MessageReactionRemoveEmoji
+func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var messageReactionRemoveEmojiPayload discord_structs.MessageReactionRemoveEmoji
 	if err = eventCtx.decodeContent(payload, &messageReactionRemoveEmojiPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1335,8 +1336,8 @@ func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload structs.Sandwi
 type OnMessageReactionRemoveEmojiFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji Emoji) (err error)
 
 // OnPresenceUpdate.
-func OnPresenceUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var presenceUpdatePayload discord.PresenceUpdate
+func OnPresenceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var presenceUpdatePayload discord_structs.PresenceUpdate
 	if err = eventCtx.decodeContent(payload, &presenceUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1355,11 +1356,11 @@ func OnPresenceUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (
 	return nil
 }
 
-type OnPresenceUpdateFuncType func(eventCtx *EventContext, user User, payload discord.PresenceUpdate) (err error)
+type OnPresenceUpdateFuncType func(eventCtx *EventContext, user User, payload discord_structs.PresenceUpdate) (err error)
 
 // OnStageInstanceCreate.
-func OnStageInstanceCreate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var stageInstanceCreatePayload discord.StageInstanceCreate
+func OnStageInstanceCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var stageInstanceCreatePayload discord_structs.StageInstanceCreate
 	if err = eventCtx.decodeContent(payload, &stageInstanceCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1381,8 +1382,8 @@ func OnStageInstanceCreate(eventCtx *EventContext, payload structs.SandwichPaylo
 type OnStageInstanceCreateFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
 
 // OnStageInstanceUpdate.
-func OnStageInstanceUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var stageInstanceUpdatePayload discord.StageInstanceUpdate
+func OnStageInstanceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var stageInstanceUpdatePayload discord_structs.StageInstanceUpdate
 	if err = eventCtx.decodeContent(payload, &stageInstanceUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1404,8 +1405,8 @@ func OnStageInstanceUpdate(eventCtx *EventContext, payload structs.SandwichPaylo
 type OnStageInstanceUpdateFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
 
 // OnStageInstanceDelete.
-func OnStageInstanceDelete(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var stageInstanceDeletePayload discord.StageInstanceDelete
+func OnStageInstanceDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var stageInstanceDeletePayload discord_structs.StageInstanceDelete
 	if err = eventCtx.decodeContent(payload, &stageInstanceDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1425,8 +1426,8 @@ func OnStageInstanceDelete(eventCtx *EventContext, payload structs.SandwichPaylo
 type OnStageInstanceDeleteFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
 
 // OnTypingStart.
-func OnTypingStart(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var typingStartPayload discord.TypingStart
+func OnTypingStart(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var typingStartPayload discord_structs.TypingStart
 	if err = eventCtx.decodeContent(payload, &typingStartPayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1464,13 +1465,13 @@ func OnTypingStart(eventCtx *EventContext, payload structs.SandwichPayload) (err
 type OnTypingStartFuncType func(eventCtx *EventContext, channel *Channel, member *GuildMember, user *User, timestamp time.Time) (err error)
 
 // OnUserUpdate.
-func OnUserUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var userUpdatePayload discord.UserUpdate
+func OnUserUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var userUpdatePayload discord_structs.UserUpdate
 	if err = eventCtx.decodeContent(payload, &userUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	var beforeUser discord.User
+	var beforeUser discord_structs.User
 	if _, err := eventCtx.decodeExtra(payload, "before", &beforeUser); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
@@ -1490,8 +1491,8 @@ func OnUserUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err 
 type OnUserUpdateFuncType func(eventCtx *EventContext, before User, after User) (err error)
 
 // OnVoiceStateUpdate.
-func OnVoiceStateUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var voiceStateUpdatePayload discord.VoiceStateUpdate
+func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var voiceStateUpdatePayload discord_structs.VoiceStateUpdate
 	if err = eventCtx.decodeContent(payload, &voiceStateUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1515,8 +1516,8 @@ func OnVoiceStateUpdate(eventCtx *EventContext, payload structs.SandwichPayload)
 type OnVoiceStateUpdateFuncType func(eventCtx *EventContext, member GuildMember, voice VoiceState) (err error)
 
 // OnVoiceServerUpdate.
-func OnVoiceServerUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var voiceServerUpdatePayload discord.VoiceServerUpdate
+func OnVoiceServerUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var voiceServerUpdatePayload discord_structs.VoiceServerUpdate
 	if err = eventCtx.decodeContent(payload, &voiceServerUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1535,11 +1536,11 @@ func OnVoiceServerUpdate(eventCtx *EventContext, payload structs.SandwichPayload
 	return nil
 }
 
-type OnVoiceServerUpdateFuncType func(eventCtx *EventContext, payload discord.VoiceServerUpdate) (err error)
+type OnVoiceServerUpdateFuncType func(eventCtx *EventContext, payload discord_structs.VoiceServerUpdate) (err error)
 
 // OnWebhookUpdate.
-func OnWebhookUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var webhookUpdatePayload discord.WebhookUpdate
+func OnWebhookUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var webhookUpdatePayload discord_structs.WebhookUpdate
 	if err = eventCtx.decodeContent(payload, &webhookUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1563,8 +1564,8 @@ func OnWebhookUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (e
 type OnWebhookUpdateFuncType func(eventCtx *EventContext, channel *Channel) (err error)
 
 // OnGuildJoin.
-func OnGuildJoin(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildCreatePayload discord.GuildCreate
+func OnGuildJoin(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildCreatePayload discord_structs.GuildCreate
 	if err = eventCtx.decodeContent(payload, &guildCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1587,8 +1588,8 @@ func OnGuildJoin(eventCtx *EventContext, payload structs.SandwichPayload) (err e
 type OnGuildJoinFuncType func(eventCtx *EventContext, guild Guild) (err error)
 
 // OnGuildAvailable.
-func OnGuildAvailable(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildCreatePayload discord.GuildCreate
+func OnGuildAvailable(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildCreatePayload discord_structs.GuildCreate
 	if err = eventCtx.decodeContent(payload, &guildCreatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1611,8 +1612,8 @@ func OnGuildAvailable(eventCtx *EventContext, payload structs.SandwichPayload) (
 type OnGuildAvailableFuncType func(eventCtx *EventContext, guild Guild) (err error)
 
 // OnGuildLeave.
-func OnGuildLeave(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildDeletePayload discord.GuildDelete
+func OnGuildLeave(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildDeletePayload discord_structs.GuildDelete
 	if err = eventCtx.decodeContent(payload, &guildDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1634,8 +1635,8 @@ func OnGuildLeave(eventCtx *EventContext, payload structs.SandwichPayload) (err 
 type OnGuildLeaveFuncType func(eventCtx *EventContext, unavailableGuild UnavailableGuild) (err error)
 
 // OnGuildUnavailable.
-func OnGuildUnavailable(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var guildDeletePayload discord.GuildDelete
+func OnGuildUnavailable(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var guildDeletePayload discord_structs.GuildDelete
 	if err = eventCtx.decodeContent(payload, &guildDeletePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1659,7 +1660,7 @@ type OnGuildUnavailableFuncType func(eventCtx *EventContext, unavailableGuild Un
 // Sandwich Events.
 
 // OnSandwichConfigurationReload.
-func OnSandwichConfigurationReload(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
+func OnSandwichConfigurationReload(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
 	eventCtx.EventHandler.eventsMu.RLock()
 	defer eventCtx.EventHandler.eventsMu.RUnlock()
 
@@ -1675,8 +1676,8 @@ func OnSandwichConfigurationReload(eventCtx *EventContext, payload structs.Sandw
 type OnSandwichConfigurationReloadFuncType func(eventCtx *EventContext) (err error)
 
 // OnSandwichShardStatusUpdate.
-func OnSandwichShardStatusUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var shardStatusUpdatePayload structs.ShardStatusUpdate
+func OnSandwichShardStatusUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var shardStatusUpdatePayload sandwich_structs.ShardStatusUpdate
 	if err = eventCtx.decodeContent(payload, &shardStatusUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1698,11 +1699,11 @@ func OnSandwichShardStatusUpdate(eventCtx *EventContext, payload structs.Sandwic
 	return nil
 }
 
-type OnSandwichShardStatusUpdateFuncType func(eventCtx *EventContext, manager string, shardGroup int32, shard int32, status structs.ShardStatus) (err error)
+type OnSandwichShardStatusUpdateFuncType func(eventCtx *EventContext, manager string, shardGroup int32, shard int32, status sandwich_structs.ShardStatus) (err error)
 
 // OnSandwichShardGroupStatusUpdate.
-func OnSandwichShardGroupStatusUpdate(eventCtx *EventContext, payload structs.SandwichPayload) (err error) {
-	var shardGroupStatusUpdatePayload structs.ShardGroupStatusUpdate
+func OnSandwichShardGroupStatusUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
+	var shardGroupStatusUpdatePayload sandwich_structs.ShardGroupStatusUpdate
 	if err = eventCtx.decodeContent(payload, &shardGroupStatusUpdatePayload); err != nil {
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
@@ -1723,7 +1724,7 @@ func OnSandwichShardGroupStatusUpdate(eventCtx *EventContext, payload structs.Sa
 	return nil
 }
 
-type OnSandwichShardGroupStatusUpdateFuncType func(eventCtx *EventContext, manager string, shardGroup int32, status structs.ShardGroupStatus) (err error)
+type OnSandwichShardGroupStatusUpdateFuncType func(eventCtx *EventContext, manager string, shardGroup int32, status sandwich_structs.ShardGroupStatus) (err error)
 
 // Generic Events.
 

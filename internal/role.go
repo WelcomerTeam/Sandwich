@@ -1,11 +1,12 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	"golang.org/x/xerrors"
 )
 
-type Role discord.Role
+type Role discord_structs.Role
 
 func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *Role {
 	return &Role{
@@ -37,4 +38,4 @@ func (r *Role) Fetch(ctx *EventContext) (err error) {
 	return
 }
 
-type RoleTag discord.RoleTag
+type RoleTag discord_structs.RoleTag

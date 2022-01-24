@@ -1,11 +1,13 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+
 	"golang.org/x/xerrors"
 )
 
-type Channel discord.Channel
+type Channel discord_structs.Channel
 
 func NewChannel(ctx *EventContext, guildID *discord.Snowflake, channelID discord.Snowflake) *Channel {
 	return &Channel{
@@ -37,10 +39,10 @@ func (c *Channel) Fetch(ctx *EventContext) (err error) {
 	return
 }
 
-type ChannelOverwrite discord.ChannelOverwrite
+type ChannelOverwrite discord_structs.ChannelOverwrite
 
-type ThreadMetadata discord.ThreadMetadata
+type ThreadMetadata discord_structs.ThreadMetadata
 
-type ThreadMember discord.ThreadMember
+type ThreadMember discord_structs.ThreadMember
 
-type StageInstance discord.StageInstance
+type StageInstance discord_structs.StageInstance

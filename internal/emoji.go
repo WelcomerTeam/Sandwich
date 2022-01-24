@@ -1,11 +1,12 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	"golang.org/x/xerrors"
 )
 
-type Emoji discord.Emoji
+type Emoji discord_structs.Emoji
 
 func NewEmoji(ctx *EventContext, guildID *discord.Snowflake, emojiID discord.Snowflake) *Emoji {
 	return &Emoji{

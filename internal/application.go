@@ -1,31 +1,31 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+import discord_structs "github.com/WelcomerTeam/Discord/structs"
 
-type Application discord.Application
+type Application discord_structs.Application
 
-type ApplicationTeam discord.ApplicationTeam
+type ApplicationTeam discord_structs.ApplicationTeam
 
-type ApplicationTeamMember discord.ApplicationTeamMember
+type ApplicationTeamMember discord_structs.ApplicationTeamMember
 
-type ApplicationCommand discord.ApplicationCommand
+type ApplicationCommand discord_structs.ApplicationCommand
 
-type ApplicationCommandOption discord.ApplicationCommandOption
+type ApplicationCommandOption discord_structs.ApplicationCommandOption
 
-type ApplicationCommandOptionChoice discord.ApplicationCommandOptionChoice
+type ApplicationCommandOptionChoice discord_structs.ApplicationCommandOptionChoice
 
-type Interaction discord.Interaction
+type Interaction discord_structs.Interaction
 
-type InteractionData discord.InteractionData
+type InteractionData discord_structs.InteractionData
 
-type InteractionDataOption discord.InteractionDataOption
+type InteractionDataOption discord_structs.InteractionDataOption
 
-type InteractionResolvedData discord.InteractionResolvedData
+type InteractionResolvedData discord_structs.InteractionResolvedData
 
-type ApplicationSelectOption discord.ApplicationSelectOption
+type ApplicationSelectOption discord_structs.ApplicationSelectOption
 
-type Integration discord.Integration
+type Integration discord_structs.Integration
 
-type IntegrationAccount discord.IntegrationAccount
+type IntegrationAccount discord_structs.IntegrationAccount
 
-type InteractionComponent discord.InteractionComponent
+type InteractionComponent discord_structs.InteractionComponent

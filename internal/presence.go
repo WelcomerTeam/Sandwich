@@ -1,15 +1,17 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+import (
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+)
 
-type Activity discord.Activity
+type Activity discord_structs.Activity
 
-type Timestamps discord.Timestamps
+type Timestamps discord_structs.Timestamps
 
-type Party discord.Party
+type Party discord_structs.Party
 
-type Assets discord.Assets
+type Assets discord_structs.Assets
 
-type Secrets discord.Secrets
+type Secrets discord_structs.Secrets
 
-type ClientStatus discord.ClientStatus
+type ClientStatus discord_structs.ClientStatus

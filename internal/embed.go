@@ -1,19 +1,21 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+import (
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+)
 
-type Embed discord.Embed
+type Embed discord_structs.Embed
 
-type EmbedFooter discord.EmbedFooter
+type EmbedFooter discord_structs.EmbedFooter
 
-type EmbedImage discord.EmbedImage
+type EmbedImage discord_structs.EmbedImage
 
-type EmbedThumbnail discord.EmbedThumbnail
+type EmbedThumbnail discord_structs.EmbedThumbnail
 
-type EmbedVideo discord.EmbedVideo
+type EmbedVideo discord_structs.EmbedVideo
 
-type EmbedProvider discord.EmbedProvider
+type EmbedProvider discord_structs.EmbedProvider
 
-type EmbedAuthor discord.EmbedAuthor
+type EmbedAuthor discord_structs.EmbedAuthor
 
-type EmbedField discord.EmbedField
+type EmbedField discord_structs.EmbedField

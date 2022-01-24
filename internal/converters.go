@@ -8,7 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	discord "github.com/WelcomerTeam/Sandwich-Daemon/discord/structs"
+	"github.com/WelcomerTeam/Discord/discord"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+
 	"golang.org/x/xerrors"
 )
 
@@ -218,7 +220,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 // argument into a TextChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleArgumentTypeTextChannel(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildText)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildText)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +232,7 @@ func HandleArgumentTypeTextChannel(ctx *CommandContext, argument string) (out in
 	return results[0], nil
 }
 
-func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.ChannelType) (out []*Channel, err error) {
+func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_structs.ChannelType) (out []*Channel, err error) {
 	match := IDRegex.FindString(argument)
 	if match == "" {
 		matches := ChannelMentionRegex.FindStringSubmatch(argument)
@@ -435,7 +437,7 @@ func intToColour(val uint64) (out *color.RGBA) {
 // argument into a VoiceChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleArgumentTypeVoiceChannel(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildVoice)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildVoice)
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +453,7 @@ func HandleArgumentTypeVoiceChannel(ctx *CommandContext, argument string) (out i
 // argument into a StageChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleArgumentTypeStageChannel(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildStageVoice)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildStageVoice)
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +534,7 @@ func HandleArgumentTypePartialEmoji(ctx *CommandContext, argument string) (out i
 // argument into a CategoryChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleArgumentTypeCategoryChannel(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildCategory)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -548,7 +550,7 @@ func HandleArgumentTypeCategoryChannel(ctx *CommandContext, argument string) (ou
 // argument into a StoreChannel type. Use .Channel() within a command
 // to get the proper type.
 func HandleArgumentTypeStoreChannel(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildStore)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildStore)
 	if err != nil {
 		return nil, err
 	}
@@ -564,8 +566,8 @@ func HandleArgumentTypeStoreChannel(ctx *CommandContext, argument string) (out i
 // argument into a Thread type. Use .Thread() within a command
 // to get the proper type.
 func HandleArgumentTypeThread(ctx *CommandContext, argument string) (out interface{}, err error) {
-	results, err := findChannel(ctx, argument, discord.ChannelTypeGuildNewsThread,
-		discord.ChannelTypeGuildPrivateThread, discord.ChannelTypeGuildPublicThread)
+	results, err := findChannel(ctx, argument, discord_structs.ChannelTypeGuildNewsThread,
+		discord_structs.ChannelTypeGuildPrivateThread, discord_structs.ChannelTypeGuildPublicThread)
 	if err != nil {
 		return nil, err
 	}
