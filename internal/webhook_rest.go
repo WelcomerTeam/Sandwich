@@ -2,6 +2,7 @@ package internal
 
 import (
 	"net/http"
+	"net/url"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
 	discord_structs "github.com/WelcomerTeam/Discord/structs"
@@ -15,9 +16,9 @@ func WebhookCreate(c *Channel, ctx *EventContext, name string, avatar string) (w
 		Avatar string `json:"avatar,omitempty"`
 	}{name, avatar}
 
-	url := discord.EndpointChannelWebhooks(c.ID.String())
+	endpoint := discord.EndpointChannelWebhooks(c.ID.String())
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPost, url, data, &webhook)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPost, endpoint, data, &webhook)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to create webhook: %v", err)
 	}
@@ -27,9 +28,9 @@ func WebhookCreate(c *Channel, ctx *EventContext, name string, avatar string) (w
 
 // ChannelWebhooks returns all webhooks for a channel.
 func ChannelWebhooks(c *Channel, ctx *EventContext) (webhooks []*Webhook, err error) {
-	url := discord.EndpointChannelWebhooks(c.ID.String())
+	endpoint := discord.EndpointChannelWebhooks(c.ID.String())
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, url, nil, &webhooks)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, endpoint, nil, &webhooks)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to create webhook: %v", err)
 	}
@@ -39,9 +40,9 @@ func ChannelWebhooks(c *Channel, ctx *EventContext) (webhooks []*Webhook, err er
 
 // GuildWebhooks returns all webhooks for a guild.
 func GuildWebhooks(g *Guild, ctx *EventContext) (webhooks []*Webhook, err error) {
-	url := discord.EndpointGuildWebhooks(g.ID.String())
+	endpoint := discord.EndpointGuildWebhooks(g.ID.String())
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, url, nil, &webhooks)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, endpoint, nil, &webhooks)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to create webhook: %v", err)
 	}
@@ -55,15 +56,15 @@ func FetchWebhook(w *Webhook, ctx *EventContext, preferBotAuth bool) (webhook *W
 		return nil, ErrWebhookMissingToken
 	}
 
-	var url string
+	var endpoint string
 
 	if preferBotAuth && ctx.Identifier.Token != "" {
-		url = discord.EndpointWebhook(w.ID.String())
+		endpoint = discord.EndpointWebhook(w.ID.String())
 	} else {
-		url = discord.EndpointWebhookToken(w.ID.String(), w.Token)
+		endpoint = discord.EndpointWebhookToken(w.ID.String(), w.Token)
 	}
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, url, nil, &webhook)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, endpoint, nil, &webhook)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to fetch webhook: %v", err)
 	}
@@ -77,15 +78,15 @@ func WebhookDelete(w *Webhook, ctx *EventContext, reason string, preferBotAuth b
 		return ErrWebhookMissingToken
 	}
 
-	var url string
+	var endpoint string
 
 	if preferBotAuth && ctx.Identifier.Token != "" {
-		url = discord.EndpointWebhook(w.ID.String())
+		endpoint = discord.EndpointWebhook(w.ID.String())
 	} else {
-		url = discord.EndpointWebhookToken(w.ID.String(), w.Token)
+		endpoint = discord.EndpointWebhookToken(w.ID.String(), w.Token)
 	}
 
-	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, url, "", nil)
+	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, endpoint, "", nil)
 	if err != nil {
 		return xerrors.Errorf("Failed to delete webhook: %v", err)
 	}
@@ -110,15 +111,15 @@ func WebhookEdit(w *Webhook, ctx *EventContext, reason string, name string, avat
 		ChannelID string `json:"channel_id"`
 	}{name, avatarData, channelID.String()}
 
-	var url string
+	var endpoint string
 
 	if preferBotAuth && ctx.Identifier.Token != "" {
-		url = discord.EndpointWebhook(w.ID.String())
+		endpoint = discord.EndpointWebhook(w.ID.String())
 	} else {
-		url = discord.EndpointWebhookToken(w.ID.String(), w.Token)
+		endpoint = discord.EndpointWebhookToken(w.ID.String(), w.Token)
 	}
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPatch, url, data, &webhook)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPatch, endpoint, data, &webhook)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to edit webhook: %v", err)
 	}
@@ -128,19 +129,20 @@ func WebhookEdit(w *Webhook, ctx *EventContext, reason string, name string, avat
 
 // WebhookExecute sends a webhook message.
 func WebhookExecute(w *Webhook, ctx *EventContext, threadID *discord.Snowflake, wait bool, data *discord_structs.WebhookMessageParams, files []*discord_structs.File) (message *WebhookMessage, err error) {
-	url := discord.EndpointWebhookToken(w.ID.String(), w.Token)
+	endpoint := discord.EndpointWebhookToken(w.ID.String(), w.Token)
 
-	// TODO: Construct query
+	values := url.Values{}
 
-	switch {
-	case threadID != nil || wait:
-		url += "?"
-	case threadID != nil:
-		url += "thread_id=" + threadID.String()
-	case threadID != nil && wait:
-		url += "&"
-	case wait:
-		url += "wait=true"
+	if threadID != nil {
+		values.Set("thread_id", threadID.String())
+	}
+
+	if wait {
+		values.Set("wait", "true")
+	}
+
+	if len(values) > 0 {
+		endpoint = endpoint + "?" + values.Encode()
 	}
 
 	if len(data.Files) > 0 {
@@ -153,9 +155,9 @@ func WebhookExecute(w *Webhook, ctx *EventContext, threadID *discord.Snowflake, 
 			return nil, xerrors.Errorf("Failed to create file body: %v", err)
 		}
 
-		err = ctx.HTTPSession.FetchBJBot(ctx, http.MethodPost, url, contentType, body, &message)
+		err = ctx.HTTPSession.FetchBJBot(ctx, http.MethodPost, endpoint, contentType, body, &message)
 	} else {
-		err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPost, url, data, &message)
+		err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPost, endpoint, data, &message)
 	}
 
 	// We will not return the message if we are not waiting.
@@ -176,9 +178,9 @@ func FetchWebhookMessage(wm *WebhookMessage, ctx *EventContext, token string) (m
 		return nil, ErrWebhookMissingToken
 	}
 
-	url := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
+	endpoint := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, url, nil, &message)
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, endpoint, nil, &message)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to fetch webhook message: %v", err)
 	}
@@ -192,10 +194,16 @@ func WebhookMessageEdit(wm *WebhookMessage, ctx *EventContext, token string, thr
 		return nil, ErrWebhookMissingToken
 	}
 
-	url := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
+	endpoint := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
+
+	var values url.Values
 
 	if threadID != nil {
-		url += "?thread_id=" + threadID.String()
+		values.Set("thread_id", threadID.String())
+	}
+
+	if len(values) > 0 {
+		endpoint = endpoint + "?" + values.Encode()
 	}
 
 	if len(data.Files) > 0 {
@@ -208,9 +216,9 @@ func WebhookMessageEdit(wm *WebhookMessage, ctx *EventContext, token string, thr
 			return nil, xerrors.Errorf("Failed to create file body: %v", err)
 		}
 
-		err = ctx.HTTPSession.FetchBJBot(ctx, http.MethodPatch, url, contentType, body, &message)
+		err = ctx.HTTPSession.FetchBJBot(ctx, http.MethodPatch, endpoint, contentType, body, &message)
 	} else {
-		err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPatch, url, data, &message)
+		err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodPatch, endpoint, data, &message)
 	}
 
 	if err != nil {
@@ -226,13 +234,13 @@ func WebhookMessageDelete(wm *WebhookMessage, ctx *EventContext, token string, t
 		return ErrWebhookMissingToken
 	}
 
-	url := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
+	endpoint := discord.EndpointWebhookMessage(wm.WebhookID.String(), token, wm.ID.String())
 
 	if threadID != nil {
-		url += "?thread_id=" + threadID.String()
+		endpoint += "?thread_id=" + threadID.String()
 	}
 
-	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, url, "", nil)
+	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, endpoint, "", nil)
 	if err != nil {
 		return xerrors.Errorf("Failed to delete webhook message: %v", err)
 	}

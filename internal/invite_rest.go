@@ -2,21 +2,34 @@ package internal
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/WelcomerTeam/Discord/discord"
 	"golang.org/x/xerrors"
 )
 
-// GuildInvites(guildID string) (st []*Invite, err error) {
-// ChannelInvites(channelID string) (st []*Invite, err error) {
-// ChannelInviteCreate(channelID string, i Invite) (st *Invite, err error) {
-
 func FetchInvite(i *Invite, ctx *EventContext, withCounts bool, withExpiration bool, guildScheduledEventID *discord.Snowflake) (invite *Invite, err error) {
-	url := discord.EndpointInvite(i.Code)
+	endpoint := discord.EndpointInvite(i.Code)
 
-	// TODO: Construct query
+	values := url.Values{}
 
-	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, url, "", &invite)
+	if withCounts {
+		values.Set("with_counts", "true")
+	}
+
+	if withExpiration {
+		values.Set("with_expiration", "true")
+	}
+
+	if guildScheduledEventID != nil {
+		values.Set("guild_scheduled_event_id", guildScheduledEventID.String())
+	}
+
+	if len(values) > 0 {
+		endpoint = endpoint + "?" + values.Encode()
+	}
+
+	err = ctx.HTTPSession.FetchJJBot(ctx, http.MethodGet, endpoint, "", &invite)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to fetch invite: %v", err)
 	}
@@ -25,9 +38,9 @@ func FetchInvite(i *Invite, ctx *EventContext, withCounts bool, withExpiration b
 }
 
 func InviteDelete(i *Invite, ctx *EventContext) (err error) {
-	url := discord.EndpointInvite(i.Code)
+	endpoint := discord.EndpointInvite(i.Code)
 
-	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, url, "", nil)
+	_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, endpoint, "", nil)
 	if err != nil {
 		return xerrors.Errorf("Failed to delete invite: %v", err)
 	}

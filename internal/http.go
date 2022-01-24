@@ -13,11 +13,11 @@ import (
 )
 
 type HTTPSession interface {
-	Fetch(ctx context.Context, method, url, contentType string, body []byte, authorization string) (response []byte, err error)
+	Fetch(ctx context.Context, method, endpoint, contentType string, body []byte, authorization string) (response []byte, err error)
 	FetchBJ(ctx context.Context, method, url string, contentType string, body []byte, structure interface{}, authorization string) (err error)
 	FetchJJ(ctx context.Context, method, url string, payload interface{}, structure interface{}, authorization string) (err error)
 
-	FetchBot(ctx *EventContext, method, url, contentType string, body []byte) (response []byte, err error)
+	FetchBot(ctx *EventContext, method, endpoint, contentType string, body []byte) (response []byte, err error)
 	FetchBJBot(ctx *EventContext, method, url string, contentType string, body []byte, structure interface{}) (err error)
 	FetchJJBot(ctx *EventContext, method, url string, payload interface{}, structure interface{}) (err error)
 }
@@ -44,8 +44,8 @@ func NewTwilightProxy(url url.URL) (httpSession HTTPSession) {
 
 // Fetch sends a request to the TwilightProxy and returns the raw response.
 // For most requests, you will want to use FetchJJ.
-func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType string, body []byte, authorization string) (response []byte, err error) {
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(body))
+func (tl *TwilightProxy) Fetch(ctx context.Context, method, endpoint, contentType string, body []byte, authorization string) (response []byte, err error) {
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to create request: %v", err)
 	}
@@ -70,9 +70,6 @@ func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType str
 
 	defer resp.Body.Close()
 
-	println(req.URL.String(), resp.StatusCode)
-	println("BODY", string(body))
-
 	if resp.StatusCode == http.StatusUnauthorized {
 		return nil, ErrInvalidToken
 	}
@@ -81,8 +78,6 @@ func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType str
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to read body: %v", err)
 	}
-
-	println("RESPONSE", string(response))
 
 	return response, err
 }
