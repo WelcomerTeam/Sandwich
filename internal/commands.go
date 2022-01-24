@@ -128,7 +128,7 @@ func (c *Commandable) GetAllCommands() (commandables []*Commandable) {
 	for key, commandable := range c.commands {
 		// If the commandable's name is the same as it's key, it is safe to assume
 		// it is not an alias.
-		if strings.ToLower(commandable.Name) == strings.ToLower(key) {
+		if strings.EqualFold(commandable.Name, key) {
 			commandables = append(commandables, commandable)
 		}
 	}
@@ -346,7 +346,8 @@ type CommandContext struct {
 
 	*Message
 
-	Guild *Guild
+	Guild   *Guild
+	Channel *Channel
 
 	Prefix  string
 	Command *Commandable
@@ -371,7 +372,9 @@ func NewCommandContext(eventContext *EventContext, bot *Bot, message *Message, v
 		EventContext: eventContext,
 
 		Message: message,
+
 		Guild:   eventContext.Guild,
+		Channel: NewChannel(eventContext, message.GuildID, message.ChannelID),
 
 		Prefix:  "",
 		Command: nil,

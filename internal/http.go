@@ -14,10 +14,12 @@ import (
 
 type HTTPSession interface {
 	Fetch(ctx context.Context, method, url, contentType string, body []byte, authorization string) (response []byte, err error)
-	FetchBot(ctx *EventContext, method, url, contentType string, body []byte) (response []byte, err error)
+	FetchBJ(ctx context.Context, method, url string, contentType string, body []byte, structure interface{}, authorization string) (err error)
+	FetchJJ(ctx context.Context, method, url string, payload interface{}, structure interface{}, authorization string) (err error)
 
-	FetchJSON(ctx context.Context, method, url string, payload interface{}, structure interface{}, authorization string) (err error)
-	FetchJSONBot(ctx *EventContext, method, url string, payload interface{}, structure interface{}) (err error)
+	FetchBot(ctx *EventContext, method, url, contentType string, body []byte) (response []byte, err error)
+	FetchBJBot(ctx *EventContext, method, url string, contentType string, body []byte, structure interface{}) (err error)
+	FetchJJBot(ctx *EventContext, method, url string, payload interface{}, structure interface{}) (err error)
 }
 
 type TwilightProxy struct {
@@ -40,13 +42,16 @@ func NewTwilightProxy(url url.URL) (httpSession HTTPSession) {
 	}
 }
 
-// Fetch sends a request to the TwilightProxy and returns the raw response. For most requests,
-// you will want to use FetchJSON.
+// Fetch sends a request to the TwilightProxy and returns the raw response.
+// For most requests, you will want to use FetchJJ.
 func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType string, body []byte, authorization string) (response []byte, err error) {
 	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to create request: %v", err)
 	}
+
+	req.URL.Host = tl.URLHost
+	req.URL.Scheme = tl.URLScheme
 
 	req.Header.Set("User-Agent", tl.UserAgent)
 
@@ -65,6 +70,9 @@ func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType str
 
 	defer resp.Body.Close()
 
+	println(req.URL.String(), resp.StatusCode)
+	println("BODY", string(body))
+
 	if resp.StatusCode == http.StatusUnauthorized {
 		return nil, ErrInvalidToken
 	}
@@ -74,21 +82,13 @@ func (tl *TwilightProxy) Fetch(ctx context.Context, method, url, contentType str
 		return nil, xerrors.Errorf("Failed to read body: %v", err)
 	}
 
+	println("RESPONSE", string(response))
+
 	return response, err
 }
 
-// FetchJSON works similar to Fetch however will turn the payload into JSON (if passed) and
-// converts the output into the structure passed.
-func (tl *TwilightProxy) FetchJSON(ctx context.Context, method, url string, payload interface{}, structure interface{}, authorization string) (err error) {
-	var body []byte
-
-	if payload != nil {
-		body, err = jsoniter.Marshal(payload)
-		if err != nil {
-			return xerrors.Errorf("Failed to marshal payload: %v", err)
-		}
-	}
-
+// FetchBJ works similar to Fetch however will convert the output into the structure passed.
+func (tl *TwilightProxy) FetchBJ(ctx context.Context, method, url string, contentType string, body []byte, structure interface{}, authorization string) (err error) {
 	response, err := tl.Fetch(ctx, method, url, "application/json", body, authorization)
 	if err != nil {
 		return xerrors.Errorf("Failed to fetch: %v", err)
@@ -102,12 +102,32 @@ func (tl *TwilightProxy) FetchJSON(ctx context.Context, method, url string, payl
 	return nil
 }
 
+// FetchJJ works similar to Fetch however will turn the payload into JSON (if passed) and
+// converts the output into the structure passed.
+func (tl *TwilightProxy) FetchJJ(ctx context.Context, method, url string, payload interface{}, structure interface{}, authorization string) (err error) {
+	var body []byte
+
+	if payload != nil {
+		body, err = jsoniter.Marshal(payload)
+		if err != nil {
+			return xerrors.Errorf("Failed to marshal payload: %v", err)
+		}
+	}
+
+	return tl.FetchBJ(ctx, method, url, "application/json", body, structure, authorization)
+}
+
 // FetchBot is similar to Fetch() however automatically passes in the proper token.
 func (tl *TwilightProxy) FetchBot(ctx *EventContext, method, url, contentType string, body []byte) (response []byte, err error) {
 	return tl.Fetch(ctx.Context, method, url, contentType, body, "Bot "+ctx.Identifier.Token)
 }
 
-// FetchBot is similar to FetchJSON() however automatically passes in the proper token.
-func (tl *TwilightProxy) FetchJSONBot(ctx *EventContext, method, url string, payload interface{}, structure interface{}) (err error) {
-	return tl.FetchJSON(ctx.Context, method, url, payload, structure, "Bot "+ctx.Identifier.Token)
+// FetchBJBot is similar to FetchBJ() however automatically passes in the proper token.
+func (tl *TwilightProxy) FetchBJBot(ctx *EventContext, method, url, contentType string, body []byte, structure interface{}) (err error) {
+	return tl.FetchBJ(ctx.Context, method, url, contentType, body, structure, "Bot "+ctx.Identifier.Token)
+}
+
+// FetchJJBot is similar to FetchJJ() however automatically passes in the proper token.
+func (tl *TwilightProxy) FetchJJBot(ctx *EventContext, method, url string, payload interface{}, structure interface{}) (err error) {
+	return tl.FetchJJ(ctx.Context, method, url, payload, structure, "Bot "+ctx.Identifier.Token)
 }

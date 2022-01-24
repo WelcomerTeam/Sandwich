@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
+	discord "github.com/WelcomerTeam/Discord/structs"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
+	sandwich "github.com/WelcomerTeam/Sandwich/internal"
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
-	sandwich "github.com/WelcomerTeam/Sandwich/sandwich"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
@@ -39,6 +40,30 @@ func main() {
 	sandwichClient := sandwich.NewSandwich(conn, session, writer)
 
 	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
+
+	bot.MustAddCommand(&sandwich.Commandable{
+		Name: "test",
+		Handler: func(ctx *sandwich.CommandContext) (err error) {
+			_, err = ctx.Channel.Send(ctx.EventContext, &discord.MessageParams{
+				Content: "Test Success.",
+				Components: []*discord.InteractionComponent{
+					{
+						Type: discord.InteractionComponentTypeActionRow,
+						Components: []*discord.InteractionComponent{
+							{
+								Type:     discord.InteractionComponentTypeButton,
+								Label:    "Test Success",
+								CustomID: "click_me",
+								Style:    discord.InteractionComponentStylePrimary,
+							},
+						},
+					},
+				},
+			}, nil)
+
+			return nil
+		},
+	})
 
 	argumentTestGroup := bot.MustAddCommand(&sandwich.Commandable{
 		Name: "argumentTest",

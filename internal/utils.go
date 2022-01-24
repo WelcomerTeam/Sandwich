@@ -3,9 +3,20 @@ package internal
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/textproto"
 	"regexp"
+	"strings"
 	"time"
+
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/xerrors"
 )
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 
 func parseTimeStamp(timestamp string) (time.Time, error) {
 	return time.Parse(time.RFC3339, timestamp)
@@ -76,4 +87,59 @@ func getImageMimeType(b []byte) (mimeType string, err error) {
 	}
 
 	return "", ErrUnsupportedImageType
+}
+
+func multipartBodyWithJSON(data interface{}, files []*discord_structs.File) (contentType string, body []byte, err error) {
+	requestBody := &bytes.Buffer{}
+	writer := multipart.NewWriter(requestBody)
+
+	payload, err := jsoniter.Marshal(data)
+	if err != nil {
+		return "", nil, xerrors.Errorf("Failed to marshal payload: %v", err)
+	}
+
+	var part io.Writer
+
+	header := make(textproto.MIMEHeader)
+	header.Set("Content-Disposition", `form-data; name="payload_json"`)
+	header.Set("Content-Type", "application/json")
+
+	part, err = writer.CreatePart(header)
+	if err != nil {
+		return "", nil, xerrors.Errorf("Failed to create part: %v", err)
+	}
+
+	_, err = part.Write(payload)
+	if err != nil {
+		return "", nil, xerrors.Errorf("Failed to write payload: %v", err)
+	}
+
+	for i, file := range files {
+		header := make(textproto.MIMEHeader)
+		header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file%d"; filename="%s"`, i, quoteEscaper.Replace(file.Name)))
+
+		fileContentType := file.ContentType
+		if fileContentType == "" {
+			fileContentType = "application/octet-stream"
+		}
+
+		header.Set("Content-Type", fileContentType)
+
+		part, err = writer.CreatePart(header)
+		if err != nil {
+			return "", nil, xerrors.Errorf("Failed to create part: %v", err)
+		}
+
+		_, err = io.Copy(part, file.Reader)
+		if err != nil {
+			return "", nil, xerrors.Errorf("Failed to copy file: %v", err)
+		}
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return "", nil, xerrors.Errorf("Failed to close writer")
+	}
+
+	return writer.FormDataContentType(), requestBody.Bytes(), nil
 }

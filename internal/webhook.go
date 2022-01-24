@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"net/http"
 	"regexp"
 	"strconv"
 
@@ -13,7 +12,7 @@ var WebhookURLRegex = regexp.MustCompile("discord(?:app)?.com/api/webhooks/(?P<i
 
 type Webhook discord_structs.Webhook
 
-type WebhookMessage discord_structs.WebhookMessage
+type WebhookMessage discord_structs.Message
 
 func NewWebhook(id discord.Snowflake, token string, webhookType discord_structs.WebhookType) (w *Webhook) {
 	w = &Webhook{
@@ -54,54 +53,56 @@ func (w *Webhook) Partial() *Webhook {
 	}
 }
 
-// Delete deletes a webhook.
-func (w *Webhook) Delete(ctx *EventContext, reason string, preferAuth bool) (err error) {
-	if w.Token == "" && ctx.Identifier.Token == "" {
-		return ErrWebhookMissingToken
-	}
-
-	if preferAuth && ctx.Identifier.Token != "" {
-		_, err = ctx.HTTPSession.FetchBot(ctx, http.MethodDelete, discord.EndpointWebhook(w.ID.String()), "", nil)
-	} else {
-		_, err = ctx.HTTPSession.Fetch(ctx, http.MethodDelete, discord.EndpointWebhookToken(w.ID.String(), w.Token), "", nil, "")
-	}
-
-	return
+func (c *Channel) CreateWebhook(ctx *EventContext, name string, avatar string) (webhook *Webhook, err error) {
+	return WebhookCreate(c, ctx, name, avatar)
 }
 
-// Edit edits a webhook.
-func (w *Webhook) Edit(ctx *EventContext, reason string, name string, avatar []byte, channelID *discord.Snowflake, preferAuth bool) (webhook *Webhook, err error) {
-	if w.Token == "" && ctx.Identifier.Token == "" {
-		return nil, ErrWebhookMissingToken
-	}
+func (c *Channel) Webhooks(ctx *EventContext) (webhooks []*Webhook, err error) {
+	return ChannelWebhooks(c, ctx)
+}
 
-	if channelID != nil && ctx.Identifier.Token == "" {
-		return nil, ErrWebhookMissingToken
-	}
+func (g *Guild) Webhooks(ctx *EventContext) (webhooks []*Webhook, err error) {
+	return GuildWebhooks(g, ctx)
+}
 
-	avatarData, err := bytesToBase64Data(avatar)
+func (w *Webhook) Fetch(ctx *EventContext, preferBotAuth bool) (err error) {
+	webhook, err := FetchWebhook(w, ctx, preferBotAuth)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	webhook = &Webhook{
-		Name:      name,
-		Avatar:    avatarData,
-		ChannelID: channelID,
-	}
-
-	if preferAuth && ctx.Identifier.Token != "" {
-		err = ctx.HTTPSession.FetchJSONBot(ctx, http.MethodPatch, discord.EndpointWebhook(w.ID.String()), "", &webhook)
-	} else {
-		err = ctx.HTTPSession.FetchJSON(ctx, http.MethodPatch, discord.EndpointWebhookToken(w.ID.String(), w.Token), "", &webhook, "")
-	}
+	*w = *webhook
 
 	return
 }
 
-// Send sends a message.
-func (w *Webhook) Send(msg *WebhookMessage) (message *WebhookMessage, err error) {
-	// TODO
+func (w *Webhook) Edit(ctx *EventContext, reason string, name string, avatar []byte, channelID *discord.Snowflake) (err error) {
+	webhook, err := WebhookEdit(w, ctx, reason, name, avatar, channelID, false)
+	if err != nil {
+		return
+	}
 
-	return nil, nil
+	*w = *webhook
+
+	return
+}
+
+func (w *Webhook) Delete(ctx *EventContext, reason string) (err error) {
+	return WebhookDelete(w, ctx, reason, false)
+}
+
+func (w *Webhook) Send(ctx *EventContext, data *discord_structs.WebhookMessageParams, files []*discord_structs.File, wait bool, threadID *discord.Snowflake) (message *WebhookMessage, err error) {
+	return WebhookExecute(w, ctx, threadID, wait, data, files)
+}
+
+func (wm *WebhookMessage) Fetch(ctx *EventContext, token string) (message *WebhookMessage, err error) {
+	return FetchWebhookMessage(wm, ctx, token)
+}
+
+func (wm *WebhookMessage) Edit(ctx *EventContext, data *discord_structs.WebhookMessageParams, files []*discord_structs.File, threadID *discord.Snowflake, token string) (message *WebhookMessage, err error) {
+	return WebhookMessageEdit(wm, ctx, token, threadID, data, files)
+}
+
+func (wm *WebhookMessage) Delete(ctx *EventContext, threadID *discord.Snowflake, token string) (err error) {
+	return WebhookMessageDelete(wm, ctx, token, threadID)
 }

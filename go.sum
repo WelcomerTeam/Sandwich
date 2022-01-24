@@ -38,6 +38,12 @@ github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/WelcomerTeam/Discord v0.0.0-20220124132014-932442dad882 h1:qIagO5UjBXnaxY5iT+dA9K5zc+speV+FG/AqHptmoI4=
 github.com/WelcomerTeam/Discord v0.0.0-20220124132014-932442dad882/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
+github.com/WelcomerTeam/Discord v0.0.0-20220124143200-805ed15f922b h1:Fc+aPBj7W91DeRKG3ZOdKXTKQ3woAQNudMFZ6TMuTwk=
+github.com/WelcomerTeam/Discord v0.0.0-20220124143200-805ed15f922b/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
+github.com/WelcomerTeam/Discord v0.0.0-20220124170434-bc7a1a1d3577 h1:LFEj6AvQo71oU52xK4+TQv4Pl/qZ+TuGrIJNvuqU9BY=
+github.com/WelcomerTeam/Discord v0.0.0-20220124170434-bc7a1a1d3577/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
+github.com/WelcomerTeam/Discord v0.0.0-20220124171205-425e9f8dbfe0 h1:vWdf6sXaHFv5UueSyY0nRHM07wi/yUwIy2ZS4X4e8so=
+github.com/WelcomerTeam/Discord v0.0.0-20220124171205-425e9f8dbfe0/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
 github.com/WelcomerTeam/RealRock v0.0.0-20220122233305-f97b8c8cbc15/go.mod h1:4oemQ7XEqKAc1DTtFpWugoE9K5RLjt7iH0emiFXnL/A=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124134706-01d555f4b120 h1:ShqGmYS+5U1W4C69LcoA+ApMslK4k9KFd9db13HW+3E=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124134706-01d555f4b120/go.mod h1:m2fyo5y1Wyd9gd+mp8HGxqeufdw9pgvMd7VA4uQ4KIE=
