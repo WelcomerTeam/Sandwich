@@ -8,7 +8,7 @@ import (
 	"time"
 
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
-	structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
+	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
@@ -29,7 +29,7 @@ type Sandwich struct {
 	SandwichEvents *Handlers
 
 	identifiersMu sync.RWMutex
-	Identifiers   map[string]*structs.ManagerConsumerConfiguration
+	Identifiers   map[string]*sandwich_structs.ManagerConsumerConfiguration
 
 	lastIdentifierRequestMu sync.RWMutex
 	LastIdentifierRequest   map[string]time.Time
@@ -50,7 +50,7 @@ func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger 
 		SandwichEvents: NewSandwichHandlers(),
 
 		identifiersMu: sync.RWMutex{},
-		Identifiers:   make(map[string]*structs.ManagerConsumerConfiguration),
+		Identifiers:   make(map[string]*sandwich_structs.ManagerConsumerConfiguration),
 
 		lastIdentifierRequestMu: sync.RWMutex{},
 		LastIdentifierRequest:   make(map[string]time.Time),
@@ -64,17 +64,18 @@ func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger 
 	return
 }
 
-func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
 	return s.SandwichEvents.Dispatch(&EventContext{
 		Logger:      s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
 		Sandwich:    s,
 		HTTPSession: s.HTTPSession,
 		Handlers:    s.SandwichEvents,
 		Context:     context,
+		payload:     &payload,
 	}, payload)
 }
 
-func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
 	s.botsMu.RLock()
 	b, ok := s.Bots[payload.Metadata.Identifier]
 	s.botsMu.RUnlock()
@@ -89,6 +90,7 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload stru
 		HTTPSession: s.HTTPSession,
 		Handlers:    b.Handlers,
 		Context:     context,
+		payload:     &payload,
 	}, payload)
 }
 
@@ -98,12 +100,12 @@ func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
 	s.botsMu.Unlock()
 }
 
-func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload structs.SandwichPayload) {
+func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload sandwich_structs.SandwichPayload) {
 	s.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
 	println(string(debug.Stack()))
 }
 
-func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName string) (identifier *structs.ManagerConsumerConfiguration, ok bool, err error) {
+func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
 	s.identifiersMu.RLock()
 	identifier, ok = s.Identifiers[applicationName]
 	s.identifiersMu.RUnlock()
@@ -127,7 +129,7 @@ func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName str
 		}
 
 		s.identifiersMu.Lock()
-		s.Identifiers = map[string]*structs.ManagerConsumerConfiguration{}
+		s.Identifiers = map[string]*sandwich_structs.ManagerConsumerConfiguration{}
 
 		for k := range identifiers.Identifiers {
 			v := identifiers.Identifiers[k]
@@ -161,12 +163,22 @@ type EventContext struct {
 	EventHandler *EventHandler
 	Handlers     *Handlers
 
-	Identifier *structs.ManagerConsumerConfiguration
+	Identifier *sandwich_structs.ManagerConsumerConfiguration
 
 	Guild *Guild
+
+	payload *sandwich_structs.SandwichPayload
 }
 
-func (eventCtx *EventContext) decodeContent(msg structs.SandwichPayload, out interface{}) (err error) {
+func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
+	if eventCtx.payload != nil {
+		return eventCtx.payload.Trace
+	}
+
+	return nil
+}
+
+func (eventCtx *EventContext) decodeContent(msg sandwich_structs.SandwichPayload, out interface{}) (err error) {
 	err = jsoniter.Unmarshal(msg.Data, &out)
 	if err != nil {
 		return xerrors.Errorf("Failed to unmarshal gateway payload: %v", err)
@@ -175,7 +187,7 @@ func (eventCtx *EventContext) decodeContent(msg structs.SandwichPayload, out int
 	return
 }
 
-func (eventCtx *EventContext) decodeExtra(msg structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
+func (eventCtx *EventContext) decodeExtra(msg sandwich_structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
 	val, ok := msg.Extra[key]
 	if ok {
 		if len(val) == 0 {

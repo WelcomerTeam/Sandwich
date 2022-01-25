@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+
 	conn, err := grpc.Dial("localhost:15000", grpc.WithInsecure())
 	if err != nil {
 		panic(err)

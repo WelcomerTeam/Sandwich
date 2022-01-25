@@ -413,11 +413,6 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	eventCtx.Guild = NewGuild(eventCtx, channelPinsUpdatePayload.GuildID)
 
-	var timestamp time.Time
-	if channelPinsUpdatePayload.LastPinTimestamp != "" {
-		timestamp, _ = parseTimeStamp(channelPinsUpdatePayload.LastPinTimestamp)
-	}
-
 	channel := NewChannel(eventCtx, &channelPinsUpdatePayload.GuildID, channelPinsUpdatePayload.ChannelID)
 
 	eventCtx.EventHandler.eventsMu.RLock()
@@ -425,7 +420,7 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelPinsUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, timestamp))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, channelPinsUpdatePayload.LastPinTimestamp))
 		}
 	}
 
