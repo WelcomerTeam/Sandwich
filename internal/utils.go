@@ -9,7 +9,6 @@ import (
 	"net/textproto"
 	"regexp"
 	"strings"
-	"time"
 
 	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	jsoniter "github.com/json-iterator/go"
@@ -17,10 +16,6 @@ import (
 )
 
 var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
-
-func parseTimeStamp(timestamp string) (time.Time, error) {
-	return time.Parse(time.RFC3339, timestamp)
-}
 
 func contains(s []string, e string) bool {
 	for _, a := range s {
@@ -45,6 +40,7 @@ func argumentTypeIs(argumentType ArgumentType, argumentTypes ...ArgumentType) bo
 func findAllGroups(re *regexp.Regexp, s string) map[string]string {
 	matches := re.FindStringSubmatch(s)
 	subnames := re.SubexpNames()
+
 	if matches == nil || len(matches) != len(subnames) {
 		return nil
 	}
@@ -65,9 +61,10 @@ func bytesToBase64Data(b []byte) (data string, err error) {
 
 	var out bytes.Buffer
 	w := base64.NewEncoder(base64.StdEncoding, &out)
+
 	_, err = w.Write(b)
 	if err != nil {
-		return "", err
+		return "", xerrors.Errorf("Failed to base64 bytes: %v", err)
 	}
 
 	defer w.Close()
@@ -76,17 +73,21 @@ func bytesToBase64Data(b []byte) (data string, err error) {
 }
 
 func getImageMimeType(b []byte) (mimeType string, err error) {
-	if bytes.Equal(b[0:8], []byte{137, 80, 78, 71, 13, 10, 26, 10}) {
+	switch {
+	case bytes.Equal(b[0:8], []byte{137, 80, 78, 71, 13, 10, 26, 10}):
 		return "image/png", nil
-	} else if bytes.Equal(b[0:3], []byte{255, 216, 255}) || bytes.Equal(b[6:10], []byte("JFIF")) || bytes.Equal(b[6:10], []byte("Exif")) {
+	case bytes.Equal(b[0:3], []byte{255, 216, 255}) ||
+		bytes.Equal(b[6:10], []byte("JFIF")) ||
+		bytes.Equal(b[6:10], []byte("Exif")):
 		return "image/jpeg", nil
-	} else if bytes.Equal(b[0:6], []byte{71, 73, 70, 56, 55, 97}) || bytes.Equal(b[0:6], []byte{71, 73, 70, 56, 57, 97}) {
+	case bytes.Equal(b[0:6], []byte{71, 73, 70, 56, 55, 97}) ||
+		bytes.Equal(b[0:6], []byte{71, 73, 70, 56, 57, 97}):
 		return "image/gif", nil
-	} else if bytes.Equal(b[0:4], []byte("RIFF")) && bytes.Equal(b[8:12], []byte("WEBP")) {
+	case bytes.Equal(b[0:4], []byte("RIFF")) && bytes.Equal(b[8:12], []byte("WEBP")):
 		return "image/webp", nil
+	default:
+		return "", ErrUnsupportedImageType
 	}
-
-	return "", ErrUnsupportedImageType
 }
 
 func multipartBodyWithJSON(data interface{}, files []*discord_structs.File) (contentType string, body []byte, err error) {

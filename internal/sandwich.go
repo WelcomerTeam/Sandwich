@@ -100,7 +100,7 @@ func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
 	s.botsMu.Unlock()
 }
 
-func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload sandwich_structs.SandwichPayload) {
+func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_structs.SandwichPayload) {
 	s.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
 	println(string(debug.Stack()))
 }

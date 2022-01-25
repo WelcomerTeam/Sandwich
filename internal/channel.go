@@ -33,10 +33,24 @@ func (c *Channel) Fetch(ctx *EventContext) (err error) {
 	if channel != nil {
 		*c = *channel
 	} else {
+		// TODO: Try http
+
 		return ErrChannelNotFound
 	}
 
 	return
+}
+
+func (c *Channel) CreateWebhook(ctx *EventContext, name string, avatar string) (webhook *Webhook, err error) {
+	return WebhookCreate(c, ctx, name, avatar)
+}
+
+func (c *Channel) Webhooks(ctx *EventContext) (webhooks []*Webhook, err error) {
+	return ChannelWebhooks(c, ctx)
+}
+
+func (c *Channel) Send(ctx *EventContext, data *discord_structs.MessageParams, files []*discord_structs.File) (message *Message, err error) {
+	return ChannelMessageSend(c, ctx, data, files)
 }
 
 type ChannelOverwrite discord_structs.ChannelOverwrite

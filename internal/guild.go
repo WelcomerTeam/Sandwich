@@ -9,12 +9,14 @@ import (
 
 type Guild discord_structs.Guild
 
+// NewGuild creates a new partial guild. Use Fetch() to populate the guild.
 func NewGuild(ctx *EventContext, guildID discord.Snowflake) *Guild {
 	return &Guild{
 		ID: guildID,
 	}
 }
 
+// Fetch populates the guild.
 func (g *Guild) Fetch(ctx *EventContext) (err error) {
 	if g.Name != "" {
 		return
@@ -28,16 +30,24 @@ func (g *Guild) Fetch(ctx *EventContext) (err error) {
 	if guild != nil {
 		*g = *guild
 	} else {
+		// TODO: Try http
+
 		return ErrGuildNotFound
 	}
 
 	return nil
 }
 
+// Webhooks returns all webhooks a guild has.
+func (g *Guild) Webhooks(ctx *EventContext) (webhooks []*Webhook, err error) {
+	return GuildWebhooks(g, ctx)
+}
+
 type UnavailableGuild discord_structs.UnavailableGuild
 
 type GuildMember discord_structs.GuildMember
 
+// NewGuildMember creates a new partial guild member. Use Fetch() to populate the member.
 func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discord.Snowflake) *GuildMember {
 	return &GuildMember{
 		User: &discord_structs.User{
@@ -47,6 +57,7 @@ func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discor
 	}
 }
 
+// Fetch populates the guild member.
 func (gm *GuildMember) Fetch(ctx *EventContext) (err error) {
 	if gm.User.Username != "" {
 		return
@@ -64,6 +75,8 @@ func (gm *GuildMember) Fetch(ctx *EventContext) (err error) {
 	if guildMember != nil {
 		*gm = *guildMember
 	} else {
+		// TODO: Try http
+
 		return ErrMemberNotFound
 	}
 

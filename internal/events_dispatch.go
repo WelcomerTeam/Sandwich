@@ -175,7 +175,7 @@ func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payloa
 		defer func() {
 			errorValue := recover()
 			if errorValue != nil {
-				eventCtx.Sandwich.RecoverEventPanic(errorValue, eventCtx, payload)
+				eventCtx.Sandwich.RecoverEventPanic(errorValue, eventCtx, &payload)
 			}
 		}()
 

@@ -74,6 +74,8 @@ func (tl *TwilightProxy) Fetch(ctx context.Context, method, endpoint, contentTyp
 		return nil, ErrInvalidToken
 	}
 
+	println(req.Method, req.URL.String(), resp.StatusCode)
+
 	response, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, xerrors.Errorf("Failed to read body: %v", err)

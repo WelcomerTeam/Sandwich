@@ -32,6 +32,8 @@ func (e *Emoji) Fetch(ctx *EventContext) (err error) {
 	if emoji != nil {
 		*e = *emoji
 	} else {
+		// TODO: Try http
+
 		return ErrEmojiNotFound
 	}
 

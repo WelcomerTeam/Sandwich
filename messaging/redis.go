@@ -90,6 +90,7 @@ func (redisMQ *RedisMQClient) Subscribe(ctx context.Context, channel string) (er
 
 	go func(redisMQ *RedisMQClient) {
 		channel := redisMQ.pubsub.Channel()
+
 		for {
 			msg := <-channel
 			redisMQ.msgChannel <- gotils_strconv.S2B(msg.Payload)

@@ -215,13 +215,6 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 		} else if !earlyInvoke {
 			view.index = previous
 			view.previous = previous
-
-			if c.Handler != nil {
-				err = c.Handler(ctx)
-				if err != nil {
-					return err
-				}
-			}
 		}
 	} else {
 		err = c.prepare(ctx)
@@ -231,12 +224,19 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 
 		ctx.InvokedSubcommand = nil
 		ctx.SubcommandPassed = nil
+	}
 
-		if c.Handler != nil {
-			err = c.Handler(ctx)
-			if err != nil {
-				return err
-			}
+	defer func() {
+		errorValue := recover()
+		if errorValue != nil {
+			ctx.EventContext.Sandwich.RecoverEventPanic(errorValue, ctx.EventContext, ctx.EventContext.payload)
+		}
+	}()
+
+	if c.Handler != nil {
+		err = c.Handler(ctx)
+		if err != nil {
+			return err
 		}
 	}
 

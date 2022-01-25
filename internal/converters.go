@@ -150,6 +150,8 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 	}
 
 	if result == nil {
+		// TODO: Try http
+
 		return nil, ErrMemberNotFound
 	}
 
@@ -210,6 +212,8 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 	}
 
 	if result == nil {
+		// TODO: Try http
+
 		return nil, ErrUserNotFound
 	}
 
@@ -226,6 +230,8 @@ func HandleArgumentTypeTextChannel(ctx *CommandContext, argument string) (out in
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -369,6 +375,8 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 	}
 
 	if result == nil {
+		// TODO: Try http
+
 		return nil, ErrRoleNotFound
 	}
 
@@ -443,6 +451,8 @@ func HandleArgumentTypeVoiceChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -459,6 +469,8 @@ func HandleArgumentTypeStageChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -502,6 +514,8 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 	}
 
 	if result == nil {
+		// TODO: Try http
+
 		return nil, ErrEmojiNotFound
 	}
 
@@ -540,6 +554,8 @@ func HandleArgumentTypeCategoryChannel(ctx *CommandContext, argument string) (ou
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -556,6 +572,8 @@ func HandleArgumentTypeStoreChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -573,6 +591,8 @@ func HandleArgumentTypeThread(ctx *CommandContext, argument string) (out interfa
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 
@@ -589,6 +609,8 @@ func HandleArgumentTypeGuildChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
+		// TODO: Try http
+
 		return nil, ErrChannelNotFound
 	}
 

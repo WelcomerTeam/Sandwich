@@ -9,7 +9,10 @@ var (
 	ErrUnknownEvent       = xerrors.New("Event type does not have a handler")
 	ErrUnknownGRPCError   = xerrors.New("GRPC returned unknown error")
 
-	ErrFetchMissingGuild = xerrors.New("Object requires guild ID to fetch")
+	ErrInvalidTarget = xerrors.New("Invalid target. Are you doing an operation on a user who is not the running application?")
+
+	ErrFetchMissingGuild     = xerrors.New("Object requires guild ID to fetch")
+	ErrFetchMissingSnowflake = xerrors.New("Object requires snowflake to fetch")
 
 	ErrCommandAlreadyRegistered = xerrors.New("Command with this name already exists")
 	ErrInvalidArgumentType      = xerrors.New("Argument value is not correct type for converter used")

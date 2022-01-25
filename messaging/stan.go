@@ -107,9 +107,7 @@ func (stanMQ *StanMQClient) Subscribe(ctx context.Context, channelName string) (
 		stanMQ.Unsubscribe()
 	}
 
-	var handler stan.MsgHandler
-
-	handler = func(msg *stan.Msg) { stanMQ.msgChannel <- msg.Data }
+	handler := func(msg *stan.Msg) { stanMQ.msgChannel <- msg.Data }
 	sub, err := stanMQ.StanClient.Subscribe(channelName, handler)
 
 	stanMQ.subscription = &sub
@@ -120,7 +118,7 @@ func (stanMQ *StanMQClient) Subscribe(ctx context.Context, channelName string) (
 func (stanMQ *StanMQClient) Unsubscribe() {
 	if stanMQ.subscription != nil {
 		sub := *stanMQ.subscription
-		sub.Unsubscribe()
+		_ = sub.Unsubscribe()
 	}
 
 	stanMQ.subscription = nil

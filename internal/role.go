@@ -32,6 +32,8 @@ func (r *Role) Fetch(ctx *EventContext) (err error) {
 	if role != nil {
 		*r = *role
 	} else {
+		// TODO: Try http
+
 		return ErrRoleNotFound
 	}
 

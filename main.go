@@ -43,6 +43,21 @@ func main() {
 	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
 
 	bot.MustAddCommand(&sandwich.Commandable{
+		Name: "dm",
+		Handler: func(ctx *sandwich.CommandContext) (err error) {
+			author := sandwich.User(*ctx.Author)
+			_, err = author.Send(ctx.EventContext, &discord.MessageParams{
+				Content: "DM Test",
+			}, nil)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	})
+
+	bot.MustAddCommand(&sandwich.Commandable{
 		Name: "test",
 		Handler: func(ctx *sandwich.CommandContext) (err error) {
 			_, err = ctx.Channel.Send(ctx.EventContext, &discord.MessageParams{
@@ -63,6 +78,13 @@ func main() {
 			}, nil)
 
 			return nil
+		},
+	})
+
+	bot.MustAddCommand(&sandwich.Commandable{
+		Name: "panic",
+		Handler: func(ctx *sandwich.CommandContext) (err error) {
+			panic("Oh no")
 		},
 	})
 
