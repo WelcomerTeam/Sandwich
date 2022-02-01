@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"strings"
+
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 )
 
 type ArgumentType uint16
@@ -344,10 +346,13 @@ type CommandContext struct {
 	Bot          *Bot
 	EventContext *EventContext
 
-	*Message
+	*discord_structs.Message
 
-	Guild   *Guild
-	Channel *Channel
+	Author *discord_structs.User
+	Member *discord_structs.GuildMember
+
+	Guild   *discord_structs.Guild
+	Channel *discord_structs.Channel
 
 	Prefix  string
 	Command *Commandable
@@ -366,12 +371,15 @@ type CommandContext struct {
 }
 
 // NewCommandContext creates a new command context.
-func NewCommandContext(eventContext *EventContext, bot *Bot, message *Message, view *StringView) (commandContext *CommandContext) {
+func NewCommandContext(eventContext *EventContext, bot *Bot, message *discord_structs.Message, view *StringView) (commandContext *CommandContext) {
 	commandContext = &CommandContext{
 		Bot:          bot,
 		EventContext: eventContext,
 
 		Message: message,
+
+		Author: message.Author,
+		Member: message.Member,
 
 		Guild:   eventContext.Guild,
 		Channel: NewChannel(eventContext, message.GuildID, message.ChannelID),

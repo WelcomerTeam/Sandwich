@@ -125,7 +125,7 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 		}
 	}
 
-	var result *GuildMember
+	var result *discord_structs.GuildMember
 
 	if match == "" {
 		if ctx.GuildID != nil {
@@ -143,15 +143,13 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 
 		result = NewGuildMember(ctx.EventContext, ctx.GuildID, discord.Snowflake(userID))
 
-		err := result.Fetch(ctx.EventContext)
+		result, err = FetchGuildMember(ctx.EventContext, result)
 		if err != nil && !xerrors.Is(err, ErrMemberNotFound) {
 			return nil, err
 		}
 	}
 
 	if result == nil {
-		// TODO: Try http
-
 		return nil, ErrMemberNotFound
 	}
 
@@ -166,18 +164,18 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 	if match == "" {
 		matches := UserMentionRegex.FindStringSubmatch(argument)
 		if len(matches) > 0 {
-			match = matches[0]
+			match = matches[1]
 		}
 	}
 
-	var result *User
+	var result *discord_structs.User
 
 	if match != "" {
 		userID, _ := strconv.ParseInt(match, 10, 64)
 
 		for _, user := range ctx.Mentions {
 			if user.ID == discord.Snowflake(userID) {
-				result = (*User)(user)
+				result = user
 
 				break
 			}
@@ -186,7 +184,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 		if result == nil {
 			result = NewUser(ctx.EventContext, discord.Snowflake(userID))
 
-			err = result.Fetch(ctx.EventContext, false)
+			result, err = FetchUser(ctx.EventContext, result, false)
 			if err != nil && !xerrors.Is(err, ErrUserNotFound) {
 				return nil, err
 			}
@@ -195,25 +193,26 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 		return result, nil
 	}
 
-	arg := argument
-	if arg[0] == '@' {
-		arg = arg[1:]
-	}
+	if result == nil {
+		arg := argument
 
-	if len(arg) > 5 && arg[len(arg)-5] == '#' {
-		users, err := ctx.EventContext.Sandwich.grpcInterface.FetchUserByName(ctx.EventContext, arg, false)
-		if err != nil {
-			return nil, xerrors.Errorf("Failed to fetch user: %v", err)
+		if arg[0] == '@' {
+			arg = arg[1:]
 		}
 
-		if len(users) > 0 {
-			result = users[0]
+		if len(arg) > 5 && arg[len(arg)-5] == '#' {
+			users, err := ctx.EventContext.Sandwich.grpcInterface.FetchUserByName(ctx.EventContext, arg, false)
+			if err != nil {
+				return nil, xerrors.Errorf("Failed to fetch user: %v", err)
+			}
+
+			if len(users) > 0 {
+				result = users[0]
+			}
 		}
 	}
 
 	if result == nil {
-		// TODO: Try http
-
 		return nil, ErrUserNotFound
 	}
 
@@ -230,15 +229,13 @@ func HandleArgumentTypeTextChannel(ctx *CommandContext, argument string) (out in
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
 	return results[0], nil
 }
 
-func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_structs.ChannelType) (out []*Channel, err error) {
+func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_structs.ChannelType) (out []*discord_structs.Channel, err error) {
 	match := IDRegex.FindString(argument)
 	if match == "" {
 		matches := ChannelMentionRegex.FindStringSubmatch(argument)
@@ -247,7 +244,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_s
 		}
 	}
 
-	var results []*Channel
+	var results []*discord_structs.Channel
 
 	if match == "" {
 		if ctx.GuildID != nil {
@@ -261,7 +258,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_s
 
 		result := NewChannel(ctx.EventContext, ctx.GuildID, discord.Snowflake(channelID))
 
-		err = result.Fetch(ctx.EventContext)
+		result, err = FetchChannel(ctx.EventContext, result)
 		if err != nil && !xerrors.Is(err, ErrChannelNotFound) {
 			return nil, err
 		}
@@ -269,7 +266,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_s
 		results = append(results, result)
 	}
 
-	out = make([]*Channel, 0)
+	out = make([]*discord_structs.Channel, 0)
 
 	for _, result := range results {
 		if len(channelTypes) == 0 {
@@ -292,9 +289,12 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord_s
 // argument into a Invite type. Use .Invite() within a command
 // to get the proper type.
 func HandleArgumentTypeInvite(ctx *CommandContext, argument string) (out interface{}, err error) {
-	var result *Invite
+	var result *discord_structs.Invite
 
-	// TODO: Fetch invite from discord
+	result, err = ctx.EventContext.Session.GetInvite(argument, nil, nil, nil)
+	if err != nil {
+		return nil, xerrors.Errorf("Failed to convert invite: %v", err)
+	}
 
 	if result == nil {
 		return nil, ErrBadInviteArgument
@@ -309,7 +309,7 @@ func HandleArgumentTypeInvite(ctx *CommandContext, argument string) (out interfa
 func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interface{}, err error) {
 	match := IDRegex.FindString(argument)
 
-	var result *Guild
+	var result *discord_structs.Guild
 
 	if match == "" {
 		guilds, err := ctx.EventContext.Sandwich.grpcInterface.FetchGuildsByName(ctx.EventContext, argument)
@@ -325,7 +325,7 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 
 		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
 
-		err := result.Fetch(ctx.EventContext)
+		result, err = FetchGuild(ctx.EventContext, result)
 		if err != nil && !xerrors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
@@ -350,7 +350,7 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 		}
 	}
 
-	var result *Role
+	var result *discord_structs.Role
 
 	if match == "" {
 		if ctx.GuildID != nil {
@@ -368,15 +368,13 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 
 		result = NewRole(ctx.EventContext, ctx.GuildID, discord.Snowflake(roleID))
 
-		err := result.Fetch(ctx.EventContext)
+		result, err = FetchRole(ctx.EventContext, result)
 		if err != nil && !xerrors.Is(err, ErrRoleNotFound) {
 			return nil, err
 		}
 	}
 
 	if result == nil {
-		// TODO: Try http
-
 		return nil, ErrRoleNotFound
 	}
 
@@ -387,7 +385,7 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 // argument into a Activity type. Use .Activity() within a command
 // to get the proper type.
 func HandleArgumentTypeActivity(ctx *CommandContext, argument string) (out interface{}, err error) {
-	result := &Activity{
+	result := &discord_structs.Activity{
 		Name: argument,
 	}
 
@@ -451,8 +449,6 @@ func HandleArgumentTypeVoiceChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -469,8 +465,6 @@ func HandleArgumentTypeStageChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -489,7 +483,7 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 		}
 	}
 
-	var result *Emoji
+	var result *discord_structs.Emoji
 
 	if match == "" {
 		if ctx.GuildID != nil {
@@ -506,17 +500,11 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 		emojiID, _ := strconv.ParseInt(match, 10, 64)
 
 		result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
-
-		err = result.Fetch(ctx.EventContext)
-		if err != nil && !xerrors.Is(err, ErrEmojiNotFound) {
-			return nil, err
-		}
 	}
 
-	if result == nil {
-		// TODO: Try http
-
-		return nil, ErrEmojiNotFound
+	result, err = FetchEmoji(ctx.EventContext, result)
+	if err != nil && !xerrors.Is(err, ErrEmojiNotFound) {
+		return nil, err
 	}
 
 	return result, nil
@@ -528,13 +516,13 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 func HandleArgumentTypePartialEmoji(ctx *CommandContext, argument string) (out interface{}, err error) {
 	matches := PartialEmojiRegex.FindStringSubmatch(argument)
 
-	var result *Emoji
+	var result *discord_structs.Emoji
 
 	if len(matches) >= 3 {
 		animated, _ := strconv.ParseBool(matches[0])
 		id, _ := strconv.ParseInt(matches[2], 10, 64)
 
-		result = &Emoji{
+		result = &discord_structs.Emoji{
 			Animated: animated,
 			Name:     matches[1],
 			ID:       discord.Snowflake(id),
@@ -554,8 +542,6 @@ func HandleArgumentTypeCategoryChannel(ctx *CommandContext, argument string) (ou
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -572,8 +558,6 @@ func HandleArgumentTypeStoreChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -591,8 +575,6 @@ func HandleArgumentTypeThread(ctx *CommandContext, argument string) (out interfa
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -609,8 +591,6 @@ func HandleArgumentTypeGuildChannel(ctx *CommandContext, argument string) (out i
 	}
 
 	if len(results) == 0 {
-		// TODO: Try http
-
 		return nil, ErrChannelNotFound
 	}
 
@@ -693,9 +673,9 @@ func (a *Argument) MustSnowflake() (value *discord.Snowflake) {
 // Member returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Member() (value *GuildMember, err error) {
+func (a *Argument) Member() (value *discord_structs.GuildMember, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeMember) {
-		value, _ = a.value.(*GuildMember)
+		value, _ = a.value.(*discord_structs.GuildMember)
 
 		return
 	}
@@ -704,7 +684,7 @@ func (a *Argument) Member() (value *GuildMember, err error) {
 }
 
 // MustMember will attempt to do Member() and will panic if not possible.
-func (a *Argument) MustMember() (value *GuildMember) {
+func (a *Argument) MustMember() (value *discord_structs.GuildMember) {
 	value, err := a.Member()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Member(): %v`, err.Error()))
@@ -716,9 +696,9 @@ func (a *Argument) MustMember() (value *GuildMember) {
 // User returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) User() (value *User, err error) {
+func (a *Argument) User() (value *discord_structs.User, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeUser) {
-		value, _ = a.value.(*User)
+		value, _ = a.value.(*discord_structs.User)
 
 		return
 	}
@@ -727,7 +707,7 @@ func (a *Argument) User() (value *User, err error) {
 }
 
 // MustUser will attempt to do User() and will panic if not possible.
-func (a *Argument) MustUser() (value *User) {
+func (a *Argument) MustUser() (value *discord_structs.User) {
 	value, err := a.User()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: User(): %v`, err.Error()))
@@ -739,11 +719,11 @@ func (a *Argument) MustUser() (value *User) {
 // Channel returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Channel() (value *Channel, err error) {
+func (a *Argument) Channel() (value *discord_structs.Channel, err error) {
 	if argumentTypeIs(a.ArgumentType,
 		ArgumentTypeTextChannel, ArgumentTypeVoiceChannel, ArgumentTypeStageChannel,
 		ArgumentTypeCategoryChannel, ArgumentTypeStoreChannel, ArgumentTypeGuildChannel) {
-		value, _ = a.value.(*Channel)
+		value, _ = a.value.(*discord_structs.Channel)
 
 		return
 	}
@@ -752,7 +732,7 @@ func (a *Argument) Channel() (value *Channel, err error) {
 }
 
 // MustTextChannel will attempt to do Channel() and will panic if not possible.
-func (a *Argument) MustChannel() (value *Channel) {
+func (a *Argument) MustChannel() (value *discord_structs.Channel) {
 	value, err := a.Channel()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Channel(): %v`, err.Error()))
@@ -764,9 +744,9 @@ func (a *Argument) MustChannel() (value *Channel) {
 // Invite returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Invite() (value *Invite, err error) {
+func (a *Argument) Invite() (value *discord_structs.Invite, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeInvite) {
-		value, _ = a.value.(*Invite)
+		value, _ = a.value.(*discord_structs.Invite)
 
 		return
 	}
@@ -775,7 +755,7 @@ func (a *Argument) Invite() (value *Invite, err error) {
 }
 
 // MustInvite will attempt to do Invite() and will panic if not possible.
-func (a *Argument) MustInvite() (value *Invite) {
+func (a *Argument) MustInvite() (value *discord_structs.Invite) {
 	value, err := a.Invite()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Invite(): %v`, err.Error()))
@@ -787,9 +767,9 @@ func (a *Argument) MustInvite() (value *Invite) {
 // Guild returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Guild() (value *Guild, err error) {
+func (a *Argument) Guild() (value *discord_structs.Guild, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeGuild) {
-		value, _ = a.value.(*Guild)
+		value, _ = a.value.(*discord_structs.Guild)
 
 		return
 	}
@@ -798,7 +778,7 @@ func (a *Argument) Guild() (value *Guild, err error) {
 }
 
 // MustGuild will attempt to do Guild() and will panic if not possible.
-func (a *Argument) MustGuild() (value *Guild) {
+func (a *Argument) MustGuild() (value *discord_structs.Guild) {
 	value, err := a.Guild()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Guild(): %v`, err.Error()))
@@ -810,9 +790,9 @@ func (a *Argument) MustGuild() (value *Guild) {
 // Role returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Role() (value *Role, err error) {
+func (a *Argument) Role() (value *discord_structs.Role, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeRole) {
-		value, _ = a.value.(*Role)
+		value, _ = a.value.(*discord_structs.Role)
 
 		return
 	}
@@ -821,7 +801,7 @@ func (a *Argument) Role() (value *Role, err error) {
 }
 
 // MustRole will attempt to do Role() and will panic if not possible.
-func (a *Argument) MustRole() (value *Role) {
+func (a *Argument) MustRole() (value *discord_structs.Role) {
 	value, err := a.Role()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Role(): %v`, err.Error()))
@@ -833,9 +813,9 @@ func (a *Argument) MustRole() (value *Role) {
 // Activity returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Activity() (value *Activity, err error) {
+func (a *Argument) Activity() (value *discord_structs.Activity, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeActivity) {
-		value, _ = a.value.(*Activity)
+		value, _ = a.value.(*discord_structs.Activity)
 
 		return
 	}
@@ -844,7 +824,7 @@ func (a *Argument) Activity() (value *Activity, err error) {
 }
 
 // MustActivity will attempt to do Activity() and will panic if not possible.
-func (a *Argument) MustActivity() (value *Activity) {
+func (a *Argument) MustActivity() (value *discord_structs.Activity) {
 	value, err := a.Activity()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Activity(): %v`, err.Error()))
@@ -879,9 +859,9 @@ func (a *Argument) MustColour() (value *color.RGBA) {
 // Emoji returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Emoji() (value *Emoji, err error) {
+func (a *Argument) Emoji() (value *discord_structs.Emoji, err error) {
 	if argumentTypeIs(a.ArgumentType, ArgumentTypeEmoji, ArgumentTypePartialEmoji) {
-		value, _ = a.value.(*Emoji)
+		value, _ = a.value.(*discord_structs.Emoji)
 
 		return
 	}
@@ -890,7 +870,7 @@ func (a *Argument) Emoji() (value *Emoji, err error) {
 }
 
 // MustEmoji will attempt to do Emoji() and will panic if not possible.
-func (a *Argument) MustEmoji() (value *Emoji) {
+func (a *Argument) MustEmoji() (value *discord_structs.Emoji) {
 	value, err := a.Emoji()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Emoji(): %v`, err.Error()))

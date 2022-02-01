@@ -6,38 +6,30 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type Role discord_structs.Role
-
-func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *Role {
-	return &Role{
+func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *discord_structs.Role {
+	return &discord_structs.Role{
 		ID:      roleID,
 		GuildID: guildID,
 	}
 }
 
-func (r *Role) Fetch(ctx *EventContext) (err error) {
+func FetchRole(ctx *EventContext, r *discord_structs.Role) (role *discord_structs.Role, err error) {
 	if r.Name != "" {
 		return
 	}
 
 	if r.GuildID == nil {
-		return ErrFetchMissingGuild
+		return r, ErrFetchMissingGuild
 	}
 
-	role, err := ctx.Sandwich.grpcInterface.FetchRoleByID(ctx, *r.GuildID, r.ID)
+	role, err = ctx.Sandwich.grpcInterface.FetchRoleByID(ctx, *r.GuildID, r.ID)
 	if err != nil {
-		return xerrors.Errorf("Failed to fetch role: %v", err)
+		return r, xerrors.Errorf("Failed to fetch role: %v", err)
 	}
 
-	if role != nil {
-		*r = *role
-	} else {
-		// TODO: Try http
-
-		return ErrRoleNotFound
+	if role == nil {
+		return r, ErrRoleNotFound
 	}
 
 	return
 }
-
-type RoleTag discord_structs.RoleTag

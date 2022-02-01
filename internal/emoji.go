@@ -6,35 +6,29 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type Emoji discord_structs.Emoji
-
-func NewEmoji(ctx *EventContext, guildID *discord.Snowflake, emojiID discord.Snowflake) *Emoji {
-	return &Emoji{
+func NewEmoji(ctx *EventContext, guildID *discord.Snowflake, emojiID discord.Snowflake) *discord_structs.Emoji {
+	return &discord_structs.Emoji{
 		ID:      emojiID,
 		GuildID: guildID,
 	}
 }
 
-func (e *Emoji) Fetch(ctx *EventContext) (err error) {
+func FetchEmoji(ctx *EventContext, e *discord_structs.Emoji) (emoji *discord_structs.Emoji, err error) {
 	if e.Name != "" {
-		return nil
+		return e, nil
 	}
 
 	if e.GuildID == nil {
-		return ErrFetchMissingGuild
+		return e, ErrFetchMissingGuild
 	}
 
-	emoji, err := ctx.Sandwich.grpcInterface.FetchEmojiByID(ctx, *e.GuildID, e.ID)
+	emoji, err = ctx.Sandwich.grpcInterface.FetchEmojiByID(ctx, *e.GuildID, e.ID)
 	if err != nil {
-		return xerrors.Errorf("Failed to fetch emoji: %v", err)
+		return e, xerrors.Errorf("Failed to fetch emoji: %v", err)
 	}
 
-	if emoji != nil {
-		*e = *emoji
-	} else {
-		// TODO: Try http
-
-		return ErrEmojiNotFound
+	if emoji == nil {
+		return e, ErrEmojiNotFound
 	}
 
 	return

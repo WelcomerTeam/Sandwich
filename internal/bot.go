@@ -3,6 +3,8 @@ package internal
 import (
 	"strconv"
 	"strings"
+
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 )
 
 type Bot struct {
@@ -15,7 +17,7 @@ type Bot struct {
 }
 
 // Func Type of prefix checking. Returns the prefixes that can be used on a command.
-type PrefixCheckFuncType func(eventCtx *EventContext, message Message) (prefixes []string, err error)
+type PrefixCheckFuncType func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error)
 
 // Func Type used for command checks.
 type CommandCheckFuncType func(commandCtx *CommandContext) (canRun bool, err error)
@@ -34,13 +36,13 @@ func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 // Prefix helpers
 
 func StaticPrefixCheck(passedPrefixes ...string) (fun PrefixCheckFuncType) {
-	return func(eventCtx *EventContext, message Message) (prefixes []string, err error) {
+	return func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error) {
 		return passedPrefixes, nil
 	}
 }
 
 func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
-	return func(eventCtx *EventContext, message Message) (prefixes []string, err error) {
+	return func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error) {
 		prefixes = append(prefixes, passedPrefixes...)
 		prefixes = append(prefixes, "<@"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
 		prefixes = append(prefixes, "<@!"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
@@ -77,7 +79,7 @@ func (b *Bot) Invoke(ctx *CommandContext) (err error) {
 
 // ProcessCommand processes the commands that have been registered to the bot.
 // This also checks that the message's author is not a bot.
-func (b *Bot) ProcessCommands(eventCtx *EventContext, message Message) (err error) {
+func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord_structs.Message) (err error) {
 	if message.Author == nil {
 		return nil
 	}
@@ -95,7 +97,7 @@ func (b *Bot) ProcessCommands(eventCtx *EventContext, message Message) (err erro
 }
 
 // GetContext returns the command context from a message.
-func (b *Bot) GetContext(eventCtx *EventContext, message Message) (commandContext *CommandContext, err error) {
+func (b *Bot) GetContext(eventCtx *EventContext, message discord_structs.Message) (commandContext *CommandContext, err error) {
 	view := NewStringView(message.Content)
 
 	commandContext = NewCommandContext(eventCtx, b, &message, view)

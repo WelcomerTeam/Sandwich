@@ -3,7 +3,7 @@ module github.com/WelcomerTeam/Sandwich
 go 1.17
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20220125151344-e453cab0f9d4
+	github.com/WelcomerTeam/Discord v0.0.0-20220131235737-2acd5287eb6b
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124215809-d18f63c1c079
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/json-iterator/go v1.1.12

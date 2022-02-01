@@ -39,6 +39,14 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/WelcomerTeam/Discord v0.0.0-20220124211741-8da91003bc47/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
 github.com/WelcomerTeam/Discord v0.0.0-20220125151344-e453cab0f9d4 h1:q/nAv7KHSGCekP47ogxrzRGzalKqAf9kMbzp/5iURx8=
 github.com/WelcomerTeam/Discord v0.0.0-20220125151344-e453cab0f9d4/go.mod h1:ahkQORE1d68toqmtxoAPgBu1sf3/zvz9dUQ+OPSbvTE=
+github.com/WelcomerTeam/Discord v0.0.0-20220131160935-e77250bab8ec h1:57sNaU2PhEXM2aAbJo2TkXC4ffJ5QKvPcvq34fx5vxw=
+github.com/WelcomerTeam/Discord v0.0.0-20220131160935-e77250bab8ec/go.mod h1:l1BZ7NWtD29z4voId7NA6gQzGqyveciQCIbEDcQyxkE=
+github.com/WelcomerTeam/Discord v0.0.0-20220131234157-fcfc5b6314e5 h1:3Ic+jLX/EWlOAoq5beR+D9vQxJMqtX1J8pcaf3Ft55E=
+github.com/WelcomerTeam/Discord v0.0.0-20220131234157-fcfc5b6314e5/go.mod h1:l1BZ7NWtD29z4voId7NA6gQzGqyveciQCIbEDcQyxkE=
+github.com/WelcomerTeam/Discord v0.0.0-20220131234655-3d42fef424e9 h1:9Ep5qgfAvwM2kLThAAjr1JsoRsHKuiScgSuoMv0dxxk=
+github.com/WelcomerTeam/Discord v0.0.0-20220131234655-3d42fef424e9/go.mod h1:l1BZ7NWtD29z4voId7NA6gQzGqyveciQCIbEDcQyxkE=
+github.com/WelcomerTeam/Discord v0.0.0-20220131235737-2acd5287eb6b h1:SNduHlRNNW/gKuwphxqVOnoE5MAD8YCDLNfYXU/1qQg=
+github.com/WelcomerTeam/Discord v0.0.0-20220131235737-2acd5287eb6b/go.mod h1:l1BZ7NWtD29z4voId7NA6gQzGqyveciQCIbEDcQyxkE=
 github.com/WelcomerTeam/RealRock v0.0.0-20220122233305-f97b8c8cbc15/go.mod h1:4oemQ7XEqKAc1DTtFpWugoE9K5RLjt7iH0emiFXnL/A=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124215809-d18f63c1c079 h1:zmOD2KwnmTvtwCPA8RN8VKxlMJX5vNmjgvPQfkYCB1o=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124215809-d18f63c1c079/go.mod h1:p95taCokDZw/U7DRKUwpkkjZ7StwuqBN4KyjKhoVbbg=

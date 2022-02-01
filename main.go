@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"os"
 	"time"
 
-	discord "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/http"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	sandwich "github.com/WelcomerTeam/Sandwich/internal"
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
@@ -36,410 +38,43 @@ func main() {
 		panic(err.Error())
 	}
 
-	session := sandwich.NewTwilightProxy(*proxyURL)
+	restInterface := discord.NewTwilightProxy(*proxyURL)
 
-	sandwichClient := sandwich.NewSandwich(conn, session, writer)
+	sandwichClient := sandwich.NewSandwich(conn, restInterface, writer)
 
 	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
 
 	bot.MustAddCommand(&sandwich.Commandable{
-		Name: "dm",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			author := sandwich.User(*ctx.Author)
-			_, err = author.Send(ctx.EventContext, &discord.MessageParams{
-				Content: "DM Test",
-			}, nil)
-			if err != nil {
-				return err
-			}
-
-			return nil
+		Name:    "avatar",
+		Aliases: []string{"profile"},
+		ArgumentParameters: []sandwich.ArgumentParameter{
+			{
+				Required:     true,
+				ArgumentType: sandwich.ArgumentTypeUser,
+				Name:         "user",
+			},
 		},
-	})
-
-	bot.MustAddCommand(&sandwich.Commandable{
-		Name: "test",
 		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			_, err = ctx.Channel.Send(ctx.EventContext, &discord.MessageParams{
-				Content: "Test Success.",
-				Components: []*discord.InteractionComponent{
+			user := ctx.MustGetArgument("user").MustUser()
+
+			avatarURL := discord.EndpointCDN + discord.EndpointUserAvatar(user.ID.String(), user.Avatar)
+
+			ctx.EventContext.Session.CreateMessage(ctx.ChannelID, discord_structs.Message{
+				Embeds: []*discord_structs.Embed{
 					{
-						Type: discord.InteractionComponentTypeActionRow,
-						Components: []*discord.InteractionComponent{
-							{
-								Type:     discord.InteractionComponentTypeButton,
-								Label:    "Test Success",
-								CustomID: "click_me",
-								Style:    discord.InteractionComponentStylePrimary,
-							},
+						Title: fmt.Sprintf("%s's avatar", user.Username+"#"+user.Discriminator),
+						Image: &discord_structs.EmbedImage{
+							URL: avatarURL,
 						},
 					},
 				},
-			}, nil)
+			})
 
 			return nil
 		},
 	})
 
-	bot.MustAddCommand(&sandwich.Commandable{
-		Name: "panic",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			panic("Oh no")
-		},
-	})
-
-	argumentTestGroup := bot.MustAddCommand(&sandwich.Commandable{
-		Name: "argumentTest",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			if ctx.InvokedSubcommand == nil {
-				println("Usage:")
-
-				for _, command := range ctx.Command.GetAllCommands() {
-					println(command.Name, command.IsGroup())
-				}
-			}
-
-			return nil
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Snowflake",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustSnowflake()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeSnowflake,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Member",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustMember()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeMember,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "User",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustUser()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeUser,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "TextChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeTextChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Invite",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustInvite()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeInvite,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Guild",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustGuild()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeGuild,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Role",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustRole()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeRole,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Activity",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustActivity()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeActivity,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Colour",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustColour()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeColour,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "VoiceChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeVoiceChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "StageChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeStageChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Emoji",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustEmoji()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeEmoji,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "PartialEmoji",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustEmoji()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypePartialEmoji,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "CategoryChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeCategoryChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "StoreChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeStoreChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "GuildChannel",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustChannel()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeGuildChannel,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "String",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustString()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeString,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Bool",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustBool()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeBool,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Int",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustInt()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeInt,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Float",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustFloat()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeFloat,
-			},
-		},
-	})
-
-	argumentTestGroup.MustAddCommand(&sandwich.Commandable{
-		Name: "Fill",
-		Handler: func(ctx *sandwich.CommandContext) (err error) {
-			value := ctx.MustGetArgument("test").MustString()
-			println(value)
-
-			return nil
-		},
-		ArgumentParameters: []sandwich.ArgumentParameter{
-			{
-				Name:         "test",
-				ArgumentType: sandwich.ArgumentTypeFill,
-			},
-		},
-	})
-
-	bot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message sandwich.Message) (err error) {
+	bot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message discord_structs.Message) (err error) {
 		err = bot.ProcessCommands(ctx, message)
 		if err != nil {
 			ctx.Logger.Warn().Err(err).Str("content", message.Content).Msg("Failed to process command")

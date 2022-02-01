@@ -167,6 +167,7 @@ func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payloa
 		return err
 	}
 
+	eventCtx.Session.Token = "Bot " + identifier.Token
 	eventCtx.Identifier = identifier
 
 	if ev, ok := h.EventHandlers[eventName]; ok {
@@ -265,14 +266,14 @@ func OnApplicationCommandCreate(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, ApplicationCommand(*applicationCommandCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnApplicationCommandCreateFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
+type OnApplicationCommandCreateFuncType func(eventCtx *EventContext, command discord_structs.ApplicationCommand) (err error)
 
 // OnApplicationCommandUpdate.
 func OnApplicationCommandUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -290,14 +291,14 @@ func OnApplicationCommandUpdate(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, ApplicationCommand(*applicationCommandUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnApplicationCommandUpdateFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
+type OnApplicationCommandUpdateFuncType func(eventCtx *EventContext, command discord_structs.ApplicationCommand) (err error)
 
 // OnApplicationCommandDelete.
 func OnApplicationCommandDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -315,14 +316,14 @@ func OnApplicationCommandDelete(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, ApplicationCommand(*applicationCommandDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnApplicationCommandDeleteFuncType func(eventCtx *EventContext, command ApplicationCommand) (err error)
+type OnApplicationCommandDeleteFuncType func(eventCtx *EventContext, command discord_structs.ApplicationCommand) (err error)
 
 // OnChannelCreate.
 func OnChannelCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -340,14 +341,14 @@ func OnChannelCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(*channelCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnChannelCreateFuncType func(eventCtx *EventContext, channel Channel) (err error)
+type OnChannelCreateFuncType func(eventCtx *EventContext, channel discord_structs.Channel) (err error)
 
 // OnChannelUpdate.
 func OnChannelUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -370,14 +371,14 @@ func OnChannelUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(beforeChannel), Channel(*channelUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *channelUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnChannelUpdateFuncType func(eventCtx *EventContext, before Channel, after Channel) (err error)
+type OnChannelUpdateFuncType func(eventCtx *EventContext, before discord_structs.Channel, after discord_structs.Channel) (err error)
 
 // OnChannelDelete.
 func OnChannelDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -395,14 +396,14 @@ func OnChannelDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(*channelDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnChannelDeleteFuncType func(eventCtx *EventContext, channel Channel) (err error)
+type OnChannelDeleteFuncType func(eventCtx *EventContext, channel discord_structs.Channel) (err error)
 
 // OnChannelPinsUpdate.
 func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -427,7 +428,7 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 	return nil
 }
 
-type OnChannelPinsUpdateFuncType func(eventCtx *EventContext, channel *Channel, lastPinTimestamp time.Time) (err error)
+type OnChannelPinsUpdateFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, lastPinTimestamp time.Time) (err error)
 
 // OnThreadCreate.
 func OnThreadCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -445,14 +446,14 @@ func OnThreadCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(*threadCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnThreadCreateFuncType func(eventCtx *EventContext, thread Channel) (err error)
+type OnThreadCreateFuncType func(eventCtx *EventContext, thread discord_structs.Channel) (err error)
 
 // OnThreadUpdate.
 func OnThreadUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -475,14 +476,14 @@ func OnThreadUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(beforeChannel), Channel(*threadUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *threadUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnThreadUpdateFuncType func(eventCtx *EventContext, before Channel, after Channel) (err error)
+type OnThreadUpdateFuncType func(eventCtx *EventContext, before discord_structs.Channel, after discord_structs.Channel) (err error)
 
 // OnThreadDelete.
 func OnThreadDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -500,14 +501,14 @@ func OnThreadDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel(*threadDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnThreadDeleteFuncType func(eventCtx *EventContext, thread Channel) (err error)
+type OnThreadDeleteFuncType func(eventCtx *EventContext, thread discord_structs.Channel) (err error)
 
 // // OnThreadListSync.
 // func. OnThreadListSync(eventCtx *Context, payload structs.SandwichPayload) (err error) {
@@ -545,14 +546,14 @@ func OnThreadMemberUpdate(eventCtx *EventContext, payload sandwich_structs.Sandw
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadMemberUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, ThreadMember(*threadMemberUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, *threadMemberUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnThreadMemberUpdateFuncType func(eventCtx *EventContext, thread *Channel, user ThreadMember) (err error)
+type OnThreadMemberUpdateFuncType func(eventCtx *EventContext, thread *discord_structs.Channel, user discord_structs.ThreadMember) (err error)
 
 // OnThreadMembersUpdate.
 func OnThreadMembersUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -565,12 +566,12 @@ func OnThreadMembersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	channel := NewChannel(eventCtx, &threadMembersUpdatePayload.GuildID, threadMembersUpdatePayload.ID)
 
-	addedUsers := make([]*User, 0, len(threadMembersUpdatePayload.AddedMembers))
+	addedUsers := make([]*discord_structs.User, 0, len(threadMembersUpdatePayload.AddedMembers))
 	for _, addedMember := range threadMembersUpdatePayload.AddedMembers {
 		addedUsers = append(addedUsers, NewUser(eventCtx, *addedMember.UserID))
 	}
 
-	removedUsers := make([]*User, 0, len(threadMembersUpdatePayload.RemovedMemberIDs))
+	removedUsers := make([]*discord_structs.User, 0, len(threadMembersUpdatePayload.RemovedMemberIDs))
 	for _, removedUser := range threadMembersUpdatePayload.RemovedMemberIDs {
 		removedUsers = append(removedUsers, NewUser(eventCtx, removedUser))
 	}
@@ -587,7 +588,7 @@ func OnThreadMembersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 	return nil
 }
 
-type OnThreadMembersUpdateFuncType func(eventCtx *EventContext, thread *Channel, addedUsers []*User, removedUsers []*User) (err error)
+type OnThreadMembersUpdateFuncType func(eventCtx *EventContext, thread *discord_structs.Channel, addedUsers []*discord_structs.User, removedUsers []*discord_structs.User) (err error)
 
 // OnGuildCreate.
 func OnGuildCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -628,7 +629,7 @@ func OnGuildUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	guild := Guild(*guildUpdatePayload)
+	guild := *guildUpdatePayload
 	eventCtx.Guild = &guild
 
 	var beforeGuild discord_structs.Guild
@@ -641,14 +642,14 @@ func OnGuildUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Guild(beforeGuild), guild))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuild, guild))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildUpdateFuncType func(eventCtx *EventContext, before Guild, after Guild) (err error)
+type OnGuildUpdateFuncType func(eventCtx *EventContext, before discord_structs.Guild, after discord_structs.Guild) (err error)
 
 // OnGuildDelete.
 func OnGuildDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -673,9 +674,11 @@ func OnGuildBanAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	eventCtx.Guild = NewGuild(eventCtx, guildBanAddPayload.GuildID)
+	if guildBanAddPayload.GuildID != nil {
+		eventCtx.Guild = NewGuild(eventCtx, *guildBanAddPayload.GuildID)
+	}
 
-	user := User(*guildBanAddPayload.User)
+	user := *guildBanAddPayload.User
 
 	eventCtx.EventHandler.eventsMu.RLock()
 	defer eventCtx.EventHandler.eventsMu.RUnlock()
@@ -689,7 +692,7 @@ func OnGuildBanAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	return nil
 }
 
-type OnGuildBanAddFuncType func(eventCtx *EventContext, user User) (err error)
+type OnGuildBanAddFuncType func(eventCtx *EventContext, user discord_structs.User) (err error)
 
 // OnGuildBanRemove.
 func OnGuildBanRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -698,9 +701,11 @@ func OnGuildBanRemove(eventCtx *EventContext, payload sandwich_structs.SandwichP
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	eventCtx.Guild = NewGuild(eventCtx, guildBanRemovePayload.GuildID)
+	if guildBanRemovePayload.GuildID != nil {
+		eventCtx.Guild = NewGuild(eventCtx, *guildBanRemovePayload.GuildID)
+	}
 
-	user := User(*guildBanRemovePayload.User)
+	user := *guildBanRemovePayload.User
 
 	eventCtx.EventHandler.eventsMu.RLock()
 	defer eventCtx.EventHandler.eventsMu.RUnlock()
@@ -714,7 +719,7 @@ func OnGuildBanRemove(eventCtx *EventContext, payload sandwich_structs.SandwichP
 	return nil
 }
 
-type OnGuildBanRemoveFuncType func(eventCtx *EventContext, user User) (err error)
+type OnGuildBanRemoveFuncType func(eventCtx *EventContext, user discord_structs.User) (err error)
 
 // OnGuildEmojisUpdate.
 func OnGuildEmojisUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -725,14 +730,14 @@ func OnGuildEmojisUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	eventCtx.Guild = NewGuild(eventCtx, guildEmojisUpdatePayload.GuildID)
 
-	var before []Emoji
+	var before []discord_structs.Emoji
 	if _, err := eventCtx.decodeExtra(payload, "before", &before); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
 
-	after := make([]Emoji, 0, len(guildEmojisUpdatePayload.Emojis))
+	after := make([]discord_structs.Emoji, 0, len(guildEmojisUpdatePayload.Emojis))
 	for _, emoji := range guildEmojisUpdatePayload.Emojis {
-		after = append(after, Emoji(*emoji))
+		after = append(after, *emoji)
 	}
 
 	eventCtx.EventHandler.eventsMu.RLock()
@@ -747,7 +752,7 @@ func OnGuildEmojisUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 	return nil
 }
 
-type OnGuildEmojisUpdateFuncType func(eventCtx *EventContext, before []Emoji, after []Emoji) (err error)
+type OnGuildEmojisUpdateFuncType func(eventCtx *EventContext, before []discord_structs.Emoji, after []discord_structs.Emoji) (err error)
 
 // OnGuildStickersUpdate.
 func OnGuildStickersUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -758,14 +763,14 @@ func OnGuildStickersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	eventCtx.Guild = NewGuild(eventCtx, guildStickersUpdatePayload.GuildID)
 
-	var before []Sticker
+	var before []discord_structs.Sticker
 	if _, err := eventCtx.decodeExtra(payload, "before", &before); err != nil {
 		return xerrors.Errorf("Failed to unmarshal extra: %v", err)
 	}
 
-	after := make([]Sticker, 0, len(guildStickersUpdatePayload.Stickers))
+	after := make([]discord_structs.Sticker, 0, len(guildStickersUpdatePayload.Stickers))
 	for _, sticker := range guildStickersUpdatePayload.Stickers {
-		after = append(after, Sticker(*sticker))
+		after = append(after, *sticker)
 	}
 
 	eventCtx.EventHandler.eventsMu.RLock()
@@ -780,7 +785,7 @@ func OnGuildStickersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 	return nil
 }
 
-type OnGuildStickersUpdateFuncType func(eventCtx *EventContext, before []Sticker, after []Sticker) (err error)
+type OnGuildStickersUpdateFuncType func(eventCtx *EventContext, before []discord_structs.Sticker, after []discord_structs.Sticker) (err error)
 
 // OnGuildIntegrationsUpdate.
 func OnGuildIntegrationsUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -819,14 +824,14 @@ func OnGuildMemberAdd(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberAddFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, GuildMember(*guildMemberAddPayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberAddPayload))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildMemberAddFuncType func(eventCtx *EventContext, member GuildMember) (err error)
+type OnGuildMemberAddFuncType func(eventCtx *EventContext, member discord_structs.GuildMember) (err error)
 
 // OnGuildMemberRemove.
 func OnGuildMemberRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -842,14 +847,14 @@ func OnGuildMemberRemove(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberRemoveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, User(*guildMemberRemovePayload.User)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberRemovePayload.User))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildMemberRemoveFuncType func(eventCtx *EventContext, member User) (err error)
+type OnGuildMemberRemoveFuncType func(eventCtx *EventContext, member discord_structs.User) (err error)
 
 // OnGuildMemberUpdate.
 func OnGuildMemberUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -870,14 +875,14 @@ func OnGuildMemberUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, GuildMember(beforeGuildMember), GuildMember(*guildMemberUpdatePayload.GuildMember)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuildMember, *guildMemberUpdatePayload.GuildMember))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildMemberUpdateFuncType func(eventCtx *EventContext, before GuildMember, after GuildMember) (err error)
+type OnGuildMemberUpdateFuncType func(eventCtx *EventContext, before discord_structs.GuildMember, after discord_structs.GuildMember) (err error)
 
 // OnGuildRoleCreate.
 func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -895,14 +900,14 @@ func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Role(*guildRoleCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildRoleCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildRoleCreateFuncType func(eventCtx *EventContext, role Role) (err error)
+type OnGuildRoleCreateFuncType func(eventCtx *EventContext, role discord_structs.Role) (err error)
 
 // OnGuildRoleUpdate.
 func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -925,14 +930,14 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Role(beforeRole), Role(*guildRoleUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeRole, *guildRoleUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildRoleUpdateFuncType func(eventCtx *EventContext, before Role, after Role) (err error)
+type OnGuildRoleUpdateFuncType func(eventCtx *EventContext, before discord_structs.Role, after discord_structs.Role) (err error)
 
 // OnGuildRoleDelete.
 func OnGuildRoleDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -973,14 +978,14 @@ func OnIntegrationCreate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnIntegrationCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Integration(*integrationCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *integrationCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnIntegrationCreateFuncType func(eventCtx *EventContext, integration Integration) (err error)
+type OnIntegrationCreateFuncType func(eventCtx *EventContext, integration discord_structs.Integration) (err error)
 
 // OnIntegrationUpdate.
 func OnIntegrationUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1003,14 +1008,14 @@ func OnIntegrationUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnIntegrationUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Integration(beforeIntegration), Integration(*integrationUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeIntegration, *integrationUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnIntegrationUpdateFuncType func(eventCtx *EventContext, before Integration, after Integration) (err error)
+type OnIntegrationUpdateFuncType func(eventCtx *EventContext, before discord_structs.Integration, after discord_structs.Integration) (err error)
 
 // OnIntegrationDelete.
 func OnIntegrationDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1056,14 +1061,14 @@ func OnInteractionCreate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInteractionCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Interaction(*interactionCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *interactionCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnInteractionCreateFuncType func(eventCtx *EventContext, interaction Interaction) (err error)
+type OnInteractionCreateFuncType func(eventCtx *EventContext, interaction discord_structs.Interaction) (err error)
 
 // OnInviteCreate.
 func OnInviteCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1081,14 +1086,14 @@ func OnInviteCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInviteCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Invite(*inviteCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnInviteCreateFuncType func(eventCtx *EventContext, invite Invite) (err error)
+type OnInviteCreateFuncType func(eventCtx *EventContext, invite discord_structs.Invite) (err error)
 
 // OnInviteDelete.
 func OnInviteDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1106,14 +1111,14 @@ func OnInviteDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInviteDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Invite(*inviteDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnInviteDeleteFuncType func(eventCtx *EventContext, invite Invite) (err error)
+type OnInviteDeleteFuncType func(eventCtx *EventContext, invite discord_structs.Invite) (err error)
 
 // OnMessageCreate.
 func OnMessageCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1131,14 +1136,14 @@ func OnMessageCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Message(*messageCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *messageCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnMessageCreateFuncType func(eventCtx *EventContext, message Message) (err error)
+type OnMessageCreateFuncType func(eventCtx *EventContext, message discord_structs.Message) (err error)
 
 // OnMessageUpdate.
 func OnMessageUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1161,14 +1166,14 @@ func OnMessageUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Message(beforeMessage), Message(*messageUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeMessage, *messageUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnMessageUpdateFuncType func(eventCtx *EventContext, before Message, after Message) (err error)
+type OnMessageUpdateFuncType func(eventCtx *EventContext, before discord_structs.Message, after discord_structs.Message) (err error)
 
 // OnMessageDelete.
 func OnMessageDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1195,7 +1200,7 @@ func OnMessageDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 	return nil
 }
 
-type OnMessageDeleteFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake) (err error)
+type OnMessageDeleteFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageID discord.Snowflake) (err error)
 
 // OnMessageDeleteBulk.
 func OnMessageDeleteBulk(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1222,7 +1227,7 @@ func OnMessageDeleteBulk(eventCtx *EventContext, payload sandwich_structs.Sandwi
 	return nil
 }
 
-type OnMessageDeleteBulkFuncType func(eventCtx *EventContext, channel *Channel, messageIDs []discord.Snowflake) (err error)
+type OnMessageDeleteBulkFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageIDs []discord.Snowflake) (err error)
 
 // OnMessageReactionAdd.
 func OnMessageReactionAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1240,14 +1245,14 @@ func OnMessageReactionAdd(eventCtx *EventContext, payload sandwich_structs.Sandw
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionAddFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionAddPayload.MessageID, Emoji(*messageReactionAddPayload.Emoji), GuildMember(*messageReactionAddPayload.Member)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionAddPayload.MessageID, *messageReactionAddPayload.Emoji, *messageReactionAddPayload.Member))
 		}
 	}
 
 	return nil
 }
 
-type OnMessageReactionAddFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji Emoji, guildMember GuildMember) (err error)
+type OnMessageReactionAddFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageID discord.Snowflake, emoji discord_structs.Emoji, guildMember discord_structs.GuildMember) (err error)
 
 // OnMessageReactionRemove.
 func OnMessageReactionRemove(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1262,7 +1267,7 @@ func OnMessageReactionRemove(eventCtx *EventContext, payload sandwich_structs.Sa
 
 	channel := NewChannel(eventCtx, messageReactionRemovePayload.GuildID, messageReactionRemovePayload.ChannelID)
 	user := NewUser(eventCtx, messageReactionRemovePayload.UserID)
-	emoji := Emoji(*messageReactionRemovePayload.Emoji)
+	emoji := *messageReactionRemovePayload.Emoji
 
 	eventCtx.EventHandler.eventsMu.RLock()
 	defer eventCtx.EventHandler.eventsMu.RUnlock()
@@ -1276,7 +1281,7 @@ func OnMessageReactionRemove(eventCtx *EventContext, payload sandwich_structs.Sa
 	return nil
 }
 
-type OnMessageReactionRemoveFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji *Emoji, user *User) (err error)
+type OnMessageReactionRemoveFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageID discord.Snowflake, emoji *discord_structs.Emoji, user *discord_structs.User) (err error)
 
 // OnMessageReactionRemoveAll.
 func OnMessageReactionRemoveAll(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1301,7 +1306,7 @@ func OnMessageReactionRemoveAll(eventCtx *EventContext, payload sandwich_structs
 	return nil
 }
 
-type OnMessageReactionRemoveAllFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake) (err error)
+type OnMessageReactionRemoveAllFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageID discord.Snowflake) (err error)
 
 // OnMessageReactionRemoveEmoji.
 func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1321,14 +1326,14 @@ func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload sandwich_struc
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionRemoveEmojiFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveEmojiPayload.MessageID, Emoji(*messageReactionRemoveEmojiPayload.Emoji)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveEmojiPayload.MessageID, *messageReactionRemoveEmojiPayload.Emoji))
 		}
 	}
 
 	return nil
 }
 
-type OnMessageReactionRemoveEmojiFuncType func(eventCtx *EventContext, channel *Channel, messageID discord.Snowflake, emoji Emoji) (err error)
+type OnMessageReactionRemoveEmojiFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, messageID discord.Snowflake, emoji discord_structs.Emoji) (err error)
 
 // OnPresenceUpdate.
 func OnPresenceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1344,14 +1349,14 @@ func OnPresenceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnPresenceUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, User(*presenceUpdatePayload.User), presenceUpdatePayload))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *presenceUpdatePayload.User, presenceUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnPresenceUpdateFuncType func(eventCtx *EventContext, user User, payload discord_structs.PresenceUpdate) (err error)
+type OnPresenceUpdateFuncType func(eventCtx *EventContext, user discord_structs.User, payload discord_structs.PresenceUpdate) (err error)
 
 // OnStageInstanceCreate.
 func OnStageInstanceCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1367,14 +1372,14 @@ func OnStageInstanceCreate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, StageInstance(*stageInstanceCreatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceCreatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnStageInstanceCreateFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
+type OnStageInstanceCreateFuncType func(eventCtx *EventContext, stage discord_structs.StageInstance) (err error)
 
 // OnStageInstanceUpdate.
 func OnStageInstanceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1390,14 +1395,14 @@ func OnStageInstanceUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, StageInstance(*stageInstanceUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnStageInstanceUpdateFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
+type OnStageInstanceUpdateFuncType func(eventCtx *EventContext, stage discord_structs.StageInstance) (err error)
 
 // OnStageInstanceDelete.
 func OnStageInstanceDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1411,14 +1416,14 @@ func OnStageInstanceDelete(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, StageInstance(*stageInstanceDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnStageInstanceDeleteFuncType func(eventCtx *EventContext, stage StageInstance) (err error)
+type OnStageInstanceDeleteFuncType func(eventCtx *EventContext, stage discord_structs.StageInstance) (err error)
 
 // OnTypingStart.
 func OnTypingStart(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1434,13 +1439,13 @@ func OnTypingStart(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	timestamp := time.Unix(int64(typingStartPayload.Timestamp), 0)
 	channel := NewChannel(eventCtx, typingStartPayload.GuildID, typingStartPayload.ChannelID)
 
-	var user *User
+	var user *discord_structs.User
 
-	var member *GuildMember
+	var member *discord_structs.GuildMember
 
 	if typingStartPayload.Member != nil {
-		member = (*GuildMember)(typingStartPayload.Member)
-		user = (*User)(typingStartPayload.Member.User)
+		member = typingStartPayload.Member
+		user = typingStartPayload.Member.User
 	} else {
 		user = NewUser(eventCtx, typingStartPayload.UserID)
 	}
@@ -1457,7 +1462,7 @@ func OnTypingStart(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	return nil
 }
 
-type OnTypingStartFuncType func(eventCtx *EventContext, channel *Channel, member *GuildMember, user *User, timestamp time.Time) (err error)
+type OnTypingStartFuncType func(eventCtx *EventContext, channel *discord_structs.Channel, member *discord_structs.GuildMember, user *discord_structs.User, timestamp time.Time) (err error)
 
 // OnUserUpdate.
 func OnUserUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1476,14 +1481,14 @@ func OnUserUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPaylo
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnUserUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, User(beforeUser), User(*userUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeUser, *userUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnUserUpdateFuncType func(eventCtx *EventContext, before User, after User) (err error)
+type OnUserUpdateFuncType func(eventCtx *EventContext, before discord_structs.User, after discord_structs.User) (err error)
 
 // OnVoiceStateUpdate.
 func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1501,14 +1506,14 @@ func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwic
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnVoiceStateUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, GuildMember(*voiceStateUpdatePayload.Member), VoiceState(*voiceStateUpdatePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *voiceStateUpdatePayload.Member, *voiceStateUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnVoiceStateUpdateFuncType func(eventCtx *EventContext, member GuildMember, voice VoiceState) (err error)
+type OnVoiceStateUpdateFuncType func(eventCtx *EventContext, member discord_structs.GuildMember, voice discord_structs.VoiceState) (err error)
 
 // OnVoiceServerUpdate.
 func OnVoiceServerUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1556,7 +1561,7 @@ func OnWebhookUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 	return nil
 }
 
-type OnWebhookUpdateFuncType func(eventCtx *EventContext, channel *Channel) (err error)
+type OnWebhookUpdateFuncType func(eventCtx *EventContext, channel *discord_structs.Channel) (err error)
 
 // OnGuildJoin.
 func OnGuildJoin(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1565,7 +1570,7 @@ func OnGuildJoin(eventCtx *EventContext, payload sandwich_structs.SandwichPayloa
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	guild := Guild(*guildCreatePayload)
+	guild := *guildCreatePayload
 	eventCtx.Guild = &guild
 
 	eventCtx.EventHandler.eventsMu.RLock()
@@ -1580,7 +1585,7 @@ func OnGuildJoin(eventCtx *EventContext, payload sandwich_structs.SandwichPayloa
 	return nil
 }
 
-type OnGuildJoinFuncType func(eventCtx *EventContext, guild Guild) (err error)
+type OnGuildJoinFuncType func(eventCtx *EventContext, guild discord_structs.Guild) (err error)
 
 // OnGuildAvailable.
 func OnGuildAvailable(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1589,7 +1594,7 @@ func OnGuildAvailable(eventCtx *EventContext, payload sandwich_structs.SandwichP
 		return xerrors.Errorf("Failed to unmarshal payload: %v", err)
 	}
 
-	guild := Guild(*guildCreatePayload)
+	guild := *guildCreatePayload
 	eventCtx.Guild = &guild
 
 	eventCtx.EventHandler.eventsMu.RLock()
@@ -1604,7 +1609,7 @@ func OnGuildAvailable(eventCtx *EventContext, payload sandwich_structs.SandwichP
 	return nil
 }
 
-type OnGuildAvailableFuncType func(eventCtx *EventContext, guild Guild) (err error)
+type OnGuildAvailableFuncType func(eventCtx *EventContext, guild discord_structs.Guild) (err error)
 
 // OnGuildLeave.
 func OnGuildLeave(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1620,14 +1625,14 @@ func OnGuildLeave(eventCtx *EventContext, payload sandwich_structs.SandwichPaylo
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildLeaveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, UnavailableGuild(*guildDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildLeaveFuncType func(eventCtx *EventContext, unavailableGuild UnavailableGuild) (err error)
+type OnGuildLeaveFuncType func(eventCtx *EventContext, unavailableGuild discord_structs.UnavailableGuild) (err error)
 
 // OnGuildUnavailable.
 func OnGuildUnavailable(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
@@ -1643,14 +1648,14 @@ func OnGuildUnavailable(eventCtx *EventContext, payload sandwich_structs.Sandwic
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildUnavailableFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, UnavailableGuild(*guildDeletePayload)))
+			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildUnavailableFuncType func(eventCtx *EventContext, unavailableGuild UnavailableGuild) (err error)
+type OnGuildUnavailableFuncType func(eventCtx *EventContext, unavailableGuild discord_structs.UnavailableGuild) (err error)
 
 // Sandwich Events.
 

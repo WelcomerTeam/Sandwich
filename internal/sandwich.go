@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	discord "github.com/WelcomerTeam/Discord/http"
+	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
@@ -34,13 +36,13 @@ type Sandwich struct {
 	lastIdentifierRequestMu sync.RWMutex
 	LastIdentifierRequest   map[string]time.Time
 
-	HTTPSession HTTPSession
+	RESTInterface discord.RESTInterface
 
 	sandwichClient protobuf.SandwichClient
 	grpcInterface  GRPC
 }
 
-func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger io.Writer) (s *Sandwich) {
+func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer) (s *Sandwich) {
 	s = &Sandwich{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
@@ -55,7 +57,7 @@ func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger 
 		lastIdentifierRequestMu: sync.RWMutex{},
 		LastIdentifierRequest:   make(map[string]time.Time),
 
-		HTTPSession: httpSession,
+		RESTInterface: restInterface,
 
 		sandwichClient: protobuf.NewSandwichClient(conn),
 		grpcInterface:  NewDefaultGRPCClient(),
@@ -65,13 +67,15 @@ func NewSandwich(conn grpc.ClientConnInterface, httpSession HTTPSession, logger 
 }
 
 func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
+	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
+
 	return s.SandwichEvents.Dispatch(&EventContext{
-		Logger:      s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
-		Sandwich:    s,
-		HTTPSession: s.HTTPSession,
-		Handlers:    s.SandwichEvents,
-		Context:     context,
-		payload:     &payload,
+		Logger:   logger,
+		Sandwich: s,
+		Session:  discord.NewSession(context, "", s.RESTInterface, logger),
+		Handlers: s.SandwichEvents,
+		Context:  context,
+		payload:  &payload,
 	}, payload)
 }
 
@@ -84,13 +88,15 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sand
 		return ErrInvalidIdentifier
 	}
 
+	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
+
 	return b.Dispatch(&EventContext{
-		Logger:      s.Logger.With().Str("application", payload.Metadata.Application).Logger(),
-		Sandwich:    s,
-		HTTPSession: s.HTTPSession,
-		Handlers:    b.Handlers,
-		Context:     context,
-		payload:     &payload,
+		Logger:   logger,
+		Sandwich: s,
+		Session:  discord.NewSession(context, "", s.RESTInterface, logger),
+		Handlers: b.Handlers,
+		Context:  context,
+		payload:  &payload,
 	}, payload)
 }
 
@@ -105,7 +111,7 @@ func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventCont
 	println(string(debug.Stack()))
 }
 
-func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
+func (s *Sandwich) FetchIdentifier(context context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
 	s.identifiersMu.RLock()
 	identifier, ok = s.Identifiers[applicationName]
 	s.identifiersMu.RUnlock()
@@ -120,9 +126,9 @@ func (s *Sandwich) FetchIdentifier(eventCtx context.Context, applicationName str
 
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
 		identifiers, err := s.grpcInterface.FetchConsumerConfiguration(&EventContext{
-			Sandwich:    s,
-			HTTPSession: s.HTTPSession,
-			Context:     eventCtx,
+			Sandwich: s,
+			Session:  discord.NewSession(context, "", s.RESTInterface, s.Logger),
+			Context:  context,
 		}, "")
 		if err != nil {
 			return nil, false, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
@@ -157,7 +163,7 @@ type EventContext struct {
 
 	Sandwich *Sandwich
 
-	HTTPSession HTTPSession
+	Session *discord.Session
 
 	// Filled in on dispatch
 	EventHandler *EventHandler
@@ -165,7 +171,7 @@ type EventContext struct {
 
 	Identifier *sandwich_structs.ManagerConsumerConfiguration
 
-	Guild *Guild
+	Guild *discord_structs.Guild
 
 	payload *sandwich_structs.SandwichPayload
 }
