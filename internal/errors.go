@@ -9,6 +9,8 @@ var (
 	ErrUnknownEvent       = xerrors.New("Event type does not have a handler")
 	ErrUnknownGRPCError   = xerrors.New("GRPC returned unknown error")
 
+	ErrCommandTreeNotAllowed = xerrors.New("Branching command tree not allowed. You must add commands to a group.")
+
 	ErrInvalidTarget = xerrors.New("Invalid target. Are you doing an operation on a user who is not the running application?")
 
 	ErrFetchMissingGuild     = xerrors.New("Object requires guild ID to fetch")
@@ -43,7 +45,4 @@ var (
 	ErrBadIntArgument     = xerrors.New("Int provided was not in valid format")
 	ErrBadFloatArgument   = xerrors.New("Float provided was not in valid format")
 	ErrBadWebhookArgument = xerrors.New("Webhook url provided was not in valid format")
-
-	ErrWebhookMissingToken  = xerrors.New("Attempt to delete webhook but no token associated with it")
-	ErrUnsupportedImageType = xerrors.New("Unsupported image type given")
 )

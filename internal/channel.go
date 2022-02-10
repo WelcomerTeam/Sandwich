@@ -2,19 +2,18 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
 
 	"golang.org/x/xerrors"
 )
 
-func NewChannel(ctx *EventContext, guildID *discord.Snowflake, channelID discord.Snowflake) *discord_structs.Channel {
-	return &discord_structs.Channel{
+func NewChannel(ctx *EventContext, guildID *discord.Snowflake, channelID discord.Snowflake) *discord.Channel {
+	return &discord.Channel{
 		ID:      channelID,
 		GuildID: guildID,
 	}
 }
 
-func FetchChannel(ctx *EventContext, c *discord_structs.Channel) (channel *discord_structs.Channel, err error) {
+func FetchChannel(ctx *EventContext, c *discord.Channel) (channel *discord.Channel, err error) {
 	if c.Name != "" {
 		return
 	}

@@ -4,11 +4,13 @@ import (
 	"strconv"
 	"strings"
 
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
 )
 
 type Bot struct {
-	*Commandable
+	Commands            *Commandable
+	InteractionCommands *InteractionCommandable
+
 	*Handlers
 
 	Converters *Converters
@@ -17,17 +19,21 @@ type Bot struct {
 }
 
 // Func Type of prefix checking. Returns the prefixes that can be used on a command.
-type PrefixCheckFuncType func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error)
+type PrefixCheckFuncType func(eventCtx *EventContext, message discord.Message) (prefixes []string, err error)
 
 // Func Type used for command checks.
 type CommandCheckFuncType func(commandCtx *CommandContext) (canRun bool, err error)
 
+// Func Type used for command checks.
+type InteractionCheckFuncType func(interactionCtx *InteractionContext) (canRun bool, err error)
+
 func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 	b = &Bot{
-		Commandable: setupCommandable(&Commandable{}),
-		Handlers:    NewDiscordHandlers(),
-		Converters:  NewDefaultConverters(),
-		Prefix:      prefix,
+		Commands:            setupCommandable(&Commandable{}),
+		InteractionCommands: setupInteractionCommandable(&InteractionCommandable{}),
+		Handlers:            NewDiscordHandlers(),
+		Converters:          NewDefaultConverters(),
+		Prefix:              prefix,
 	}
 
 	return b
@@ -36,13 +42,13 @@ func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 // Prefix helpers
 
 func StaticPrefixCheck(passedPrefixes ...string) (fun PrefixCheckFuncType) {
-	return func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error) {
+	return func(eventCtx *EventContext, message discord.Message) (prefixes []string, err error) {
 		return passedPrefixes, nil
 	}
 }
 
 func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
-	return func(eventCtx *EventContext, message discord_structs.Message) (prefixes []string, err error) {
+	return func(eventCtx *EventContext, message discord.Message) (prefixes []string, err error) {
 		prefixes = append(prefixes, passedPrefixes...)
 		prefixes = append(prefixes, "<@"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
 		prefixes = append(prefixes, "<@!"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
@@ -79,7 +85,7 @@ func (b *Bot) Invoke(ctx *CommandContext) (err error) {
 
 // ProcessCommand processes the commands that have been registered to the bot.
 // This also checks that the message's author is not a bot.
-func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord_structs.Message) (err error) {
+func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message) (err error) {
 	if message.Author == nil {
 		return nil
 	}
@@ -96,8 +102,18 @@ func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord_structs.Me
 	return b.Invoke(commandCtx)
 }
 
+// ProcessInteraction processes the interaction that has been registered to the bot.
+func (b *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Interaction) (resp *InteractionResponse, err error) {
+	interactionCtx, err := b.GetInteractionContext(eventCtx, interaction)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.InteractionCommands.Invoke(interactionCtx)
+}
+
 // GetContext returns the command context from a message.
-func (b *Bot) GetContext(eventCtx *EventContext, message discord_structs.Message) (commandContext *CommandContext, err error) {
+func (b *Bot) GetContext(eventCtx *EventContext, message discord.Message) (commandContext *CommandContext, err error) {
 	view := NewStringView(message.Content)
 
 	commandContext = NewCommandContext(eventCtx, b, &message, view)
@@ -135,7 +151,7 @@ func (b *Bot) GetContext(eventCtx *EventContext, message discord_structs.Message
 
 	eventCtx.Logger.Debug().Str("invoker", invoker).Str("prefix", invokedPrefix).Msg("Created context")
 
-	command := b.GetCommand(invoker)
+	command := b.Commands.GetCommand(invoker)
 
 	commandContext.InvokedWith = invoker
 	commandContext.Prefix = invokedPrefix
@@ -144,10 +160,47 @@ func (b *Bot) GetContext(eventCtx *EventContext, message discord_structs.Message
 	return commandContext, nil
 }
 
+// GetInteractionContext returns the interaction context from an interaction.
+func (b *Bot) GetInteractionContext(eventCtx *EventContext, interaction discord.Interaction) (interactionContext *InteractionContext, err error) {
+	interactionContext = NewInteractionContext(eventCtx, b, &interaction)
+
+	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
+
+	command := b.InteractionCommands.GetCommand(interaction.Data.Name)
+
+	interactionContext.InteractionCommand = command
+	interactionContext.CommandTree = commandTree
+
+	return interactionContext, nil
+}
+
+func constructCommandTree(options []*discord.InteractionDataOption, tree []string) (newTree []string) {
+	newTree = tree
+
+	foundForOptions := false
+
+	for _, option := range options {
+		switch option.Type {
+		case discord.ApplicationCommandOptionTypeSubCommandGroup:
+		case discord.ApplicationCommandOptionTypeSubCommand:
+			if foundForOptions {
+				println("Found multiple subcommand(group)", option.Name, option.Type, option.Value)
+			}
+
+			newTree = append(newTree, option.Name)
+			newTree = constructCommandTree(option.Options, newTree)
+			foundForOptions = true
+		default:
+		}
+	}
+
+	return
+}
+
 // CanRun checks all global bot checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
 func (b *Bot) CanRun(ctx *CommandContext) (canRun bool, err error) {
-	for _, check := range b.Checks {
+	for _, check := range b.Commands.Checks {
 		canRun, err := check(ctx)
 		if err != nil {
 			return false, err

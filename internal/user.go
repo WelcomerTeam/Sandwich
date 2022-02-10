@@ -2,17 +2,17 @@ package internal
 
 import (
 	"github.com/WelcomerTeam/Discord/discord"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+
 	"golang.org/x/xerrors"
 )
 
-func NewUser(ctx *EventContext, userID discord.Snowflake) *discord_structs.User {
-	return &discord_structs.User{
+func NewUser(ctx *EventContext, userID discord.Snowflake) *discord.User {
+	return &discord.User{
 		ID: userID,
 	}
 }
 
-func FetchUser(ctx *EventContext, u *discord_structs.User, createDMChannel bool) (user *discord_structs.User, err error) {
+func FetchUser(ctx *EventContext, u *discord.User, createDMChannel bool) (user *discord.User, err error) {
 	if u.Username != "" || (createDMChannel && u.DMChannelID != nil) {
 		return u, nil
 	}
@@ -23,7 +23,7 @@ func FetchUser(ctx *EventContext, u *discord_structs.User, createDMChannel bool)
 	}
 
 	if user == nil {
-		user, err = ctx.Session.GetUser(u.ID)
+		user, err = discord.GetUser(ctx.Session, u.ID)
 		if err != nil {
 			return u, ErrUserNotFound
 		}

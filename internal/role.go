@@ -2,18 +2,18 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+
 	"golang.org/x/xerrors"
 )
 
-func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *discord_structs.Role {
-	return &discord_structs.Role{
+func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
+	return &discord.Role{
 		ID:      roleID,
 		GuildID: guildID,
 	}
 }
 
-func FetchRole(ctx *EventContext, r *discord_structs.Role) (role *discord_structs.Role, err error) {
+func FetchRole(ctx *EventContext, r *discord.Role) (role *discord.Role, err error) {
 	if r.Name != "" {
 		return
 	}

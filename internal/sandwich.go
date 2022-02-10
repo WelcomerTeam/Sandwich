@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	discord "github.com/WelcomerTeam/Discord/http"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
@@ -171,7 +171,7 @@ type EventContext struct {
 
 	Identifier *sandwich_structs.ManagerConsumerConfiguration
 
-	Guild *discord_structs.Guild
+	Guild *discord.Guild
 
 	payload *sandwich_structs.SandwichPayload
 }

@@ -2,18 +2,17 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
 	"golang.org/x/xerrors"
 )
 
 // NewGuild creates a new partial guild. Use Fetch() to populate the guild.
-func NewGuild(ctx *EventContext, guildID discord.Snowflake) *discord_structs.Guild {
-	return &discord_structs.Guild{
+func NewGuild(ctx *EventContext, guildID discord.Snowflake) *discord.Guild {
+	return &discord.Guild{
 		ID: guildID,
 	}
 }
 
-func FetchGuild(ctx *EventContext, g *discord_structs.Guild) (guild *discord_structs.Guild, err error) {
+func FetchGuild(ctx *EventContext, g *discord.Guild) (guild *discord.Guild, err error) {
 	if g.Name != "" {
 		return g, nil
 	}
@@ -31,16 +30,16 @@ func FetchGuild(ctx *EventContext, g *discord_structs.Guild) (guild *discord_str
 }
 
 // NewGuildMember creates a new partial guild member. Use Fetch() to populate the member.
-func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discord.Snowflake) *discord_structs.GuildMember {
-	return &discord_structs.GuildMember{
-		User: &discord_structs.User{
+func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discord.Snowflake) *discord.GuildMember {
+	return &discord.GuildMember{
+		User: &discord.User{
 			ID: userID,
 		},
 		GuildID: guildID,
 	}
 }
 
-func FetchGuildMember(ctx *EventContext, gm *discord_structs.GuildMember) (guildMember *discord_structs.GuildMember, err error) {
+func FetchGuildMember(ctx *EventContext, gm *discord.GuildMember) (guildMember *discord.GuildMember, err error) {
 	if gm.User.Username != "" {
 		return gm, nil
 	}

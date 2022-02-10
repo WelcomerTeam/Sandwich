@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
 )
 
 type ArgumentType uint16
@@ -245,7 +245,7 @@ func (c *Commandable) Invoke(ctx *CommandContext) (err error) {
 	return nil
 }
 
-// CanRun checks commandable bot checks and returns if the message passes them all.
+// CanRun checks commandable checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
 func (c *Commandable) CanRun(ctx *CommandContext) (canRun bool, err error) {
 	for _, check := range c.Checks {
@@ -346,13 +346,10 @@ type CommandContext struct {
 	Bot          *Bot
 	EventContext *EventContext
 
-	*discord_structs.Message
+	*discord.Message
 
-	Author *discord_structs.User
-	Member *discord_structs.GuildMember
-
-	Guild   *discord_structs.Guild
-	Channel *discord_structs.Channel
+	Guild   *discord.Guild
+	Channel *discord.Channel
 
 	Prefix  string
 	Command *Commandable
@@ -371,15 +368,12 @@ type CommandContext struct {
 }
 
 // NewCommandContext creates a new command context.
-func NewCommandContext(eventContext *EventContext, bot *Bot, message *discord_structs.Message, view *StringView) (commandContext *CommandContext) {
+func NewCommandContext(eventContext *EventContext, bot *Bot, message *discord.Message, view *StringView) (commandContext *CommandContext) {
 	commandContext = &CommandContext{
 		Bot:          bot,
 		EventContext: eventContext,
 
 		Message: message,
-
-		Author: message.Author,
-		Member: message.Member,
 
 		Guild:   eventContext.Guild,
 		Channel: NewChannel(eventContext, message.GuildID, message.ChannelID),

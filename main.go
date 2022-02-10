@@ -1,14 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 	"time"
 
-	discord "github.com/WelcomerTeam/Discord/http"
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
+
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	sandwich "github.com/WelcomerTeam/Sandwich/internal"
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
@@ -44,7 +44,7 @@ func main() {
 
 	bot := sandwich.NewBot(sandwich.StaticPrefixCheck("?"))
 
-	bot.MustAddCommand(&sandwich.Commandable{
+	bot.Commands.MustAddCommand(&sandwich.Commandable{
 		Name:    "avatar",
 		Aliases: []string{"profile"},
 		ArgumentParameters: []sandwich.ArgumentParameter{
@@ -59,22 +59,56 @@ func main() {
 
 			avatarURL := discord.EndpointCDN + discord.EndpointUserAvatar(user.ID.String(), user.Avatar)
 
-			ctx.EventContext.Session.CreateMessage(ctx.ChannelID, discord_structs.Message{
-				Embeds: []*discord_structs.Embed{
-					{
-						Title: fmt.Sprintf("%s's avatar", user.Username+"#"+user.Discriminator),
-						Image: &discord_structs.EmbedImage{
-							URL: avatarURL,
-						},
-					},
-				},
-			})
+			ctx.Reply(ctx.EventContext.Session,
+				*discord.NewMessage("").
+					AddEmbed(
+						*discord.NewEmbed(
+							discord.EmbedTypeDefault,
+						).SetImage(discord.NewEmbedImage(avatarURL)),
+					),
+			)
 
-			return nil
+			return
 		},
 	})
 
-	bot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message discord_structs.Message) (err error) {
+	bot.Commands.MustAddCommand(&sandwich.Commandable{
+		Name: "filetest",
+		Handler: func(ctx *sandwich.CommandContext) (err error) {
+			ctx.Reply(ctx.EventContext.Session,
+				*discord.NewMessage("").
+					AddFile(discord.File{
+						Name:        "file.txt",
+						ContentType: "application/octet-stream",
+						Reader:      bytes.NewBufferString("Hello world!"),
+					}),
+			)
+
+			return
+		},
+	})
+
+	bot.RegisterOnInteractionCreateEvent(func(ctx *sandwich.EventContext, interaction discord.Interaction) (err error) {
+		resp, err := bot.ProcessInteraction(ctx, interaction)
+		if err != nil {
+			println(err.Error())
+
+			return
+		}
+
+		if resp != nil {
+			err = interaction.SendResponse(ctx.Session, *resp.Type, *resp.Data.WebhookMessageParams, resp.Data.Choices)
+			if err != nil {
+				println(err.Error())
+
+				return
+			}
+		}
+
+		return nil
+	})
+
+	bot.RegisterOnMessageCreateEvent(func(ctx *sandwich.EventContext, message discord.Message) (err error) {
 		err = bot.ProcessCommands(ctx, message)
 		if err != nil {
 			ctx.Logger.Warn().Err(err).Str("content", message.Content).Msg("Failed to process command")
@@ -82,6 +116,10 @@ func main() {
 			return xerrors.Errorf("Failed to process command: %v", err)
 		}
 
+		return nil
+	})
+
+	bot.RegisterOnInteractionCreateEvent(func(eventCtx *sandwich.EventContext, interaction discord.Interaction) (err error) {
 		return nil
 	})
 

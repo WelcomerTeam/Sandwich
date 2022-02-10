@@ -3,12 +3,12 @@ package internal
 import (
 	"sort"
 
-	discord_structs "github.com/WelcomerTeam/Discord/structs"
+	discord "github.com/WelcomerTeam/Discord/discord"
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
 // sortGuilds returns Guilds in order of most similar to the query passed.
-func sortGuilds(source []*discord_structs.Guild, query string) (sorted []*discord_structs.Guild) {
+func sortGuilds(source []*discord.Guild, query string) (sorted []*discord.Guild) {
 	if len(source) < 2 {
 		return source
 	}
@@ -21,7 +21,7 @@ func sortGuilds(source []*discord_structs.Guild, query string) (sorted []*discor
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.Guild, 0, len(source))
+	sorted = make([]*discord.Guild, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -33,7 +33,7 @@ func sortGuilds(source []*discord_structs.Guild, query string) (sorted []*discor
 }
 
 // sortChannels returns Channels in order of most similar to the query passed.
-func sortChannels(source []*discord_structs.Channel, query string) (sorted []*discord_structs.Channel) {
+func sortChannels(source []*discord.Channel, query string) (sorted []*discord.Channel) {
 	if len(source) < 2 {
 		return source
 	}
@@ -46,7 +46,7 @@ func sortChannels(source []*discord_structs.Channel, query string) (sorted []*di
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.Channel, 0, len(source))
+	sorted = make([]*discord.Channel, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -58,7 +58,7 @@ func sortChannels(source []*discord_structs.Channel, query string) (sorted []*di
 }
 
 // sortRoles returns Roles in order of most similar to the query passed.
-func sortRoles(source []*discord_structs.Role, query string) (sorted []*discord_structs.Role) {
+func sortRoles(source []*discord.Role, query string) (sorted []*discord.Role) {
 	if len(source) < 2 {
 		return source
 	}
@@ -71,7 +71,7 @@ func sortRoles(source []*discord_structs.Role, query string) (sorted []*discord_
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.Role, 0, len(source))
+	sorted = make([]*discord.Role, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -83,7 +83,7 @@ func sortRoles(source []*discord_structs.Role, query string) (sorted []*discord_
 }
 
 // sortEmojis returns Emojis in order of most similar to the query passed.
-func sortEmojis(source []*discord_structs.Emoji, query string) (sorted []*discord_structs.Emoji) {
+func sortEmojis(source []*discord.Emoji, query string) (sorted []*discord.Emoji) {
 	if len(source) < 2 {
 		return source
 	}
@@ -96,7 +96,7 @@ func sortEmojis(source []*discord_structs.Emoji, query string) (sorted []*discor
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.Emoji, 0, len(source))
+	sorted = make([]*discord.Emoji, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -108,7 +108,7 @@ func sortEmojis(source []*discord_structs.Emoji, query string) (sorted []*discor
 }
 
 // sortMembers returns Members in order of most similar to the query passed.
-func sortMembers(source []*discord_structs.GuildMember, query string) (sorted []*discord_structs.GuildMember) {
+func sortMembers(source []*discord.GuildMember, query string) (sorted []*discord.GuildMember) {
 	if len(source) < 2 {
 		return source
 	}
@@ -121,7 +121,7 @@ func sortMembers(source []*discord_structs.GuildMember, query string) (sorted []
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.GuildMember, 0, len(source))
+	sorted = make([]*discord.GuildMember, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -133,7 +133,7 @@ func sortMembers(source []*discord_structs.GuildMember, query string) (sorted []
 }
 
 // sortUsers returns Users in order of most similar to the query passed.
-func sortUsers(source []*discord_structs.User, query string) (sorted []*discord_structs.User) {
+func sortUsers(source []*discord.User, query string) (sorted []*discord.User) {
 	if len(source) < 2 {
 		return source
 	}
@@ -146,7 +146,7 @@ func sortUsers(source []*discord_structs.User, query string) (sorted []*discord_
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord_structs.User, 0, len(source))
+	sorted = make([]*discord.User, 0, len(source))
 
 	sort.Sort(ranks)
 
