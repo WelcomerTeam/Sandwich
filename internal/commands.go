@@ -16,10 +16,8 @@ const (
 	_
 	_
 	ArgumentTypeTextChannel
-	ArgumentTypeInvite
 	ArgumentTypeGuild
 	ArgumentTypeRole
-	ArgumentTypeActivity
 	ArgumentTypeColour
 	ArgumentTypeVoiceChannel
 	ArgumentTypeStageChannel
@@ -321,7 +319,7 @@ func (c *Commandable) transform(ctx *CommandContext, argumentParameter ArgumentP
 			return nil, ErrMissingRequiredArgument
 		}
 
-		return converter.d, nil
+		return converter.data, nil
 	}
 
 	previous := view.index
@@ -339,7 +337,7 @@ func (c *Commandable) transform(ctx *CommandContext, argumentParameter ArgumentP
 
 	view.previous = previous
 
-	return converter.f(ctx, argument)
+	return converter.converterType(ctx, argument)
 }
 
 type CommandContext struct {

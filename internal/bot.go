@@ -8,13 +8,13 @@ import (
 )
 
 type Bot struct {
-	Commands            *Commandable
-	InteractionCommands *InteractionCommandable
-
-	*Handlers
-
+	Commands   *Commandable
 	Converters *Converters
 
+	InteractionCommands   *InteractionCommandable
+	InteractionConverters *InteractionConverters
+
+	*Handlers
 	Prefix PrefixCheckFuncType
 }
 
@@ -29,11 +29,14 @@ type InteractionCheckFuncType func(interactionCtx *InteractionContext) (canRun b
 
 func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 	b = &Bot{
-		Commands:            setupCommandable(&Commandable{}),
-		InteractionCommands: setupInteractionCommandable(&InteractionCommandable{}),
-		Handlers:            NewDiscordHandlers(),
-		Converters:          NewDefaultConverters(),
-		Prefix:              prefix,
+		Commands:   setupCommandable(&Commandable{}),
+		Converters: NewDefaultConverters(),
+
+		InteractionCommands:   setupInteractionCommandable(&InteractionCommandable{}),
+		InteractionConverters: NewInteractionConverters(),
+
+		Handlers: NewDiscordHandlers(),
+		Prefix:   prefix,
 	}
 
 	return b
@@ -83,6 +86,12 @@ func (b *Bot) Invoke(ctx *CommandContext) (err error) {
 	return
 }
 
+// Invoke invokes the command given under the context and handles any extra internal
+// dispatch mechanisms.
+func (b *Bot) InvokeInteraction(ctx *InteractionContext) (resp *InteractionResponse, err error) {
+	return ctx.InteractionCommand.Invoke(ctx)
+}
+
 // ProcessCommand processes the commands that have been registered to the bot.
 // This also checks that the message's author is not a bot.
 func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message) (err error) {
@@ -109,7 +118,7 @@ func (b *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Int
 		return nil, err
 	}
 
-	return b.InteractionCommands.Invoke(interactionCtx)
+	return b.InvokeInteraction(interactionCtx)
 }
 
 // GetContext returns the command context from a message.
@@ -177,19 +186,12 @@ func (b *Bot) GetInteractionContext(eventCtx *EventContext, interaction discord.
 func constructCommandTree(options []*discord.InteractionDataOption, tree []string) (newTree []string) {
 	newTree = tree
 
-	foundForOptions := false
-
 	for _, option := range options {
 		switch option.Type {
 		case discord.ApplicationCommandOptionTypeSubCommandGroup:
 		case discord.ApplicationCommandOptionTypeSubCommand:
-			if foundForOptions {
-				println("Found multiple subcommand(group)", option.Name, option.Type, option.Value)
-			}
-
 			newTree = append(newTree, option.Name)
 			newTree = constructCommandTree(option.Options, newTree)
-			foundForOptions = true
 		default:
 		}
 	}

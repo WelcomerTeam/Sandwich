@@ -51,6 +51,10 @@ github.com/WelcomerTeam/Discord v0.0.0-20220205235759-7ebe05492241 h1:bWe+JWUnto
 github.com/WelcomerTeam/Discord v0.0.0-20220205235759-7ebe05492241/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
 github.com/WelcomerTeam/Discord v0.0.0-20220206112053-c3a6a028fd37 h1:Y2EZH2hhQLHxMm6Cnpkpo4wtAt4eagNqnbuXZlut9EE=
 github.com/WelcomerTeam/Discord v0.0.0-20220206112053-c3a6a028fd37/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
+github.com/WelcomerTeam/Discord v0.0.0-20220214094050-eb4ab3a89355 h1:A3LYHdX1+6dwZ+61HAD3V38FyBfeqRQuFrQa8zQsp6g=
+github.com/WelcomerTeam/Discord v0.0.0-20220214094050-eb4ab3a89355/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
+github.com/WelcomerTeam/Discord v0.0.0-20220214151353-e47a2f9f7480 h1:ll1pkZlLoLeL5CpMTP1JRE3/E+pILnzPkpb2bAXqtXE=
+github.com/WelcomerTeam/Discord v0.0.0-20220214151353-e47a2f9f7480/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
 github.com/WelcomerTeam/RealRock v0.0.0-20220122233305-f97b8c8cbc15/go.mod h1:4oemQ7XEqKAc1DTtFpWugoE9K5RLjt7iH0emiFXnL/A=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124215809-d18f63c1c079 h1:zmOD2KwnmTvtwCPA8RN8VKxlMJX5vNmjgvPQfkYCB1o=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220124215809-d18f63c1c079/go.mod h1:p95taCokDZw/U7DRKUwpkkjZ7StwuqBN4KyjKhoVbbg=

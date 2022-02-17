@@ -49,6 +49,7 @@ type ArgumentParameter struct {
 	Required     bool
 	ArgumentType ArgumentType
 	Name         string
+	Description  string
 }
 
 type Argument struct {
@@ -64,8 +65,8 @@ type Converters struct {
 }
 
 type Converter struct {
-	f ArgumentConverterType
-	d interface{}
+	converterType ArgumentConverterType
+	data          interface{}
 }
 
 // RegisterConverter adds a new converter. If there is already a
@@ -75,8 +76,8 @@ func (co *Converters) RegisterConverter(converterName ArgumentType, converter Ar
 	defer co.convertersMu.Unlock()
 
 	co.Converters[converterName] = &Converter{
-		f: converter,
-		d: defaultValue,
+		converterType: converter,
+		data:          defaultValue,
 	}
 }
 
@@ -234,75 +235,7 @@ func HandleArgumentTypeTextChannel(ctx *CommandContext, argument string) (out in
 	return results[0], nil
 }
 
-func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.ChannelType) (out []*discord.Channel, err error) {
-	match := IDRegex.FindString(argument)
-	if match == "" {
-		matches := ChannelMentionRegex.FindStringSubmatch(argument)
-		if len(matches) > 1 {
-			match = matches[1]
-		}
-	}
-
-	var results []*discord.Channel
-
-	if match == "" {
-		if ctx.GuildID != nil {
-			results, err = ctx.EventContext.Sandwich.grpcInterface.FetchChannelsByName(ctx.EventContext, *ctx.GuildID, argument)
-			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch channel: %v", err)
-			}
-		}
-	} else {
-		channelID, _ := strconv.ParseInt(match, 10, 64)
-
-		result := NewChannel(ctx.EventContext, ctx.GuildID, discord.Snowflake(channelID))
-
-		result, err = FetchChannel(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrChannelNotFound) {
-			return nil, err
-		}
-
-		results = append(results, result)
-	}
-
-	out = make([]*discord.Channel, 0)
-
-	for _, result := range results {
-		if len(channelTypes) == 0 {
-			out = append(out, result)
-		} else {
-			for _, channelType := range channelTypes {
-				if result.Type == channelType {
-					out = append(out, result)
-
-					break
-				}
-			}
-		}
-	}
-
-	return out, nil
-}
-
-// HandleArgumentTypeInvite handles converting from a string
-// argument into a Invite type. Use .Invite() within a command
-// to get the proper type.
-func HandleArgumentTypeInvite(ctx *CommandContext, argument string) (out interface{}, err error) {
-	var result *discord.Invite
-
-	result, err = discord.GetInvite(ctx.EventContext.Session, argument, nil, nil, nil)
-	if err != nil {
-		return nil, xerrors.Errorf("Failed to convert invite: %v", err)
-	}
-
-	if result == nil {
-		return nil, ErrBadInviteArgument
-	}
-
-	return result, nil
-}
-
-// HandleArgumentTypeGuild handles converting from a string
+// HandleArgumentTypeGuild handles converting  from a string
 // argument into a Guild type. Use .Guild() within a command
 // to get the proper type.
 func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interface{}, err error) {
@@ -380,38 +313,28 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 	return result, nil
 }
 
-// HandleArgumentTypeActivity handles converting from a string
-// argument into a Activity type. Use .Activity() within a command
-// to get the proper type.
-func HandleArgumentTypeActivity(ctx *CommandContext, argument string) (out interface{}, err error) {
-	result := &discord.Activity{
-		Name: argument,
-	}
-
-	return result, nil
-}
-
 // HandleArgumentTypeColour handles converting from a string
 // argument into a Colour type. Use .Colour() within a command
 // to get the proper type.
 func HandleArgumentTypeColour(ctx *CommandContext, argument string) (out interface{}, err error) {
 	var result *color.RGBA
 
-	if argument[0] == '#' {
+	switch {
+	case argument[0] == '#':
 		hexNum, err := parseHexNumber(argument[1:])
 		if err != nil {
 			return nil, err
 		}
 
 		result = intToColour(hexNum)
-	} else if argument[0:2] == "0x" {
+	case argument[0:2] == "0x":
 		hexNum, err := parseHexNumber(argument[2:])
 		if err != nil {
 			return nil, err
 		}
 
 		result = intToColour(hexNum)
-	} else {
+	default:
 		hexNum, err := parseHexNumber(argument)
 		if err == nil {
 			result = intToColour(hexNum)
@@ -423,19 +346,6 @@ func HandleArgumentTypeColour(ctx *CommandContext, argument string) (out interfa
 	}
 
 	return result, nil
-}
-
-func parseHexNumber(arg string) (out uint64, err error) {
-	return strconv.ParseUint(arg, 16, 64)
-}
-
-func intToColour(val uint64) (out *color.RGBA) {
-	return &color.RGBA{
-		R: uint8((val >> 24) & 0xFF),
-		G: uint8((val >> 16) & 0xFF),
-		B: uint8((val >> 8) & 0xFF),
-		A: uint8(val & 0xFF),
-	}
 }
 
 // HandleArgumentTypeVoiceChannel handles converting from a string
@@ -474,35 +384,45 @@ func HandleArgumentTypeStageChannel(ctx *CommandContext, argument string) (out i
 // argument into a Emoji type. Use .Emoji() within a command
 // to get the proper type.
 func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interface{}, err error) {
+	var result *discord.Emoji
+
 	match := IDRegex.FindString(argument)
 	if match == "" {
-		matches := EmojiRegex.FindStringSubmatch(argument)
-		if len(matches) > 0 {
-			match = matches[0]
+		matches := PartialEmojiRegex.FindStringSubmatch(argument)
+
+		if len(matches) >= 4 {
+			animated := matches[1] != ""
+			id, _ := strconv.ParseInt(matches[3], 10, 64)
+
+			result = &discord.Emoji{
+				Animated: animated,
+				Name:     matches[2],
+				ID:       discord.Snowflake(id),
+			}
 		}
 	}
 
-	var result *discord.Emoji
+	if result == nil {
+		if match == "" {
+			if ctx.GuildID != nil {
+				emojis, err := ctx.EventContext.Sandwich.grpcInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
+				if err != nil {
+					return nil, xerrors.Errorf("Failed to fetch emoji: %v", err)
+				}
 
-	if match == "" {
-		if ctx.GuildID != nil {
-			emojis, err := ctx.EventContext.Sandwich.grpcInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
-			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch emoji: %v", err)
+				if len(emojis) > 0 {
+					result = emojis[0]
+				}
 			}
+		} else {
+			emojiID, _ := strconv.ParseInt(match, 10, 64)
 
-			if len(emojis) > 0 {
-				result = emojis[0]
-			}
+			result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
 		}
-	} else {
-		emojiID, _ := strconv.ParseInt(match, 10, 64)
-
-		result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
 	}
 
 	result, err = FetchEmoji(ctx.EventContext, result)
-	if err != nil && !xerrors.Is(err, ErrEmojiNotFound) {
+	if err != nil && !xerrors.Is(err, ErrEmojiNotFound) && !xerrors.Is(err, ErrFetchMissingGuild) {
 		return nil, err
 	}
 
@@ -517,13 +437,13 @@ func HandleArgumentTypePartialEmoji(ctx *CommandContext, argument string) (out i
 
 	var result *discord.Emoji
 
-	if len(matches) >= 3 {
-		animated, _ := strconv.ParseBool(matches[0])
-		id, _ := strconv.ParseInt(matches[2], 10, 64)
+	if len(matches) >= 4 {
+		animated := matches[1] != ""
+		id, _ := strconv.ParseInt(matches[3], 10, 64)
 
 		result = &discord.Emoji{
 			Animated: animated,
-			Name:     matches[1],
+			Name:     matches[2],
 			ID:       discord.Snowflake(id),
 		}
 	}
@@ -740,29 +660,6 @@ func (a *Argument) MustChannel() (value *discord.Channel) {
 	return value
 }
 
-// Invite returns an argument as the specified Type.
-// If the argument is not the right type for the converter
-// that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Invite() (value *discord.Invite, err error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeInvite) {
-		value, _ = a.value.(*discord.Invite)
-
-		return
-	}
-
-	return nil, ErrInvalidArgumentType
-}
-
-// MustInvite will attempt to do Invite() and will panic if not possible.
-func (a *Argument) MustInvite() (value *discord.Invite) {
-	value, err := a.Invite()
-	if err != nil {
-		panic(fmt.Sprintf(`argument: Invite(): %v`, err.Error()))
-	}
-
-	return value
-}
-
 // Guild returns an argument as the specified Type.
 // If the argument is not the right type for the converter
 // that made the argument, ErrInvalidArgumentType will be returned.
@@ -804,29 +701,6 @@ func (a *Argument) MustRole() (value *discord.Role) {
 	value, err := a.Role()
 	if err != nil {
 		panic(fmt.Sprintf(`argument: Role(): %v`, err.Error()))
-	}
-
-	return value
-}
-
-// Activity returns an argument as the specified Type.
-// If the argument is not the right type for the converter
-// that made the argument, ErrInvalidArgumentType will be returned.
-func (a *Argument) Activity() (value *discord.Activity, err error) {
-	if argumentTypeIs(a.ArgumentType, ArgumentTypeActivity) {
-		value, _ = a.value.(*discord.Activity)
-
-		return
-	}
-
-	return nil, ErrInvalidArgumentType
-}
-
-// MustActivity will attempt to do Activity() and will panic if not possible.
-func (a *Argument) MustActivity() (value *discord.Activity) {
-	value, err := a.Activity()
-	if err != nil {
-		panic(fmt.Sprintf(`argument: Activity(): %v`, err.Error()))
 	}
 
 	return value
@@ -979,10 +853,8 @@ func NewDefaultConverters() (co *Converters) {
 	co.RegisterConverter(ArgumentTypeMember, HandleArgumentTypeMember, nil)
 	co.RegisterConverter(ArgumentTypeUser, HandleArgumentTypeUser, nil)
 	co.RegisterConverter(ArgumentTypeTextChannel, HandleArgumentTypeTextChannel, nil)
-	co.RegisterConverter(ArgumentTypeInvite, HandleArgumentTypeInvite, nil)
 	co.RegisterConverter(ArgumentTypeGuild, HandleArgumentTypeGuild, nil)
 	co.RegisterConverter(ArgumentTypeRole, HandleArgumentTypeRole, nil)
-	co.RegisterConverter(ArgumentTypeActivity, HandleArgumentTypeActivity, nil)
 	co.RegisterConverter(ArgumentTypeColour, HandleArgumentTypeColour, nil)
 	co.RegisterConverter(ArgumentTypeVoiceChannel, HandleArgumentTypeVoiceChannel, nil)
 	co.RegisterConverter(ArgumentTypeStageChannel, HandleArgumentTypeStageChannel, nil)

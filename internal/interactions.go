@@ -16,8 +16,11 @@ const (
 )
 
 type InteractionCommandable struct {
-	Name string
-	Type InteractionCommandableType
+	Name        string
+	Description string
+
+	Type        InteractionCommandableType
+	CommandType *discord.ApplicationCommandType
 
 	Checks            []InteractionCheckFuncType
 	ArgumentParameter []ArgumentParameter
@@ -28,7 +31,139 @@ type InteractionCommandable struct {
 	parent   *InteractionCommandable
 }
 
+func (ic *InteractionCommandable) MapApplicationCommands() (applicationCommands []discord.ApplicationCommand) {
+	applicationCommands = make([]discord.ApplicationCommand, 0, len(ic.commands))
+
+	applicationCommandType := discord.ApplicationCommandTypeChatInput
+
+	var applicationType *discord.ApplicationCommandType
+
+	for _, interactionCommandable := range ic.commands {
+		if interactionCommandable.CommandType != nil {
+			applicationType = interactionCommandable.CommandType
+		} else {
+			applicationType = &applicationCommandType
+		}
+
+		applicationCommands = append(applicationCommands, discord.ApplicationCommand{
+			// ID:                0,
+			Type: applicationType,
+			// ApplicationID:     0,
+			// GuildID:           0,
+			Name:        interactionCommandable.Name,
+			Description: interactionCommandable.Description,
+			Options:     interactionCommandable.MapApplicationOptions(),
+			// DefaultPermission: true,
+			// Version:           0,
+		})
+	}
+
+	return applicationCommands
+}
+
+func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []*discord.ApplicationCommandOption) {
+	applicationOptions = make([]*discord.ApplicationCommandOption, 0)
+
+	var applicationOptionType discord.ApplicationCommandOptionType
+
+	// Map subgroups/subcommands.
+	for _, command := range ic.commands {
+		switch command.Type {
+		case InteractionCommandableTypeCommand:
+			applicationOptionType = discord.ApplicationCommandOptionTypeSubCommand
+		case InteractionCommandableTypeSubcommand:
+			applicationOptionType = discord.ApplicationCommandOptionTypeSubCommand
+		case InteractionCommandableTypeSubcommandGroup:
+			applicationOptionType = discord.ApplicationCommandOptionTypeSubCommandGroup
+		}
+
+		applicationOptions = append(applicationOptions, &discord.ApplicationCommandOption{
+			Type:        applicationOptionType,
+			Name:        command.Name,
+			Description: "test",
+			// Required:     false,
+			// Choices:      []*discord.ApplicationCommandOptionChoice{},
+			Options: command.MapApplicationOptions(),
+			// ChannelTypes: []*discord.ChannelType{},
+			// MinValue:     0,
+			// MaxValue:     0,
+			// Autocomplete: false,
+		})
+	}
+
+	var channelType discord.ChannelType
+
+	// Map arguments.
+	for _, argument := range ic.ArgumentParameter {
+		channelType = 0
+
+		switch argument.ArgumentType {
+		case ArgumentTypeSnowflake:
+			applicationOptionType = discord.ApplicationCommandOptionTypeString
+		case ArgumentTypeMember, ArgumentTypeUser:
+			applicationOptionType = discord.ApplicationCommandOptionTypeUser
+		case ArgumentTypeTextChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildText
+		case ArgumentTypeVoiceChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildVoice
+		case ArgumentTypeStageChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildStageVoice
+		case ArgumentTypeCategoryChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildCategory
+		case ArgumentTypeStoreChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildStore
+		case ArgumentTypeThread:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+			channelType = discord.ChannelTypeGuildPublicThread
+		case ArgumentTypeGuildChannel:
+			applicationOptionType = discord.ApplicationCommandOptionTypeChannel
+		case ArgumentTypeGuild:
+			applicationOptionType = discord.ApplicationCommandOptionTypeString
+		case ArgumentTypeRole:
+			applicationOptionType = discord.ApplicationCommandOptionTypeRole
+		case ArgumentTypeColour, ArgumentTypeEmoji, ArgumentTypePartialEmoji, ArgumentTypeString, ArgumentTypeFill:
+			applicationOptionType = discord.ApplicationCommandOptionTypeString
+		case ArgumentTypeBool:
+			applicationOptionType = discord.ApplicationCommandOptionTypeBoolean
+		case ArgumentTypeFloat:
+			applicationOptionType = discord.ApplicationCommandOptionTypeString
+		case ArgumentTypeInt:
+			applicationOptionType = discord.ApplicationCommandOptionTypeInteger
+		}
+
+		commandOption := &discord.ApplicationCommandOption{
+			Type:        applicationOptionType,
+			Name:        argument.Name,
+			Description: argument.Description,
+			Required:    argument.Required,
+			// Choices:      []*discord.ApplicationCommandOptionChoice{},
+			// Options:      applicationOptions,
+			// MinValue:     0,
+			// MaxValue:     0,
+			// Autocomplete: false,
+		}
+
+		if channelType != 0 {
+			commandOption.ChannelTypes = []*discord.ChannelType{&channelType}
+		}
+
+		applicationOptions = append(applicationOptions, commandOption)
+	}
+
+	return applicationOptions
+}
+
 func (ic *InteractionCommandable) AddInteractionCommand(interactionCommandable *InteractionCommandable) (icc *InteractionCommandable, err error) {
+	// If this command is not a base command, turn it into a subcommand
+	if ic.Type == InteractionCommandableTypeCommand && ic.parent != nil {
+		ic.Type = InteractionCommandableTypeSubcommand
+	}
+
 	// Convert interactionCommandable parent to SubcommandGroup if it is a subcommand.
 	// Convert interactionCommandable to SubcommandGroup if it is not a Command.
 	if ic.Type != InteractionCommandableTypeCommand {
@@ -49,13 +184,20 @@ func (ic *InteractionCommandable) AddInteractionCommand(interactionCommandable *
 	}
 
 	interactionCommandable = setupInteractionCommandable(interactionCommandable)
-	icc.parent = ic
 
 	icc = interactionCommandable
 
+	if ic.Type == InteractionCommandableTypeSubcommandGroup {
+		icc.Type = InteractionCommandableTypeSubcommand
+	} else {
+		icc.Type = InteractionCommandableTypeCommand
+	}
+
+	icc.parent = ic
+
 	ic.setCommand(commandName, icc)
 
-	return
+	return icc, nil
 }
 
 func (ic *InteractionCommandable) RemoveCommand(name string) (command *InteractionCommandable) {
@@ -198,9 +340,52 @@ func (ic *InteractionCommandable) prepare(ctx *InteractionContext) (err error) {
 		return err
 	}
 
-	// TODO: Parse arguments
+	err = ic.parseArguments(ctx)
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+// parseArgynebts generates the arguments for a command.
+func (ic *InteractionCommandable) parseArguments(ctx *InteractionContext) (err error) {
+	ctx.Arguments = map[string]*Argument{}
+
+	for _, argumentParameter := range ic.ArgumentParameter {
+		ctx.currentParameter = &argumentParameter
+
+		transformed, err := ic.transform(ctx, argumentParameter)
+		if err != nil {
+			return err
+		}
+
+		ctx.Arguments[argumentParameter.Name] = &Argument{
+			ArgumentType: argumentParameter.ArgumentType,
+			value:        transformed,
+		}
+	}
+
+	return nil
+}
+
+// transform returns a output value based on the argument parameter passed in.
+func (ic *InteractionCommandable) transform(ctx *InteractionContext, argumentParameter ArgumentParameter) (out interface{}, err error) {
+	converter := ctx.Bot.InteractionConverters.GetConverter(argumentParameter.ArgumentType)
+	if converter == nil {
+		return nil, ErrConverterNotFound
+	}
+
+	rawOption, ok := ctx.rawOptions[argumentParameter.Name]
+	if !ok || rawOption == nil {
+		if argumentParameter.Required {
+			return nil, ErrMissingRequiredArgument
+		}
+
+		return nil, nil
+	}
+
+	return converter.converterType(ctx, rawOption)
 }
 
 type InteractionContext struct {
@@ -211,6 +396,10 @@ type InteractionContext struct {
 
 	CommandTree        []string
 	InteractionCommand *InteractionCommandable
+
+	currentParameter *ArgumentParameter
+
+	rawOptions map[string]*discord.InteractionDataOption
 
 	Arguments map[string]*Argument
 }
@@ -225,15 +414,29 @@ func NewInteractionContext(eventContext *EventContext, bot *Bot, interaction *di
 
 		InteractionCommand: nil,
 
+		rawOptions: extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)),
+
 		Arguments: make(map[string]*Argument),
 	}
+}
+
+func extractOptions(options []*discord.InteractionDataOption, optionsMap map[string]*discord.InteractionDataOption) (newOptionsMap map[string]*discord.InteractionDataOption) {
+	for _, dataOption := range options {
+		optionsMap[dataOption.Name] = dataOption
+
+		if len(dataOption.Options) > 0 {
+			optionsMap = extractOptions(dataOption.Options, optionsMap)
+		}
+	}
+
+	return optionsMap
 }
 
 type InteractionHandler func(ctx *InteractionContext) (resp *InteractionResponse, err error)
 
 type InteractionResponse struct {
-	Type *discord.InteractionCallbackType
-	Data *discord.InteractionCallbackData
+	Type discord.InteractionCallbackType
+	Data discord.InteractionCallbackData
 }
 
 // MustGetArgument returns an argument based on its name. Panics on error.
