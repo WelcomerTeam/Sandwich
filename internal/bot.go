@@ -1,10 +1,9 @@
 package internal
 
 import (
+	discord "github.com/WelcomerTeam/Discord/discord"
 	"strconv"
 	"strings"
-
-	discord "github.com/WelcomerTeam/Discord/discord"
 )
 
 type Bot struct {

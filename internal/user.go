@@ -2,7 +2,6 @@ package internal
 
 import (
 	"github.com/WelcomerTeam/Discord/discord"
-
 	"golang.org/x/xerrors"
 )
 

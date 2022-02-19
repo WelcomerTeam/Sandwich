@@ -2,19 +2,17 @@ package internal
 
 import (
 	"context"
-	"io"
-	"runtime/debug"
-	"sync"
-	"time"
-
 	discord "github.com/WelcomerTeam/Discord/discord"
-
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
+	"io"
+	"runtime/debug"
+	"sync"
+	"time"
 )
 
 // VERSION follows semantic versioning.

@@ -2,9 +2,8 @@ package internal
 
 import (
 	"fmt"
-	"strings"
-
 	discord "github.com/WelcomerTeam/Discord/discord"
+	"strings"
 )
 
 type ArgumentType uint16

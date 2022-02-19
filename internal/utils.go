@@ -1,12 +1,11 @@
 package internal
 
 import (
+	discord "github.com/WelcomerTeam/Discord/discord"
+	"golang.org/x/xerrors"
 	"image/color"
 	"regexp"
 	"strconv"
-
-	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
 )
 
 func contains(s []string, e string) bool {

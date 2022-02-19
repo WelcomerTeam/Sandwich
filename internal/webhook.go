@@ -1,10 +1,9 @@
 package internal
 
 import (
+	"github.com/WelcomerTeam/Discord/discord"
 	"regexp"
 	"strconv"
-
-	"github.com/WelcomerTeam/Discord/discord"
 )
 
 var WebhookURLRegex = regexp.MustCompile("discord(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,20})/(?P<token>[A-Za-z0-9.-_]{60,68})")

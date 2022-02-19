@@ -2,15 +2,13 @@ package internal
 
 import (
 	"fmt"
+	"github.com/WelcomerTeam/Discord/discord"
+	"golang.org/x/xerrors"
 	"image/color"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/WelcomerTeam/Discord/discord"
-
-	"golang.org/x/xerrors"
 )
 
 var (

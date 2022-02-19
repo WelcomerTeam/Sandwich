@@ -1,10 +1,9 @@
 package internal
 
 import (
-	"sort"
-
 	discord "github.com/WelcomerTeam/Discord/discord"
 	"github.com/lithammer/fuzzysearch/fuzzy"
+	"sort"
 )
 
 // sortGuilds returns Guilds in order of most similar to the query passed.

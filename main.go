@@ -4,12 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/url"
-	"os"
-	"time"
-
 	discord "github.com/WelcomerTeam/Discord/discord"
-
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	sandwich "github.com/WelcomerTeam/Sandwich/internal"
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
@@ -17,10 +12,12 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
+	"net/url"
+	"os"
+	"time"
 )
 
 func main() {
-
 	conn, err := grpc.Dial("localhost:15000", grpc.WithInsecure())
 	if err != nil {
 		panic(err)

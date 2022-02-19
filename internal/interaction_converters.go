@@ -1,13 +1,12 @@
 package internal
 
 import (
-	"image/color"
-	"strconv"
-	"sync"
-
 	discord "github.com/WelcomerTeam/Discord/discord"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/xerrors"
+	"image/color"
+	"strconv"
+	"sync"
 )
 
 type InteractionArgumentConverterType func(ctx *InteractionContext, argument *discord.InteractionDataOption) (out interface{}, err error)

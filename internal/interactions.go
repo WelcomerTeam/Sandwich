@@ -2,9 +2,8 @@ package internal
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/WelcomerTeam/Discord/discord"
+	"strings"
 )
 
 type InteractionCommandableType uint8
