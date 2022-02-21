@@ -1,12 +1,13 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Discord/discord"
-	jsoniter "github.com/json-iterator/go"
-	"golang.org/x/xerrors"
 	"image/color"
 	"strconv"
 	"sync"
+
+	discord "github.com/WelcomerTeam/Discord/discord"
+	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/xerrors"
 )
 
 type InteractionArgumentConverterType func(ctx *InteractionContext, argument *discord.InteractionDataOption) (out interface{}, err error)
@@ -85,9 +86,7 @@ func HandleInteractionArgumentTypeMember(ctx *InteractionContext, option *discor
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
 
-	var result *discord.GuildMember
-
-	result = ctx.Data.Resolved.Members[discord.Snowflake(snowflakeID)]
+	result := ctx.Data.Resolved.Members[discord.Snowflake(snowflakeID)]
 
 	if result == nil {
 		return nil, ErrMemberNotFound
@@ -109,9 +108,7 @@ func HandleInteractionArgumentTypeUser(ctx *InteractionContext, option *discord.
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
 
-	var result *discord.User
-
-	result = ctx.Data.Resolved.Users[discord.Snowflake(snowflakeID)]
+	result := ctx.Data.Resolved.Users[discord.Snowflake(snowflakeID)]
 
 	if result == nil {
 		return nil, ErrUserNotFound
@@ -133,9 +130,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx *InteractionContext, option *
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
 
-	var result *discord.Channel
-
-	result = ctx.Data.Resolved.Channels[discord.Snowflake(snowflakeID)]
+	result := ctx.Data.Resolved.Channels[discord.Snowflake(snowflakeID)]
 
 	if result == nil {
 		return nil, ErrChannelNotFound
@@ -160,7 +155,7 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 	var result *discord.Guild
 
 	if match == "" {
-		guilds, err := ctx.EventContext.Sandwich.grpcInterface.FetchGuildsByName(ctx.EventContext, argument)
+		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext, argument)
 		if err != nil {
 			return nil, xerrors.Errorf("Failed to fetch guild: %v", err)
 		}
@@ -199,9 +194,7 @@ func HandleInteractionArgumentTypeRole(ctx *InteractionContext, option *discord.
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
 
-	var result *discord.Role
-
-	result = ctx.Data.Resolved.Roles[discord.Snowflake(snowflakeID)]
+	result := ctx.Data.Resolved.Roles[discord.Snowflake(snowflakeID)]
 
 	if result == nil {
 		return nil, ErrRoleNotFound
@@ -223,21 +216,22 @@ func HandleInteractionArgumentTypeColour(ctx *InteractionContext, option *discor
 
 	var result *color.RGBA
 
-	if argument[0] == '#' {
+	switch {
+	case argument[0] == '#':
 		hexNum, err := parseHexNumber(argument[1:])
 		if err != nil {
 			return nil, err
 		}
 
 		result = intToColour(hexNum)
-	} else if argument[0:2] == "0x" {
+	case argument[0:2] == "0x":
 		hexNum, err := parseHexNumber(argument[2:])
 		if err != nil {
 			return nil, err
 		}
 
 		result = intToColour(hexNum)
-	} else {
+	default:
 		hexNum, err := parseHexNumber(argument)
 		if err == nil {
 			result = intToColour(hexNum)
@@ -283,7 +277,7 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 	if result == nil {
 		if match == "" {
 			if ctx.GuildID != nil {
-				emojis, err := ctx.EventContext.Sandwich.grpcInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
+				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
 				if err != nil {
 					return nil, xerrors.Errorf("Failed to fetch emoji: %v", err)
 				}

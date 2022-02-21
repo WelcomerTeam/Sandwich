@@ -21,7 +21,7 @@ func FetchEmoji(ctx *EventContext, e *discord.Emoji) (emoji *discord.Emoji, err 
 		return e, ErrFetchMissingGuild
 	}
 
-	emoji, err = ctx.Sandwich.grpcInterface.FetchEmojiByID(ctx, *e.GuildID, e.ID)
+	emoji, err = ctx.Sandwich.GRPCInterface.FetchEmojiByID(ctx, *e.GuildID, e.ID)
 	if err != nil {
 		return e, xerrors.Errorf("Failed to fetch emoji: %v", err)
 	}

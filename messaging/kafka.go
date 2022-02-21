@@ -2,9 +2,10 @@ package mqclients
 
 import (
 	"context"
+	"io"
+
 	"github.com/segmentio/kafka-go"
 	"golang.org/x/xerrors"
-	"io"
 )
 
 func init() {
@@ -21,23 +22,6 @@ type KafkaMQClient struct {
 	reader *kafka.Reader
 
 	msgChannel chan []byte
-}
-
-func parseKafkaBalancer(balancer string) kafka.Balancer {
-	switch balancer {
-	case "crc32":
-		return &kafka.CRC32Balancer{}
-	case "hash":
-		return &kafka.Hash{}
-	case "murmur2":
-		return &kafka.Murmur2Balancer{}
-	case "roundrobin":
-		return &kafka.RoundRobin{}
-	case "leastbytes":
-		return &kafka.LeastBytes{}
-	default:
-		return nil
-	}
 }
 
 func NewKafkaMQClient() (mqC *KafkaMQClient) {

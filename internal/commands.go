@@ -2,8 +2,9 @@ package internal
 
 import (
 	"fmt"
-	discord "github.com/WelcomerTeam/Discord/discord"
 	"strings"
+
+	discord "github.com/WelcomerTeam/Discord/discord"
 )
 
 type ArgumentType uint16
@@ -38,6 +39,8 @@ type Commandable struct {
 	Name    string
 	Aliases []string
 
+	Description string
+
 	Checks             []CommandCheckFuncType
 	ArgumentParameters []ArgumentParameter
 
@@ -70,7 +73,7 @@ func (c *Commandable) AddCommand(commandable *Commandable) (cc *Commandable, err
 		}
 	}
 
-	commandable = setupCommandable(commandable)
+	commandable = SetupCommandable(commandable)
 	commandable.parent = c
 
 	cc = commandable
@@ -410,8 +413,8 @@ func (ctx *CommandContext) GetArgument(name string) (arg *Argument, err error) {
 	return arg, nil
 }
 
-// setupCommandable ensures all nullable variables are properly constructed.
-func setupCommandable(in *Commandable) (out *Commandable) {
+// SetupCommandable ensures all nullable variables are properly constructed.
+func SetupCommandable(in *Commandable) (out *Commandable) {
 	if in.commands == nil {
 		in.commands = make(map[string]*Commandable)
 	}

@@ -17,7 +17,7 @@ func FetchGuild(ctx *EventContext, g *discord.Guild) (guild *discord.Guild, err 
 		return g, nil
 	}
 
-	guild, err = ctx.Sandwich.grpcInterface.FetchGuildByID(ctx, g.ID)
+	guild, err = ctx.Sandwich.GRPCInterface.FetchGuildByID(ctx, g.ID)
 	if err != nil {
 		return g, xerrors.Errorf("Failed to fetch guild: %v", err)
 	}
@@ -48,7 +48,7 @@ func FetchGuildMember(ctx *EventContext, gm *discord.GuildMember) (guildMember *
 		return gm, ErrFetchMissingGuild
 	}
 
-	guildMember, err = ctx.Sandwich.grpcInterface.FetchMemberByID(ctx, *gm.GuildID, gm.User.ID)
+	guildMember, err = ctx.Sandwich.GRPCInterface.FetchMemberByID(ctx, *gm.GuildID, gm.User.ID)
 	if err != nil {
 		return gm, xerrors.Errorf("Failed to fetch member: %v", err)
 	}

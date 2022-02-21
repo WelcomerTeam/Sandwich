@@ -16,6 +16,7 @@ var (
 	ErrFetchMissingGuild     = xerrors.New("Object requires guild ID to fetch")
 	ErrFetchMissingSnowflake = xerrors.New("Object requires snowflake to fetch")
 
+	ErrCogAlreadyRegistered     = xerrors.New("Cog with this name already exists")
 	ErrCommandAlreadyRegistered = xerrors.New("Command with this name already exists")
 	ErrInvalidArgumentType      = xerrors.New("Argument value is not correct type for converter used")
 

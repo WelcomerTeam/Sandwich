@@ -2,11 +2,12 @@ package internal
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	"golang.org/x/xerrors"
-	"sync"
-	"time"
 )
 
 type Handlers struct {
@@ -96,7 +97,7 @@ func NewSandwichHandlers() (h *Handlers) {
 
 	// Register events that are handled by default.
 	h.RegisterOnSandwichConfigurationReload(func(eventCtx *EventContext) (err error) {
-		identifiers, err := eventCtx.Sandwich.grpcInterface.FetchConsumerConfiguration(eventCtx, "")
+		identifiers, err := eventCtx.Sandwich.GRPCInterface.FetchConsumerConfiguration(eventCtx, "")
 		if err != nil {
 			return xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
 		}
@@ -152,7 +153,9 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) (e
 
 // Dispatch. dispatches a payload.
 func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) (err error) {
-	return h.DispatchType(eventCtx, payload.Type, payload)
+	go h.DispatchType(eventCtx, payload.Type, payload)
+
+	return
 }
 
 // DispatchType. is similar to Dispatch however a custom event name

@@ -2,6 +2,11 @@ package internal
 
 import (
 	"context"
+	"io"
+	"runtime/debug"
+	"sync"
+	"time"
+
 	discord "github.com/WelcomerTeam/Discord/discord"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
@@ -9,14 +14,10 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
-	"io"
-	"runtime/debug"
-	"sync"
-	"time"
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.1"
+const VERSION = "0.2"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -36,16 +37,15 @@ type Sandwich struct {
 
 	RESTInterface discord.RESTInterface
 
-	sandwichClient protobuf.SandwichClient
-	grpcInterface  GRPC
+	SandwichClient protobuf.SandwichClient
+	GRPCInterface  GRPC
 }
 
 func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer) (s *Sandwich) {
 	s = &Sandwich{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
-		botsMu: sync.RWMutex{},
-		Bots:   make(map[string]*Bot),
+		Bots: make(map[string]*Bot),
 
 		SandwichEvents: NewSandwichHandlers(),
 
@@ -57,9 +57,23 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 
 		RESTInterface: restInterface,
 
-		sandwichClient: protobuf.NewSandwichClient(conn),
-		grpcInterface:  NewDefaultGRPCClient(),
+		SandwichClient: protobuf.NewSandwichClient(conn),
+		GRPCInterface:  NewDefaultGRPCClient(),
 	}
+
+	return
+}
+
+func (s *Sandwich) Close() (err error) {
+	wg := &sync.WaitGroup{}
+
+	s.botsMu.RLock()
+	for _, bot := range s.Bots {
+		wg.Add(1)
+
+		bot.Close(wg)
+	}
+	s.botsMu.RUnlock()
 
 	return
 }
@@ -123,7 +137,7 @@ func (s *Sandwich) FetchIdentifier(context context.Context, applicationName stri
 	s.lastIdentifierRequestMu.RUnlock()
 
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
-		identifiers, err := s.grpcInterface.FetchConsumerConfiguration(&EventContext{
+		identifiers, err := s.GRPCInterface.FetchConsumerConfiguration(&EventContext{
 			Sandwich: s,
 			Session:  discord.NewSession(context, "", s.RESTInterface, s.Logger),
 			Context:  context,

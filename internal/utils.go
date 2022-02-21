@@ -70,7 +70,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.C
 
 	if match == "" {
 		if ctx.GuildID != nil {
-			results, err = ctx.EventContext.Sandwich.grpcInterface.FetchChannelsByName(ctx.EventContext, *ctx.GuildID, argument)
+			results, err = ctx.EventContext.Sandwich.GRPCInterface.FetchChannelsByName(ctx.EventContext, *ctx.GuildID, argument)
 			if err != nil {
 				return nil, xerrors.Errorf("Failed to fetch channel: %v", err)
 			}

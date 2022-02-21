@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
@@ -54,7 +55,7 @@ func NewDefaultGRPCClient() (grpcClient GRPC) {
 }
 
 func (grpcClient *DefaultGRPCClient) Listen(eventCtx *EventContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error) {
-	client, err = eventCtx.Sandwich.sandwichClient.Listen(eventCtx.Context, &sandwich_protobuf.ListenRequest{
+	client, err = eventCtx.Sandwich.SandwichClient.Listen(eventCtx.Context, &sandwich_protobuf.ListenRequest{
 		Identifier: identifier,
 	})
 	if err != nil {
@@ -65,7 +66,7 @@ func (grpcClient *DefaultGRPCClient) Listen(eventCtx *EventContext, identifier s
 }
 
 func (grpcClient *DefaultGRPCClient) PostAnalytics(eventCtx *EventContext, identifier string, data []byte) (err error) {
-	base, err := eventCtx.Sandwich.sandwichClient.PostAnalytics(eventCtx.Context, &sandwich_protobuf.PostAnalyticsRequest{
+	base, err := eventCtx.Sandwich.SandwichClient.PostAnalytics(eventCtx.Context, &sandwich_protobuf.PostAnalyticsRequest{
 		Identifier: identifier,
 		Data:       data,
 	})
@@ -81,7 +82,7 @@ func (grpcClient *DefaultGRPCClient) PostAnalytics(eventCtx *EventContext, ident
 }
 
 func (grpcClient *DefaultGRPCClient) FetchGuildByID(eventCtx *EventContext, guildID discord.Snowflake) (guild *discord.Guild, err error) {
-	guildsResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
+	guildsResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
 		GuildIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
@@ -100,7 +101,7 @@ func (grpcClient *DefaultGRPCClient) FetchGuildByID(eventCtx *EventContext, guil
 }
 
 func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *EventContext, query string) (guilds []*discord.Guild, err error) {
-	guildsResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
+	guildsResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
 		Query: query,
 	})
 	if err != nil {
@@ -124,7 +125,7 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *EventContext, q
 }
 
 func (grpcClient *DefaultGRPCClient) FetchChannelByID(eventCtx *EventContext, guildID discord.Snowflake, channelID discord.Snowflake) (channel *discord.Channel, err error) {
-	channelsResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
+	channelsResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
 		GuildID:    int64(guildID),
 		ChannelIDs: []int64{int64(channelID)},
 	})
@@ -144,7 +145,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelByID(eventCtx *EventContext, gu
 }
 
 func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *EventContext, guildID discord.Snowflake, query string) (channels []*discord.Channel, err error) {
-	channelsResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
+	channelsResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -169,7 +170,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *EventContext,
 }
 
 func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *EventContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *discord.Role, err error) {
-	rolesResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
+	rolesResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
 		GuildID: int64(guildID),
 		RoleIDs: []int64{int64(guildID)},
 	})
@@ -189,7 +190,7 @@ func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *EventContext, guild
 }
 
 func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *EventContext, guildID discord.Snowflake, query string) (roles []*discord.Role, err error) {
-	rolesResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
+	rolesResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -214,7 +215,7 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *EventContext, gu
 }
 
 func (grpcClient *DefaultGRPCClient) FetchEmojiByID(eventCtx *EventContext, guildID discord.Snowflake, emojiID discord.Snowflake) (emoji *discord.Emoji, err error) {
-	emojisResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
+	emojisResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
 		GuildID:  int64(guildID),
 		EmojiIDs: []int64{int64(guildID)},
 	})
@@ -234,7 +235,7 @@ func (grpcClient *DefaultGRPCClient) FetchEmojiByID(eventCtx *EventContext, guil
 }
 
 func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *EventContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error) {
-	emojisResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
+	emojisResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -259,7 +260,7 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *EventContext, g
 }
 
 func (grpcClient *DefaultGRPCClient) FetchMemberByID(eventCtx *EventContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error) {
-	membersResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
+	membersResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
 		GuildID: int64(guildID),
 		UserIDs: []int64{int64(memberID)},
 	})
@@ -279,7 +280,7 @@ func (grpcClient *DefaultGRPCClient) FetchMemberByID(eventCtx *EventContext, gui
 }
 
 func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *EventContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error) {
-	membersResponse, err := eventCtx.Sandwich.sandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
+	membersResponse, err := eventCtx.Sandwich.SandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -304,7 +305,7 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *EventContext, 
 }
 
 func (grpcClient *DefaultGRPCClient) FetchUserByID(eventCtx *EventContext, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error) {
-	usersResponse, err := eventCtx.Sandwich.sandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
+	usersResponse, err := eventCtx.Sandwich.SandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
 		UserIDs:         []int64{int64(userID)},
 		CreateDMChannel: createDMChannel,
 		Token:           eventCtx.Identifier.Token,
@@ -325,7 +326,7 @@ func (grpcClient *DefaultGRPCClient) FetchUserByID(eventCtx *EventContext, userI
 }
 
 func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *EventContext, query string, createDMChannel bool) (users []*discord.User, err error) {
-	usersResponse, err := eventCtx.Sandwich.sandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
+	usersResponse, err := eventCtx.Sandwich.SandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
 		Query:           query,
 		CreateDMChannel: createDMChannel,
 		Token:           eventCtx.Identifier.Token,
@@ -351,7 +352,7 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *EventContext, que
 }
 
 func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(eventCtx *EventContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error) {
-	consumerConfiguration, err := eventCtx.Sandwich.sandwichClient.FetchConsumerConfiguration(eventCtx.Context, &sandwich_protobuf.FetchConsumerConfigurationRequest{
+	consumerConfiguration, err := eventCtx.Sandwich.SandwichClient.FetchConsumerConfiguration(eventCtx.Context, &sandwich_protobuf.FetchConsumerConfigurationRequest{
 		Identifier: identifier,
 	})
 	if err != nil {
@@ -369,7 +370,7 @@ func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(eventCtx *EventC
 }
 
 func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *EventContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error) {
-	mutualGuilds, err := eventCtx.Sandwich.sandwichClient.FetchMutualGuilds(eventCtx.Context, &sandwich_protobuf.FetchMutualGuildsRequest{
+	mutualGuilds, err := eventCtx.Sandwich.SandwichClient.FetchMutualGuilds(eventCtx.Context, &sandwich_protobuf.FetchMutualGuildsRequest{
 		UserID: int64(userID),
 		Expand: expand,
 	})
@@ -394,7 +395,7 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *EventContext, u
 }
 
 func (grpcClient *DefaultGRPCClient) RequestGuildChunk(eventCtx *EventContext, guildID discord.Snowflake) (err error) {
-	baseResponse, err := eventCtx.Sandwich.sandwichClient.RequestGuildChunk(eventCtx.Context, &sandwich_protobuf.RequestGuildChunkRequest{
+	baseResponse, err := eventCtx.Sandwich.SandwichClient.RequestGuildChunk(eventCtx.Context, &sandwich_protobuf.RequestGuildChunkRequest{
 		GuildId: int64(guildID),
 	})
 	if err != nil {
@@ -413,7 +414,7 @@ func (grpcClient *DefaultGRPCClient) RequestGuildChunk(eventCtx *EventContext, g
 }
 
 func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(eventCtx *EventContext, location Location, op int32, data []byte) (err error) {
-	baseResponse, err := eventCtx.Sandwich.sandwichClient.SendWebsocketMessage(eventCtx.Context, &sandwich_protobuf.SendWebsocketMessageRequest{
+	baseResponse, err := eventCtx.Sandwich.SandwichClient.SendWebsocketMessage(eventCtx.Context, &sandwich_protobuf.SendWebsocketMessageRequest{
 		Manager:       location.Manager,
 		ShardGroup:    location.ShardGroup,
 		Shard:         location.ShardID,
@@ -436,7 +437,7 @@ func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(eventCtx *EventContext
 }
 
 func (grpcClient *DefaultGRPCClient) WhereIsGuild(eventCtx *EventContext, guildID discord.Snowflake) (locations []*Location, err error) {
-	locationResponse, err := eventCtx.Sandwich.sandwichClient.WhereIsGuild(eventCtx.Context, &sandwich_protobuf.WhereIsGuildRequest{
+	locationResponse, err := eventCtx.Sandwich.SandwichClient.WhereIsGuild(eventCtx.Context, &sandwich_protobuf.WhereIsGuildRequest{
 		GuildID: int64(guildID),
 	})
 	if err != nil {

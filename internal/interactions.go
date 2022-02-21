@@ -2,8 +2,9 @@ package internal
 
 import (
 	"fmt"
-	"github.com/WelcomerTeam/Discord/discord"
 	"strings"
+
+	"github.com/WelcomerTeam/Discord/discord"
 )
 
 type InteractionCommandableType uint8
@@ -44,6 +45,8 @@ func (ic *InteractionCommandable) MapApplicationCommands() (applicationCommands 
 			applicationType = &applicationCommandType
 		}
 
+		nilInt64 := (discord.Int64)(0)
+
 		applicationCommands = append(applicationCommands, discord.ApplicationCommand{
 			// ID:                0,
 			Type: applicationType,
@@ -53,7 +56,7 @@ func (ic *InteractionCommandable) MapApplicationCommands() (applicationCommands 
 			Description: interactionCommandable.Description,
 			Options:     interactionCommandable.MapApplicationOptions(),
 			// DefaultPermission: true,
-			// Version:           0,
+			Version: &nilInt64,
 		})
 	}
 
@@ -157,6 +160,15 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 	return applicationOptions
 }
 
+func (ic *InteractionCommandable) MustAddInteractionCommand(interactionCommandable *InteractionCommandable) (icc *InteractionCommandable) {
+	icc, err := ic.AddInteractionCommand(interactionCommandable)
+	if err != nil {
+		panic(fmt.Sprintf(`sandwich: AddInteractionCommand(%v): %v`, interactionCommandable, err.Error()))
+	}
+
+	return icc
+}
+
 func (ic *InteractionCommandable) AddInteractionCommand(interactionCommandable *InteractionCommandable) (icc *InteractionCommandable, err error) {
 	// If this command is not a base command, turn it into a subcommand
 	if ic.Type == InteractionCommandableTypeCommand && ic.parent != nil {
@@ -182,7 +194,7 @@ func (ic *InteractionCommandable) AddInteractionCommand(interactionCommandable *
 		return nil, err
 	}
 
-	interactionCommandable = setupInteractionCommandable(interactionCommandable)
+	interactionCommandable = SetupInteractionCommandable(interactionCommandable)
 
 	icc = interactionCommandable
 
@@ -280,12 +292,12 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (resp *Interac
 			}
 
 			return commandable.Invoke(ctx)
-		} else {
-			ctx.EventContext.Logger.Warn().
-				Str("command", ic.Name).
-				Str("branch", ctx.CommandTree[0]).
-				Msg("Encountered non-group whilst traversing command tree.")
 		}
+
+		ctx.EventContext.Logger.Warn().
+			Str("command", ic.Name).
+			Str("branch", ctx.CommandTree[0]).
+			Msg("Encountered non-group whilst traversing command tree.")
 	}
 
 	err = ic.prepare(ctx)
@@ -458,8 +470,8 @@ func (ctx *InteractionContext) GetArgument(name string) (arg *Argument, err erro
 	return arg, nil
 }
 
-// setupInteractionCommandable ensures all nullable variables are properly constructed.
-func setupInteractionCommandable(in *InteractionCommandable) (out *InteractionCommandable) {
+// SetupInteractionCommandable ensures all nullable variables are properly constructed.
+func SetupInteractionCommandable(in *InteractionCommandable) (out *InteractionCommandable) {
 	if in.commands == nil {
 		in.commands = make(map[string]*InteractionCommandable)
 	}

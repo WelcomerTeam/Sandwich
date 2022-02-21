@@ -1,16 +1,24 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Discord/discord"
+	"fmt"
 	"strconv"
 	"strings"
+	"sync"
+
+	discord "github.com/WelcomerTeam/Discord/discord"
+	"github.com/rs/zerolog"
 )
 
 type Bot struct {
-	Commands   *Commandable
-	Converters *Converters
+	Logger zerolog.Logger
 
-	InteractionCommands   *InteractionCommandable
+	Commands            *Commandable
+	InteractionCommands *InteractionCommandable
+
+	Cogs map[string]Cog
+
+	Converters            *Converters
 	InteractionConverters *InteractionConverters
 
 	*Handlers
@@ -26,12 +34,16 @@ type CommandCheckFuncType func(commandCtx *CommandContext) (canRun bool, err err
 // Func Type used for command checks.
 type InteractionCheckFuncType func(interactionCtx *InteractionContext) (canRun bool, err error)
 
-func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
+func NewBot(prefix PrefixCheckFuncType, logger zerolog.Logger) (b *Bot) {
 	b = &Bot{
-		Commands:   setupCommandable(&Commandable{}),
-		Converters: NewDefaultConverters(),
+		Logger: logger,
 
-		InteractionCommands:   setupInteractionCommandable(&InteractionCommandable{}),
+		Commands:            SetupCommandable(&Commandable{}),
+		InteractionCommands: SetupInteractionCommandable(&InteractionCommandable{}),
+
+		Cogs: make(map[string]Cog),
+
+		Converters:            NewDefaultConverters(),
 		InteractionConverters: NewInteractionConverters(),
 
 		Handlers: NewDiscordHandlers(),
@@ -39,6 +51,18 @@ func NewBot(prefix PrefixCheckFuncType) (b *Bot) {
 	}
 
 	return b
+}
+
+func (b *Bot) Close(wg *sync.WaitGroup) {
+	for _, cog := range b.Cogs {
+		if cast, ok := cog.(CogWithBotUnload); ok {
+			wg.Add(1)
+
+			cast.BotUnload(b, wg)
+		}
+	}
+
+	wg.Done()
 }
 
 // Prefix helpers
@@ -56,6 +80,68 @@ func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 		prefixes = append(prefixes, "<@!"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
 
 		return prefixes, nil
+	}
+}
+
+// Cogs
+
+func (b *Bot) MustRegisterCog(cog Cog) (err error) {
+	err = b.RegisterCog(cog)
+	if err != nil {
+		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
+	}
+
+	return
+}
+
+func (b *Bot) RegisterCog(cog Cog) (err error) {
+	cogInfo := cog.CogInfo()
+
+	if _, ok := b.Cogs[cogInfo.Name]; ok {
+		return ErrCogAlreadyRegistered
+	}
+
+	err = cog.RegisterCog(b)
+	if err != nil {
+		b.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
+
+		return
+	}
+
+	b.Cogs[cogInfo.Name] = cog
+
+	if cast, ok := cog.(CogWithBotLoad); ok {
+		cast.BotLoad(b)
+	}
+
+	if cast, ok := cog.(CogWithCommands); ok {
+		b.RegisterCogCommandable(cog, cast.GetCommandable())
+	}
+
+	if cast, ok := cog.(CogWithInteractionCommands); ok {
+		b.RegisterCogInteractionCommandable(cog, cast.GetInteractionCommandable())
+	}
+
+	return nil
+}
+
+func (b *Bot) RegisterCogCommandable(cog Cog, commandable *Commandable) {
+	for _, command := range commandable.GetAllCommands() {
+		command := command
+
+		// Add cog checks to all commands.
+		command.Checks = append(commandable.Checks, command.Checks...)
+
+		b.Commands.MustAddCommand(command)
+	}
+}
+
+func (b *Bot) RegisterCogInteractionCommandable(cog Cog, interactionCommandable *InteractionCommandable) {
+	for _, command := range interactionCommandable.GetAllCommands() {
+		// Add cog checks to all commands.
+		command.Checks = append(interactionCommandable.Checks, command.Checks...)
+
+		b.InteractionCommands.MustAddInteractionCommand(command)
 	}
 }
 

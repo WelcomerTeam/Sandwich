@@ -39,6 +39,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/WelcomerTeam/Discord v0.0.0-20220206112053-c3a6a028fd37/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
 github.com/WelcomerTeam/Discord v0.0.0-20220217232428-0c55b77c506a h1:qGmhMEJzXX0ATkZG7F7k12Cvwv7iCrOtciWo0nRmt+s=
 github.com/WelcomerTeam/Discord v0.0.0-20220217232428-0c55b77c506a/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
+github.com/WelcomerTeam/Discord v0.0.0-20220221114610-6ca86b31e4b4 h1:FnssDeMRk8R9i7oxu9Z2cvI0N+tDZR9IlsZnSiq5JlA=
+github.com/WelcomerTeam/Discord v0.0.0-20220221114610-6ca86b31e4b4/go.mod h1:aPAozUdVzF46wZmZy9ll5kNP8VJeH+hBjiOl0ankMYM=
 github.com/WelcomerTeam/RealRock v0.0.0-20220122233305-f97b8c8cbc15/go.mod h1:4oemQ7XEqKAc1DTtFpWugoE9K5RLjt7iH0emiFXnL/A=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220206122342-81a4dd3b14da h1:xC4ANu3w4mKTyfNhgS9+dzNZ1DKY/4hmcmUtc/Otke8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20220206122342-81a4dd3b14da/go.mod h1:yPE5jTgJn7HSMeOmL6AMbUvRpOy+X6F7Q6UBc02AneA=
