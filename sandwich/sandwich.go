@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"runtime/debug"
 	"sync"
@@ -120,7 +121,8 @@ func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
 
 func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_structs.SandwichPayload) {
 	s.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
-	println(string(debug.Stack()))
+
+	fmt.Println(string(debug.Stack()))
 }
 
 func (s *Sandwich) FetchIdentifier(context context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {

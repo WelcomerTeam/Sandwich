@@ -58,6 +58,10 @@ func (b *Bot) Close(wg *sync.WaitGroup) {
 		if cast, ok := cog.(CogWithBotUnload); ok {
 			wg.Add(1)
 
+			cogInfo := cog.CogInfo()
+
+			b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotUnload")
+
 			cast.BotUnload(b, wg)
 		}
 	}
@@ -85,13 +89,11 @@ func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 
 // Cogs
 
-func (b *Bot) MustRegisterCog(cog Cog) (err error) {
-	err = b.RegisterCog(cog)
+func (b *Bot) MustRegisterCog(cog Cog) {
+	err := b.RegisterCog(cog)
 	if err != nil {
 		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
 	}
-
-	return
 }
 
 func (b *Bot) RegisterCog(cog Cog) (err error) {
@@ -111,15 +113,25 @@ func (b *Bot) RegisterCog(cog Cog) (err error) {
 	b.Cogs[cogInfo.Name] = cog
 
 	if cast, ok := cog.(CogWithBotLoad); ok {
+		b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
+
 		cast.BotLoad(b)
 	}
 
 	if cast, ok := cog.(CogWithCommands); ok {
-		b.RegisterCogCommandable(cog, cast.GetCommandable())
+		commandable := cast.GetCommandable()
+
+		b.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(commandable.GetAllCommands())).Msg("Cog has commands")
+
+		b.RegisterCogCommandable(cog, commandable)
 	}
 
 	if cast, ok := cog.(CogWithInteractionCommands); ok {
-		b.RegisterCogInteractionCommandable(cog, cast.GetInteractionCommandable())
+		interactionCommandable := cast.GetInteractionCommandable()
+
+		b.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(interactionCommandable.GetAllCommands())).Msg("Cog has interaction commands")
+
+		b.RegisterCogInteractionCommandable(cog, interactionCommandable)
 	}
 
 	return nil
@@ -132,6 +144,8 @@ func (b *Bot) RegisterCogCommandable(cog Cog, commandable *Commandable) {
 		// Add cog checks to all commands.
 		command.Checks = append(commandable.Checks, command.Checks...)
 
+		b.Logger.Debug().Str("name", command.Name).Msg("Registering command")
+
 		b.Commands.MustAddCommand(command)
 	}
 }
@@ -140,6 +154,8 @@ func (b *Bot) RegisterCogInteractionCommandable(cog Cog, interactionCommandable 
 	for _, command := range interactionCommandable.GetAllCommands() {
 		// Add cog checks to all commands.
 		command.Checks = append(interactionCommandable.Checks, command.Checks...)
+
+		b.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
 
 		b.InteractionCommands.MustAddInteractionCommand(command)
 	}
@@ -239,7 +255,7 @@ func (b *Bot) GetContext(eventCtx *EventContext, message discord.Message) (comma
 		return
 	}
 
-	// view.skip_ws()
+	view.SkipWS()
 
 	invoker := view.GetWord()
 

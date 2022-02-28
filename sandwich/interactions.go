@@ -82,7 +82,7 @@ func (ic *InteractionCommandable) MapApplicationOptions() (applicationOptions []
 		applicationOptions = append(applicationOptions, &discord.ApplicationCommandOption{
 			Type:        applicationOptionType,
 			Name:        command.Name,
-			Description: "test",
+			Description: command.Description,
 			// Required:     false,
 			// Choices:      []*discord.ApplicationCommandOptionChoice{},
 			Options: command.MapApplicationOptions(),
