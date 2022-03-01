@@ -161,15 +161,17 @@ func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_structs.San
 // DispatchType. is similar to Dispatch however a custom event name
 // can. be passed, preserving the original payload.
 func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payload sandwich_structs.SandwichPayload) (err error) {
-	identifier, ok, err := eventCtx.Sandwich.FetchIdentifier(context.TODO(), payload.Metadata.Application)
-	if !ok || err != nil {
-		eventCtx.Logger.Warn().Err(err).Msg("Failed to fetch identifier for application")
+	if payload.Metadata.Application != "" {
+		identifier, ok, err := eventCtx.Sandwich.FetchIdentifier(context.TODO(), payload.Metadata.Application)
+		if !ok || err != nil {
+			eventCtx.Logger.Warn().Err(err).Msg("Failed to fetch identifier for application")
 
-		return err
+			return err
+		}
+
+		eventCtx.Session.Token = "Bot " + identifier.Token
+		eventCtx.Identifier = identifier
 	}
-
-	eventCtx.Session.Token = "Bot " + identifier.Token
-	eventCtx.Identifier = identifier
 
 	if ev, ok := h.EventHandlers[eventName]; ok {
 		eventCtx.EventHandler = ev

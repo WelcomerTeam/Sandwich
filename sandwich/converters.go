@@ -783,7 +783,7 @@ func (a *Argument) Bool() (value bool, err error) {
 		return
 	}
 
-	return false, ErrInvalidApplication
+	return false, ErrInvalidArgumentType
 }
 
 // MustBool will attempt to do Bool() and will panic if not possible.
