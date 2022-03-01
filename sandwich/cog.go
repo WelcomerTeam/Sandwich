@@ -26,6 +26,11 @@ type CogWithInteractionCommands interface {
 	GetInteractionCommandable() *InteractionCommandable
 }
 
+// CogWithEvents is an interface for any cog that implements custom event listeners.
+type CogWithEvents interface {
+	GetEventHandlers() *Handlers
+}
+
 // CogWithBotLoad is an interface for any cog that implements methods that run when a bot loads.
 type CogWithBotLoad interface {
 	BotLoad(b *Bot)

@@ -112,6 +112,8 @@ func (b *Bot) RegisterCog(cog Cog) (err error) {
 
 	b.Cogs[cogInfo.Name] = cog
 
+	b.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded cog")
+
 	if cast, ok := cog.(CogWithBotLoad); ok {
 		b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
 
@@ -132,6 +134,12 @@ func (b *Bot) RegisterCog(cog Cog) (err error) {
 		b.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(interactionCommandable.GetAllCommands())).Msg("Cog has interaction commands")
 
 		b.RegisterCogInteractionCommandable(cog, interactionCommandable)
+	}
+
+	if cast, ok := cog.(CogWithEvents); ok {
+		b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has events")
+
+		b.RegisterCogEvents(cog, cast.GetEventHandlers())
 	}
 
 	return nil
@@ -158,6 +166,40 @@ func (b *Bot) RegisterCogInteractionCommandable(cog Cog, interactionCommandable 
 		b.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
 
 		b.InteractionCommands.MustAddInteractionCommand(command)
+	}
+}
+
+func (b *Bot) RegisterCogEvents(cog Cog, events *Handlers) {
+	events.eventHandlersMu.RLock()
+	defer events.eventHandlersMu.RUnlock()
+
+	for _, eventHandler := range events.EventHandlers {
+		eventHandler.eventsMu.RLock()
+
+		if len(eventHandler.Events) > 0 {
+			b.eventHandlersMu.Lock()
+
+			botEventHandler, ok := b.EventHandlers[eventHandler.eventName]
+			if !ok {
+				b.EventHandlers[eventHandler.eventName] = eventHandler
+
+				b.Logger.Info().Str("event", eventHandler.eventName).Msg("Registered new event handler")
+			} else {
+				botEventHandler.eventsMu.Lock()
+				eventHandler.eventsMu.RLock()
+
+				botEventHandler.Events = append(botEventHandler.Events, eventHandler.Events...)
+
+				b.Logger.Info().Str("event", eventHandler.eventName).Int("events", len(eventHandler.Events)).Msg("Registered new events")
+
+				eventHandler.eventsMu.RUnlock()
+				botEventHandler.eventsMu.Unlock()
+			}
+
+			b.eventHandlersMu.Unlock()
+		}
+
+		eventHandler.eventsMu.RUnlock()
 	}
 }
 
