@@ -261,6 +261,12 @@ func (b *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Int
 		return nil, err
 	}
 
+	if interactionCtx.InteractionCommand == nil {
+		return &InteractionResponse{
+			Type: discord.InteractionCallbackTypePong,
+		}, ErrCommandNotFound
+	}
+
 	return b.InvokeInteraction(interactionCtx)
 }
 

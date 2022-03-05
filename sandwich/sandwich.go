@@ -98,6 +98,11 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sand
 	s.botsMu.RUnlock()
 
 	if !ok {
+		s.Logger.Debug().
+			Str("identifier", payload.Metadata.Identifier).
+			Str("application", payload.Metadata.Application).
+			Msg(ErrInvalidIdentifier.Error())
+
 		return ErrInvalidIdentifier
 	}
 
