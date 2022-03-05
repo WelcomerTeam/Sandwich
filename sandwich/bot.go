@@ -90,8 +90,7 @@ func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 // Cogs
 
 func (b *Bot) MustRegisterCog(cog Cog) {
-	err := b.RegisterCog(cog)
-	if err != nil {
+	if err := b.RegisterCog(cog); err != nil {
 		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
 	}
 }
@@ -325,6 +324,7 @@ func (b *Bot) GetInteractionContext(eventCtx *EventContext, interaction discord.
 	command := b.InteractionCommands.GetCommand(interaction.Data.Name)
 
 	interactionContext.InteractionCommand = command
+	interactionContext.commandBranch = commandTree
 	interactionContext.CommandTree = commandTree
 
 	return interactionContext, nil

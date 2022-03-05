@@ -282,8 +282,8 @@ func (ic *InteractionCommandable) IsGroup() bool {
 func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (resp *InteractionResponse, err error) {
 	if len(ctx.CommandTree) > 0 {
 		if ic.IsGroup() {
-			branch := ctx.CommandTree[0]
-			ctx.CommandTree = ctx.CommandTree[1:]
+			branch := ctx.commandBranch[0]
+			ctx.commandBranch = ctx.commandBranch[1:]
 
 			commandable := ic.GetCommand(branch)
 
@@ -296,7 +296,7 @@ func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (resp *Interac
 
 		ctx.EventContext.Logger.Warn().
 			Str("command", ic.Name).
-			Str("branch", ctx.CommandTree[0]).
+			Str("branch", ctx.commandBranch[0]).
 			Msg("Encountered non-group whilst traversing command tree.")
 	}
 
@@ -405,7 +405,9 @@ type InteractionContext struct {
 
 	*discord.Interaction
 
-	CommandTree        []string
+	commandBranch []string
+	CommandTree   []string
+
 	InteractionCommand *InteractionCommandable
 
 	currentParameter *ArgumentParameter
