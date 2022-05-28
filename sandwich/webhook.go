@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-var WebhookURLRegex = regexp.MustCompile("discord(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,20})/(?P<token>[A-Za-z0-9.-_]{60,68})")
+var WebhookURLRegex = regexp.MustCompile("discord(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,20})/(?P<token>[A-Za-z0-9._-]{60,68})")
 
 // NewWebhook creates a partial webhook. Use Fetch() to populate the webhook.
 func NewWebhook(id discord.Snowflake, token string, webhookType discord.WebhookType) (w *discord.Webhook) {
