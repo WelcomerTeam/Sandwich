@@ -1,6 +1,6 @@
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe h1:p5eqJ2jc1AwYf8/9qKP2GjVRnS3NGCB4oRkOlIfOmcA=
-github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe/go.mod h1:ysN7+TdHdLMW8tfXUocG5UB0KgWCbdowa0AwkeY8vFs=
+github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02 h1:z9revI2ZVYJlwMoWZyA0k4zsJKPi44smYS+iDXvOIqE=
+github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02/go.mod h1:xx2AEDJzKQSegernYkY2wWFPa1FgND52NxxPtqjx1s8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1 h1:V7sCcIPxIuTIle3NrBUgYzXaHFI8sbvmyN9/nsIZiQY=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1/go.mod h1:2sWYSq+XdLGTli1YoNZS4x4B+RJqc4ECKxOzaiW7aAY=
 github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878/go.mod h1:3AMJUQhVx52RsWOnlkpikZr01T/yAVN2gn0861vByNg=
