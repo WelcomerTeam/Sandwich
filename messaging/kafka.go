@@ -2,10 +2,10 @@ package mqclients
 
 import (
 	"context"
+	"errors"
 	"io"
 
 	"github.com/segmentio/kafka-go"
-	"golang.org/x/xerrors"
 )
 
 func init() {
@@ -50,7 +50,7 @@ func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, ar
 	var address string
 
 	if address, ok = GetEntry(args, "Address").(string); !ok {
-		return xerrors.New("kafkaMQ connect: string type assertion failed for Address")
+		return errors.New("kafkaMQ connect: string type assertion failed for Address")
 	}
 
 	kafkaMQ.address = address
@@ -72,7 +72,7 @@ func (kafkaMQ *KafkaMQClient) Subscribe(ctx context.Context, channelName string)
 		for {
 			msg, err := kafkaMQ.reader.ReadMessage(ctx)
 			if err != nil {
-				if xerrors.Is(err, io.EOF) {
+				if errors.Is(err, io.EOF) {
 					return
 				}
 			}

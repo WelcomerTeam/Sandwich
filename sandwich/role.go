@@ -2,7 +2,7 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
@@ -23,7 +23,7 @@ func FetchRole(ctx *EventContext, r *discord.Role) (role *discord.Role, err erro
 
 	role, err = ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx, *r.GuildID, r.ID)
 	if err != nil {
-		return r, xerrors.Errorf("Failed to fetch role: %v", err)
+		return r, errors.Errorf("Failed to fetch role: %v", err)
 	}
 
 	if role == nil {

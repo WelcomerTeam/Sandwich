@@ -1,11 +1,12 @@
 package internal
 
 import (
-	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
 	"image/color"
 	"regexp"
 	"strconv"
+
+	discord "github.com/WelcomerTeam/Discord/discord"
+	"github.com/pkg/errors"
 )
 
 func contains(s []string, e string) bool {
@@ -72,7 +73,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.C
 		if ctx.GuildID != nil {
 			results, err = ctx.EventContext.Sandwich.GRPCInterface.FetchChannelsByName(ctx.EventContext, *ctx.GuildID, argument)
 			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch channel: %v", err)
+				return nil, errors.Errorf("Failed to fetch channel: %v", err)
 			}
 		}
 	} else {
@@ -81,7 +82,7 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.C
 		result := NewChannel(ctx.EventContext, ctx.GuildID, discord.Snowflake(channelID))
 
 		result, err = FetchChannel(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrChannelNotFound) {
+		if err != nil && !errors.Is(err, ErrChannelNotFound) {
 			return nil, err
 		}
 

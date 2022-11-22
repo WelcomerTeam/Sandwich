@@ -7,7 +7,7 @@ import (
 
 	discord "github.com/WelcomerTeam/Discord/discord"
 	jsoniter "github.com/json-iterator/go"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 type InteractionArgumentConverterType func(ctx *InteractionContext, argument *discord.InteractionDataOption) (out interface{}, err error)
@@ -50,7 +50,7 @@ func HandleInteractionArgumentTypeSnowflake(ctx *InteractionContext, option *dis
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	match := IDRegex.FindString(argument)
@@ -81,7 +81,7 @@ func HandleInteractionArgumentTypeMember(ctx *InteractionContext, option *discor
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
@@ -103,7 +103,7 @@ func HandleInteractionArgumentTypeUser(ctx *InteractionContext, option *discord.
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
@@ -125,7 +125,7 @@ func HandleInteractionArgumentTypeGuildChannel(ctx *InteractionContext, option *
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
@@ -147,7 +147,7 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	match := IDRegex.FindString(argument)
@@ -157,7 +157,7 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 	if match == "" {
 		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext, argument)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to fetch guild: %v", err)
+			return nil, errors.Errorf("Failed to fetch guild: %v", err)
 		}
 
 		if len(guilds) > 0 {
@@ -169,7 +169,7 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
 
 		result, err = FetchGuild(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrGuildNotFound) {
+		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
 	}
@@ -189,7 +189,7 @@ func HandleInteractionArgumentTypeRole(ctx *InteractionContext, option *discord.
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	snowflakeID, _ := strconv.ParseInt(argument, 10, 64)
@@ -211,7 +211,7 @@ func HandleInteractionArgumentTypeColour(ctx *InteractionContext, option *discor
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	var result *color.RGBA
@@ -253,7 +253,7 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	var result *discord.Emoji
@@ -279,7 +279,7 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 			if ctx.GuildID != nil {
 				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
 				if err != nil {
-					return nil, xerrors.Errorf("Failed to fetch emoji: %v", err)
+					return nil, errors.Errorf("Failed to fetch emoji: %v", err)
 				}
 
 				if len(emojis) > 0 {
@@ -294,7 +294,7 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 	}
 
 	result, err = FetchEmoji(ctx.EventContext, result)
-	if err != nil && !xerrors.Is(err, ErrEmojiNotFound) && !xerrors.Is(err, ErrFetchMissingGuild) {
+	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, err
 	}
 
@@ -309,7 +309,7 @@ func HandleInteractionArgumentTypePartialEmoji(ctx *InteractionContext, option *
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	matches := PartialEmojiRegex.FindStringSubmatch(argument)
@@ -338,7 +338,7 @@ func HandleInteractionArgumentTypeString(ctx *InteractionContext, option *discor
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	return argument, nil
@@ -352,7 +352,7 @@ func HandleInteractionArgumentTypeBool(ctx *InteractionContext, option *discord.
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	return argument, nil
@@ -366,7 +366,7 @@ func HandleInteractionArgumentTypeInt(ctx *InteractionContext, option *discord.I
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	return argument, nil
@@ -380,7 +380,7 @@ func HandleInteractionArgumentTypeFloat(ctx *InteractionContext, option *discord
 
 	err = jsoniter.Unmarshal(option.Value, &argument)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal option value: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal option value: %v", err)
 	}
 
 	result, err := strconv.ParseFloat(argument, 64)

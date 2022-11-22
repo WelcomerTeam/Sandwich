@@ -2,13 +2,14 @@ package internal
 
 import (
 	"fmt"
-	"github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
 	"image/color"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/WelcomerTeam/Discord/discord"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -129,7 +130,7 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 		if ctx.GuildID != nil {
 			members, err := ctx.EventContext.Sandwich.GRPCInterface.FetchMembersByName(ctx.EventContext, *ctx.GuildID, argument)
 			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch member: %v", err)
+				return nil, errors.Errorf("Failed to fetch member: %v", err)
 			}
 
 			if len(members) > 0 {
@@ -142,7 +143,7 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 		result = NewGuildMember(ctx.EventContext, ctx.GuildID, discord.Snowflake(userID))
 
 		result, err = FetchGuildMember(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrMemberNotFound) {
+		if err != nil && !errors.Is(err, ErrMemberNotFound) {
 			return nil, err
 		}
 	}
@@ -183,7 +184,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 			result = NewUser(ctx.EventContext, discord.Snowflake(userID))
 
 			result, err = FetchUser(ctx.EventContext, result, false)
-			if err != nil && !xerrors.Is(err, ErrUserNotFound) {
+			if err != nil && !errors.Is(err, ErrUserNotFound) {
 				return nil, err
 			}
 		}
@@ -201,7 +202,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 		if len(arg) > 5 && arg[len(arg)-5] == '#' {
 			users, err := ctx.EventContext.Sandwich.GRPCInterface.FetchUserByName(ctx.EventContext, arg, false)
 			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch user: %v", err)
+				return nil, errors.Errorf("Failed to fetch user: %v", err)
 			}
 
 			if len(users) > 0 {
@@ -244,7 +245,7 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 	if match == "" {
 		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext, argument)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to fetch guild: %v", err)
+			return nil, errors.Errorf("Failed to fetch guild: %v", err)
 		}
 
 		if len(guilds) > 0 {
@@ -256,7 +257,7 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
 
 		result, err = FetchGuild(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrGuildNotFound) {
+		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
 	}
@@ -286,7 +287,7 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 		if ctx.GuildID != nil {
 			roles, err := ctx.EventContext.Sandwich.GRPCInterface.FetchRolesByName(ctx.EventContext, *ctx.GuildID, argument)
 			if err != nil {
-				return nil, xerrors.Errorf("Failed to fetch role: %v", err)
+				return nil, errors.Errorf("Failed to fetch role: %v", err)
 			}
 
 			if len(roles) > 0 {
@@ -299,7 +300,7 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 		result = NewRole(ctx.EventContext, ctx.GuildID, discord.Snowflake(roleID))
 
 		result, err = FetchRole(ctx.EventContext, result)
-		if err != nil && !xerrors.Is(err, ErrRoleNotFound) {
+		if err != nil && !errors.Is(err, ErrRoleNotFound) {
 			return nil, err
 		}
 	}
@@ -405,7 +406,7 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 			if ctx.GuildID != nil {
 				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
 				if err != nil {
-					return nil, xerrors.Errorf("Failed to fetch emoji: %v", err)
+					return nil, errors.Errorf("Failed to fetch emoji: %v", err)
 				}
 
 				if len(emojis) > 0 {
@@ -420,7 +421,7 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 	}
 
 	result, err = FetchEmoji(ctx.EventContext, result)
-	if err != nil && !xerrors.Is(err, ErrEmojiNotFound) && !xerrors.Is(err, ErrFetchMissingGuild) {
+	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, err
 	}
 

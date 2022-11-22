@@ -1,49 +1,49 @@
 package internal
 
-import "golang.org/x/xerrors"
+import "github.com/pkg/errors"
 
 var (
-	ErrInvalidIdentifier  = xerrors.New("Payload does not include a valid identifier")
-	ErrInvalidApplication = xerrors.New("Could not find identifier matching application")
-	ErrInvalidToken       = xerrors.Errorf("Invalid token was passed")
-	ErrUnknownEvent       = xerrors.New("Event type does not have a handler")
-	ErrUnknownGRPCError   = xerrors.New("GRPC returned unknown error")
+	ErrInvalidIdentifier  = errors.New("Payload does not include a valid identifier")
+	ErrInvalidApplication = errors.New("Could not find identifier matching application")
+	ErrInvalidToken       = errors.Errorf("Invalid token was passed")
+	ErrUnknownEvent       = errors.New("Event type does not have a handler")
+	ErrUnknownGRPCError   = errors.New("GRPC returned unknown error")
 
-	ErrCommandTreeNotAllowed = xerrors.New("Branching command tree not allowed. You must add commands to a group.")
+	ErrCommandTreeNotAllowed = errors.New("Branching command tree not allowed. You must add commands to a group.")
 
-	ErrInvalidTarget = xerrors.New("Invalid target. Are you doing an operation on a user who is not the running application?")
+	ErrInvalidTarget = errors.New("Invalid target. Are you doing an operation on a user who is not the running application?")
 
-	ErrFetchMissingGuild     = xerrors.New("Object requires guild ID to fetch")
-	ErrFetchMissingSnowflake = xerrors.New("Object requires snowflake to fetch")
+	ErrFetchMissingGuild     = errors.New("Object requires guild ID to fetch")
+	ErrFetchMissingSnowflake = errors.New("Object requires snowflake to fetch")
 
-	ErrCogAlreadyRegistered     = xerrors.New("Cog with this name already exists")
-	ErrCommandAlreadyRegistered = xerrors.New("Command with this name already exists")
-	ErrInvalidArgumentType      = xerrors.New("Argument value is not correct type for converter used")
+	ErrCogAlreadyRegistered     = errors.New("Cog with this name already exists")
+	ErrCommandAlreadyRegistered = errors.New("Command with this name already exists")
+	ErrInvalidArgumentType      = errors.New("Argument value is not correct type for converter used")
 
-	ErrUnexpectedQuoteError          = xerrors.New("Encountered a quote mark inside a non-quoted string")
-	ErrExpectedClosingQuoteError     = xerrors.New("Quote character is expected but not found")
-	ErrInvalidEndOfQuotedStringError = xerrors.New("Space is expected after the closing quote")
+	ErrUnexpectedQuoteError          = errors.New("Encountered a quote mark inside a non-quoted string")
+	ErrExpectedClosingQuoteError     = errors.New("Quote character is expected but not found")
+	ErrInvalidEndOfQuotedStringError = errors.New("Space is expected after the closing quote")
 
-	ErrCommandNotFound         = xerrors.New("Command with this name was not found")
-	ErrCheckFailure            = xerrors.New("Command failed built-in checks")
-	ErrMissingRequiredArgument = xerrors.New("Command missing required arguments")
-	ErrArgumentNotFound        = xerrors.New("Command argument was not found")
-	ErrConverterNotFound       = xerrors.New("Command converter is not setup")
+	ErrCommandNotFound         = errors.New("Command with this name was not found")
+	ErrCheckFailure            = errors.New("Command failed built-in checks")
+	ErrMissingRequiredArgument = errors.New("Command missing required arguments")
+	ErrArgumentNotFound        = errors.New("Command argument was not found")
+	ErrConverterNotFound       = errors.New("Command converter is not setup")
 
 	// Converter errors.
 
-	ErrSnowflakeNotFound = xerrors.New("ID does not follow a valid ID or mention format")
-	ErrMemberNotFound    = xerrors.New("Member provided was not found")
-	ErrUserNotFound      = xerrors.New("User provided was not found")
-	ErrChannelNotFound   = xerrors.New("Channel provided was not found")
-	ErrGuildNotFound     = xerrors.New("Guild provided was not found")
-	ErrRoleNotFound      = xerrors.New("Role provided was not found")
-	ErrEmojiNotFound     = xerrors.New("Emoji provided was not found")
+	ErrSnowflakeNotFound = errors.New("ID does not follow a valid ID or mention format")
+	ErrMemberNotFound    = errors.New("Member provided was not found")
+	ErrUserNotFound      = errors.New("User provided was not found")
+	ErrChannelNotFound   = errors.New("Channel provided was not found")
+	ErrGuildNotFound     = errors.New("Guild provided was not found")
+	ErrRoleNotFound      = errors.New("Role provided was not found")
+	ErrEmojiNotFound     = errors.New("Emoji provided was not found")
 
-	ErrBadInviteArgument  = xerrors.New("Invite provided was invalid or expired")
-	ErrBadColourArgument  = xerrors.New("Colour provided was not in valid format")
-	ErrBadBoolArgument    = xerrors.New("Bool provided was not in valid format")
-	ErrBadIntArgument     = xerrors.New("Int provided was not in valid format")
-	ErrBadFloatArgument   = xerrors.New("Float provided was not in valid format")
-	ErrBadWebhookArgument = xerrors.New("Webhook url provided was not in valid format")
+	ErrBadInviteArgument  = errors.New("Invite provided was invalid or expired")
+	ErrBadColourArgument  = errors.New("Colour provided was not in valid format")
+	ErrBadBoolArgument    = errors.New("Bool provided was not in valid format")
+	ErrBadIntArgument     = errors.New("Int provided was not in valid format")
+	ErrBadFloatArgument   = errors.New("Float provided was not in valid format")
+	ErrBadWebhookArgument = errors.New("Webhook url provided was not in valid format")
 )

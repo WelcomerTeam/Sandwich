@@ -13,7 +13,7 @@ type CogInfo struct {
 // such as its name and description.
 type Cog interface {
 	CogInfo() *CogInfo
-	RegisterCog(b *Bot) error
+	RegisterCog(bot *Bot) error
 }
 
 // CogWithCommands is an interface for any cog that implements methods that return cog commands.
@@ -33,10 +33,10 @@ type CogWithEvents interface {
 
 // CogWithBotLoad is an interface for any cog that implements methods that run when a bot loads.
 type CogWithBotLoad interface {
-	BotLoad(b *Bot)
+	BotLoad(bot *Bot)
 }
 
 // CogWithBotUnload is an interface for any cog that implements methods that run when a bot unloads.
 type CogWithBotUnload interface {
-	BotUnload(b *Bot, wg *sync.WaitGroup)
+	BotUnload(bot *Bot, wg *sync.WaitGroup)
 }

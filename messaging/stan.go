@@ -2,10 +2,11 @@ package mqclients
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
-	"golang.org/x/xerrors"
-	"strconv"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -49,19 +50,19 @@ func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args
 	var address string
 
 	if address, ok = GetEntry(args, "Address").(string); !ok {
-		return xerrors.New("stanMQ connect: string type assertion failed for Address")
+		return errors.New("stanMQ connect: string type assertion failed for Address")
 	}
 
 	var cluster string
 
 	if cluster, ok = GetEntry(args, "Cluster").(string); !ok {
-		return xerrors.New("stanMQ connect: string type assertion failed for Cluster")
+		return errors.New("stanMQ connect: string type assertion failed for Cluster")
 	}
 
 	var channel string
 
 	if channel, ok = GetEntry(args, "Channel").(string); !ok {
-		return xerrors.New("stanMQ connect: string type assertion failed for Channel")
+		return errors.New("stanMQ connect: string type assertion failed for Channel")
 	}
 
 	stanMQ.cluster = cluster
@@ -82,7 +83,7 @@ func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args
 	if useNatsConnection {
 		stanMQ.NatsClient, err = nats.Connect(address)
 		if err != nil {
-			return xerrors.Errorf("stanMQ connect nats: %w", err)
+			return errors.Errorf("stanMQ connect nats: %w", err)
 		}
 
 		option = stan.NatsConn(stanMQ.NatsClient)
@@ -96,7 +97,7 @@ func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args
 		option,
 	)
 	if err != nil {
-		return xerrors.Errorf("stanMQ connect stan: %w", err)
+		return errors.Errorf("stanMQ connect stan: %w", err)
 	}
 
 	return nil

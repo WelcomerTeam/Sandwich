@@ -34,8 +34,8 @@ type CommandCheckFuncType func(commandCtx *CommandContext) (canRun bool, err err
 // Func Type used for command checks.
 type InteractionCheckFuncType func(interactionCtx *InteractionContext) (canRun bool, err error)
 
-func NewBot(prefix PrefixCheckFuncType, logger zerolog.Logger) (b *Bot) {
-	b = &Bot{
+func NewBot(prefix PrefixCheckFuncType, logger zerolog.Logger) *Bot {
+	bot := &Bot{
 		Logger: logger,
 
 		Commands:            SetupCommandable(&Commandable{}),
@@ -50,19 +50,19 @@ func NewBot(prefix PrefixCheckFuncType, logger zerolog.Logger) (b *Bot) {
 		Prefix:   prefix,
 	}
 
-	return b
+	return bot
 }
 
-func (b *Bot) Close(wg *sync.WaitGroup) {
-	for _, cog := range b.Cogs {
+func (bot *Bot) Close(wg *sync.WaitGroup) {
+	for _, cog := range bot.Cogs {
 		if cast, ok := cog.(CogWithBotUnload); ok {
 			wg.Add(1)
 
 			cogInfo := cog.CogInfo()
 
-			b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotUnload")
+			bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotUnload")
 
-			cast.BotUnload(b, wg)
+			cast.BotUnload(bot, wg)
 		}
 	}
 
@@ -78,7 +78,8 @@ func StaticPrefixCheck(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 }
 
 func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
-	return func(eventCtx *EventContext, message discord.Message) (prefixes []string, err error) {
+	return func(eventCtx *EventContext, message discord.Message) ([]string, error) {
+		prefixes := []string{}
 		prefixes = append(prefixes, passedPrefixes...)
 		prefixes = append(prefixes, "<@"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
 		prefixes = append(prefixes, "<@!"+strconv.FormatInt(int64(eventCtx.Identifier.ID), 10)+">")
@@ -89,86 +90,86 @@ func WhenMentionedOr(passedPrefixes ...string) (fun PrefixCheckFuncType) {
 
 // Cogs
 
-func (b *Bot) MustRegisterCog(cog Cog) {
-	if err := b.RegisterCog(cog); err != nil {
+func (bot *Bot) MustRegisterCog(cog Cog) {
+	if err := bot.RegisterCog(cog); err != nil {
 		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
 	}
 }
 
-func (b *Bot) RegisterCog(cog Cog) (err error) {
+func (bot *Bot) RegisterCog(cog Cog) (err error) {
 	cogInfo := cog.CogInfo()
 
-	if _, ok := b.Cogs[cogInfo.Name]; ok {
+	if _, ok := bot.Cogs[cogInfo.Name]; ok {
 		return ErrCogAlreadyRegistered
 	}
 
-	err = cog.RegisterCog(b)
+	err = cog.RegisterCog(bot)
 	if err != nil {
-		b.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
+		bot.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
 
 		return
 	}
 
-	b.Cogs[cogInfo.Name] = cog
+	bot.Cogs[cogInfo.Name] = cog
 
-	b.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded cog")
+	bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded cog")
 
 	if cast, ok := cog.(CogWithBotLoad); ok {
-		b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
+		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
 
-		cast.BotLoad(b)
+		cast.BotLoad(bot)
 	}
 
 	if cast, ok := cog.(CogWithCommands); ok {
 		commandable := cast.GetCommandable()
 
-		b.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(commandable.GetAllCommands())).Msg("Cog has commands")
+		bot.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(commandable.GetAllCommands())).Msg("Cog has commands")
 
-		b.RegisterCogCommandable(cog, commandable)
+		bot.RegisterCogCommandable(cog, commandable)
 	}
 
 	if cast, ok := cog.(CogWithInteractionCommands); ok {
 		interactionCommandable := cast.GetInteractionCommandable()
 
-		b.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(interactionCommandable.GetAllCommands())).Msg("Cog has interaction commands")
+		bot.Logger.Info().Str("cog", cogInfo.Name).Int("commands", len(interactionCommandable.GetAllCommands())).Msg("Cog has interaction commands")
 
-		b.RegisterCogInteractionCommandable(cog, interactionCommandable)
+		bot.RegisterCogInteractionCommandable(cog, interactionCommandable)
 	}
 
 	if cast, ok := cog.(CogWithEvents); ok {
-		b.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has events")
+		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has events")
 
-		b.RegisterCogEvents(cog, cast.GetEventHandlers())
+		bot.RegisterCogEvents(cog, cast.GetEventHandlers())
 	}
 
 	return nil
 }
 
-func (b *Bot) RegisterCogCommandable(cog Cog, commandable *Commandable) {
+func (bot *Bot) RegisterCogCommandable(cog Cog, commandable *Commandable) {
 	for _, command := range commandable.GetAllCommands() {
 		command := command
 
 		// Add cog checks to all commands.
 		command.Checks = append(commandable.Checks, command.Checks...)
 
-		b.Logger.Debug().Str("name", command.Name).Msg("Registering command")
+		bot.Logger.Debug().Str("name", command.Name).Msg("Registering command")
 
-		b.Commands.MustAddCommand(command)
+		bot.Commands.MustAddCommand(command)
 	}
 }
 
-func (b *Bot) RegisterCogInteractionCommandable(cog Cog, interactionCommandable *InteractionCommandable) {
+func (bot *Bot) RegisterCogInteractionCommandable(cog Cog, interactionCommandable *InteractionCommandable) {
 	for _, command := range interactionCommandable.GetAllCommands() {
 		// Add cog checks to all commands.
 		command.Checks = append(interactionCommandable.Checks, command.Checks...)
 
-		b.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
+		bot.Logger.Debug().Str("name", command.Name).Msg("Registering interaction command")
 
-		b.InteractionCommands.MustAddInteractionCommand(command)
+		bot.InteractionCommands.MustAddInteractionCommand(command)
 	}
 }
 
-func (b *Bot) RegisterCogEvents(cog Cog, events *Handlers) {
+func (bot *Bot) RegisterCogEvents(cog Cog, events *Handlers) {
 	events.eventHandlersMu.RLock()
 	defer events.eventHandlersMu.RUnlock()
 
@@ -176,26 +177,26 @@ func (b *Bot) RegisterCogEvents(cog Cog, events *Handlers) {
 		eventHandler.eventsMu.RLock()
 
 		if len(eventHandler.Events) > 0 {
-			b.eventHandlersMu.Lock()
+			bot.eventHandlersMu.Lock()
 
-			botEventHandler, ok := b.EventHandlers[eventHandler.eventName]
+			botEventHandler, ok := bot.EventHandlers[eventHandler.eventName]
 			if !ok {
-				b.EventHandlers[eventHandler.eventName] = eventHandler
+				bot.EventHandlers[eventHandler.eventName] = eventHandler
 
-				b.Logger.Info().Str("event", eventHandler.eventName).Msg("Registered new event handler")
+				bot.Logger.Info().Str("event", eventHandler.eventName).Msg("Registered new event handler")
 			} else {
 				botEventHandler.eventsMu.Lock()
 				eventHandler.eventsMu.RLock()
 
 				botEventHandler.Events = append(botEventHandler.Events, eventHandler.Events...)
 
-				b.Logger.Info().Str("event", eventHandler.eventName).Int("events", len(eventHandler.Events)).Msg("Registered new events")
+				bot.Logger.Info().Str("event", eventHandler.eventName).Int("events", len(eventHandler.Events)).Msg("Registered new events")
 
 				eventHandler.eventsMu.RUnlock()
 				botEventHandler.eventsMu.Unlock()
 			}
 
-			b.eventHandlersMu.Unlock()
+			bot.eventHandlersMu.Unlock()
 		}
 
 		eventHandler.eventsMu.RUnlock()
@@ -206,10 +207,10 @@ func (b *Bot) RegisterCogEvents(cog Cog, events *Handlers) {
 
 // Invoke invokes the command given under the context and handles any extra internal
 // dispatch mechanisms.
-func (b *Bot) Invoke(ctx *CommandContext) (err error) {
+func (bot *Bot) Invoke(ctx *CommandContext) (err error) {
 	if ctx.Command != nil {
 		// dispatch command event
-		ok, err := b.CanRun(ctx)
+		ok, err := bot.CanRun(ctx)
 
 		switch {
 		case ok:
@@ -230,13 +231,13 @@ func (b *Bot) Invoke(ctx *CommandContext) (err error) {
 
 // Invoke invokes the command given under the context and handles any extra internal
 // dispatch mechanisms.
-func (b *Bot) InvokeInteraction(ctx *InteractionContext) (resp *InteractionResponse, err error) {
+func (bot *Bot) InvokeInteraction(ctx *InteractionContext) (resp *InteractionResponse, err error) {
 	return ctx.InteractionCommand.Invoke(ctx)
 }
 
 // ProcessCommand processes the commands that have been registered to the bot.
 // This also checks that the message's author is not a bot.
-func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message) (err error) {
+func (bot *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message) (err error) {
 	if message.Author == nil {
 		return nil
 	}
@@ -245,17 +246,17 @@ func (b *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message) (
 		return nil
 	}
 
-	commandCtx, err := b.GetContext(eventCtx, message)
+	commandCtx, err := bot.GetContext(eventCtx, message)
 	if err != nil {
 		return err
 	}
 
-	return b.Invoke(commandCtx)
+	return bot.Invoke(commandCtx)
 }
 
 // ProcessInteraction processes the interaction that has been registered to the bot.
-func (b *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Interaction) (resp *InteractionResponse, err error) {
-	interactionCtx, err := b.GetInteractionContext(eventCtx, interaction)
+func (bot *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Interaction) (resp *InteractionResponse, err error) {
+	interactionCtx, err := bot.GetInteractionContext(eventCtx, interaction)
 	if err != nil {
 		return nil, err
 	}
@@ -264,20 +265,20 @@ func (b *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Int
 		return nil, ErrCommandNotFound
 	}
 
-	return b.InvokeInteraction(interactionCtx)
+	return bot.InvokeInteraction(interactionCtx)
 }
 
 // GetContext returns the command context from a message.
-func (b *Bot) GetContext(eventCtx *EventContext, message discord.Message) (commandContext *CommandContext, err error) {
+func (bot *Bot) GetContext(eventCtx *EventContext, message discord.Message) (commandContext *CommandContext, err error) {
 	view := NewStringView(message.Content)
 
-	commandContext = NewCommandContext(eventCtx, b, &message, view)
+	commandContext = NewCommandContext(eventCtx, bot, &message, view)
 
 	if message.Author.ID == eventCtx.Identifier.User.ID {
 		return
 	}
 
-	prefixes, err := b.Prefix(eventCtx, message)
+	prefixes, err := bot.Prefix(eventCtx, message)
 
 	var invokedPrefix string
 
@@ -306,7 +307,7 @@ func (b *Bot) GetContext(eventCtx *EventContext, message discord.Message) (comma
 
 	eventCtx.Logger.Debug().Str("invoker", invoker).Str("prefix", invokedPrefix).Msg("Created context")
 
-	command := b.Commands.GetCommand(invoker)
+	command := bot.Commands.GetCommand(invoker)
 
 	commandContext.InvokedWith = invoker
 	commandContext.Prefix = invokedPrefix
@@ -316,12 +317,12 @@ func (b *Bot) GetContext(eventCtx *EventContext, message discord.Message) (comma
 }
 
 // GetInteractionContext returns the interaction context from an interaction.
-func (b *Bot) GetInteractionContext(eventCtx *EventContext, interaction discord.Interaction) (interactionContext *InteractionContext, err error) {
-	interactionContext = NewInteractionContext(eventCtx, b, &interaction)
+func (bot *Bot) GetInteractionContext(eventCtx *EventContext, interaction discord.Interaction) (interactionContext *InteractionContext, err error) {
+	interactionContext = NewInteractionContext(eventCtx, bot, &interaction)
 
 	commandTree := constructCommandTree(interaction.Data.Options, make([]string, 0))
 
-	command := b.InteractionCommands.GetCommand(interaction.Data.Name)
+	command := bot.InteractionCommands.GetCommand(interaction.Data.Name)
 
 	interactionContext.InteractionCommand = command
 	interactionContext.commandBranch = commandTree
@@ -348,8 +349,8 @@ func constructCommandTree(options []*discord.InteractionDataOption, tree []strin
 
 // CanRun checks all global bot checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
-func (b *Bot) CanRun(ctx *CommandContext) (canRun bool, err error) {
-	for _, check := range b.Commands.Checks {
+func (bot *Bot) CanRun(ctx *CommandContext) (canRun bool, err error) {
+	for _, check := range bot.Commands.Checks {
 		canRun, err := check(ctx)
 		if err != nil {
 			return false, err

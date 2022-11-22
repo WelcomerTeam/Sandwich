@@ -12,8 +12,8 @@ import (
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"golang.org/x/xerrors"
 	"google.golang.org/grpc"
 )
 
@@ -150,7 +150,7 @@ func (s *Sandwich) FetchIdentifier(context context.Context, applicationName stri
 			Context:  context,
 		}, "")
 		if err != nil {
-			return nil, false, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
+			return nil, false, errors.Errorf("Failed to fetch consumer configuration: %v", err)
 		}
 
 		s.identifiersMu.Lock()
@@ -206,7 +206,7 @@ func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
 func (eventCtx *EventContext) decodeContent(msg sandwich_structs.SandwichPayload, out interface{}) (err error) {
 	err = jsoniter.Unmarshal(msg.Data, &out)
 	if err != nil {
-		return xerrors.Errorf("Failed to unmarshal gateway payload: %v", err)
+		return errors.Errorf("Failed to unmarshal gateway payload: %v", err)
 	}
 
 	return
@@ -223,7 +223,7 @@ func (eventCtx *EventContext) decodeExtra(msg sandwich_structs.SandwichPayload, 
 
 		err = jsoniter.Unmarshal(val, &out)
 		if err != nil {
-			return ok, xerrors.Errorf("Failed to unmarshal extra: %v", err)
+			return ok, errors.Errorf("Failed to unmarshal extra: %v", err)
 		}
 	}
 

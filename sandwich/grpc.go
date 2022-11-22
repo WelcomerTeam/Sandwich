@@ -6,7 +6,7 @@ import (
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 type GRPC interface {
@@ -59,7 +59,7 @@ func (grpcClient *DefaultGRPCClient) Listen(eventCtx *EventContext, identifier s
 		Identifier: identifier,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to listen: %v", err)
+		return nil, errors.Errorf("Failed to listen: %v", err)
 	}
 
 	return
@@ -71,11 +71,11 @@ func (grpcClient *DefaultGRPCClient) PostAnalytics(eventCtx *EventContext, ident
 		Data:       data,
 	})
 	if err != nil {
-		return xerrors.Errorf("Failed to post analytics: %v", err)
+		return errors.Errorf("Failed to post analytics: %v", err)
 	}
 
 	if !base.Ok {
-		return xerrors.New(base.Error)
+		return errors.New(base.Error)
 	}
 
 	return nil
@@ -86,14 +86,14 @@ func (grpcClient *DefaultGRPCClient) FetchGuildByID(eventCtx *EventContext, guil
 		GuildIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch guilds: %v", err)
+		return nil, errors.Errorf("Failed to fetch guilds: %v", err)
 	}
 
 	grpcGuild := guildsResponse.Guilds[int64(guildID)]
 	if grpcGuild != nil {
 		guild, err = sandwich_protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.Guild to Guild: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Guild to Guild: %v", err)
 		}
 	}
 
@@ -105,7 +105,7 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *EventContext, q
 		Query: query,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch guilds: %v", err)
+		return nil, errors.Errorf("Failed to fetch guilds: %v", err)
 	}
 
 	guilds = make([]*discord.Guild, 0, len(guildsResponse.Guilds))
@@ -130,14 +130,14 @@ func (grpcClient *DefaultGRPCClient) FetchChannelByID(eventCtx *EventContext, gu
 		ChannelIDs: []int64{int64(channelID)},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch channels: %v", err)
+		return nil, errors.Errorf("Failed to fetch channels: %v", err)
 	}
 
 	grpcChannel := channelsResponse.GuildChannels[int64(channelID)]
 	if grpcChannel != nil {
 		channel, err = sandwich_protobuf.GRPCToChannel(grpcChannel)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.Channel to Channel: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Channel to Channel: %v", err)
 		}
 	}
 
@@ -150,7 +150,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *EventContext,
 		Query:   query,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch channels: %v", err)
+		return nil, errors.Errorf("Failed to fetch channels: %v", err)
 	}
 
 	channels = make([]*discord.Channel, 0, len(channelsResponse.GuildChannels))
@@ -175,14 +175,14 @@ func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *EventContext, guild
 		RoleIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch roles: %v", err)
+		return nil, errors.Errorf("Failed to fetch roles: %v", err)
 	}
 
 	grpcRole := rolesResponse.GuildRoles[int64(guildID)]
 	if grpcRole != nil {
 		role, err = sandwich_protobuf.GRPCToRole(grpcRole)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.Role to Role: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Role to Role: %v", err)
 		}
 	}
 
@@ -195,7 +195,7 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *EventContext, gu
 		Query:   query,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch roles: %v", err)
+		return nil, errors.Errorf("Failed to fetch roles: %v", err)
 	}
 
 	roles = make([]*discord.Role, 0, len(rolesResponse.GuildRoles))
@@ -220,14 +220,14 @@ func (grpcClient *DefaultGRPCClient) FetchEmojiByID(eventCtx *EventContext, guil
 		EmojiIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch emojis: %v", err)
+		return nil, errors.Errorf("Failed to fetch emojis: %v", err)
 	}
 
 	grpcEmoji := emojisResponse.GuildEmojis[int64(guildID)]
 	if grpcEmoji != nil {
 		emoji, err = sandwich_protobuf.GRPCToEmoji(grpcEmoji)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.Emoji to Emoji: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Emoji to Emoji: %v", err)
 		}
 	}
 
@@ -240,7 +240,7 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *EventContext, g
 		Query:   query,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch emojis: %v", err)
+		return nil, errors.Errorf("Failed to fetch emojis: %v", err)
 	}
 
 	emojis = make([]*discord.Emoji, 0, len(emojisResponse.GuildEmojis))
@@ -265,14 +265,14 @@ func (grpcClient *DefaultGRPCClient) FetchMemberByID(eventCtx *EventContext, gui
 		UserIDs: []int64{int64(memberID)},
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch members: %v", err)
+		return nil, errors.Errorf("Failed to fetch members: %v", err)
 	}
 
 	grpcMember := membersResponse.GuildMembers[int64(memberID)]
 	if grpcMember != nil {
 		member, err = sandwich_protobuf.GRPCToGuildMember(grpcMember)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.GuildMember to GuildMember: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.GuildMember to GuildMember: %v", err)
 		}
 	}
 
@@ -285,7 +285,7 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *EventContext, 
 		Query:   query,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch members: %v", err)
+		return nil, errors.Errorf("Failed to fetch members: %v", err)
 	}
 
 	members = make([]*discord.GuildMember, 0, len(membersResponse.GuildMembers))
@@ -311,14 +311,14 @@ func (grpcClient *DefaultGRPCClient) FetchUserByID(eventCtx *EventContext, userI
 		Token:           eventCtx.Identifier.Token,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch users: %v", err)
+		return nil, errors.Errorf("Failed to fetch users: %v", err)
 	}
 
 	grpcUser := usersResponse.Users[int64(userID)]
 	if grpcUser != nil {
 		user, err = sandwich_protobuf.GRPCToUser(grpcUser)
 		if err != nil {
-			return nil, xerrors.Errorf("Failed to convert sandwich_protobuf.User to User: %v", err)
+			return nil, errors.Errorf("Failed to convert sandwich_protobuf.User to User: %v", err)
 		}
 	}
 
@@ -332,7 +332,7 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *EventContext, que
 		Token:           eventCtx.Identifier.Token,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch users: %v", err)
+		return nil, errors.Errorf("Failed to fetch users: %v", err)
 	}
 
 	users = make([]*discord.User, 0, len(usersResponse.Users))
@@ -356,14 +356,14 @@ func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(eventCtx *EventC
 		Identifier: identifier,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch consumer configuration: %v", err)
+		return nil, errors.Errorf("Failed to fetch consumer configuration: %v", err)
 	}
 
 	identifiers = &sandwich_structs.SandwichConsumerConfiguration{}
 
 	err = json.Unmarshal(consumerConfiguration.File, &identifiers)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to unmarshal consumer configuration: %v", err)
+		return nil, errors.Errorf("Failed to unmarshal consumer configuration: %v", err)
 	}
 
 	return identifiers, nil
@@ -375,7 +375,7 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *EventContext, u
 		Expand: expand,
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch mutual guilds: %v", err)
+		return nil, errors.Errorf("Failed to fetch mutual guilds: %v", err)
 	}
 
 	guilds = make([]*discord.Guild, 0, len(mutualGuilds.Guilds))
@@ -399,11 +399,11 @@ func (grpcClient *DefaultGRPCClient) RequestGuildChunk(eventCtx *EventContext, g
 		GuildId: int64(guildID),
 	})
 	if err != nil {
-		return xerrors.Errorf("Failed to request guild chunk: %v", err)
+		return errors.Errorf("Failed to request guild chunk: %v", err)
 	}
 
 	if baseResponse.Error != "" {
-		return xerrors.New(baseResponse.Error)
+		return errors.New(baseResponse.Error)
 	}
 
 	if !baseResponse.Ok {
@@ -422,11 +422,11 @@ func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(eventCtx *EventContext
 		Data:          data,
 	})
 	if err != nil {
-		return xerrors.Errorf("Failed to send websocket message: %v", err)
+		return errors.Errorf("Failed to send websocket message: %v", err)
 	}
 
 	if baseResponse.Error != "" {
-		return xerrors.New(baseResponse.Error)
+		return errors.New(baseResponse.Error)
 	}
 
 	if !baseResponse.Ok {
@@ -441,7 +441,7 @@ func (grpcClient *DefaultGRPCClient) WhereIsGuild(eventCtx *EventContext, guildI
 		GuildID: int64(guildID),
 	})
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch guild locations: %v", err)
+		return nil, errors.Errorf("Failed to fetch guild locations: %v", err)
 	}
 
 	locations = make([]*Location, 0, len(locationResponse.Locations))

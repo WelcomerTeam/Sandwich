@@ -2,7 +2,7 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 func NewChannel(ctx *EventContext, guildID *discord.Snowflake, channelID discord.Snowflake) *discord.Channel {
@@ -23,7 +23,7 @@ func FetchChannel(ctx *EventContext, c *discord.Channel) (channel *discord.Chann
 
 	channel, err = ctx.Sandwich.GRPCInterface.FetchChannelByID(ctx, *c.GuildID, c.ID)
 	if err != nil {
-		return nil, xerrors.Errorf("Failed to fetch channel: %v", err)
+		return nil, errors.Errorf("Failed to fetch channel: %v", err)
 	}
 
 	if channel == nil {

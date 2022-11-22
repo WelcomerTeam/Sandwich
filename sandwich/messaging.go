@@ -2,8 +2,9 @@ package internal
 
 import (
 	"context"
+	"errors"
+
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
-	"golang.org/x/xerrors"
 )
 
 type MQClient interface {
@@ -26,6 +27,6 @@ func NewMQClient(mqType string) (MQClient, error) {
 	case "redis":
 		return messaging.NewRedisMQClient(), nil
 	default:
-		return nil, xerrors.New("No MQ client named " + mqType)
+		return nil, errors.New("No MQ client named " + mqType)
 	}
 }

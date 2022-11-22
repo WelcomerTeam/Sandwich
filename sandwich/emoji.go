@@ -2,7 +2,7 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 func NewEmoji(ctx *EventContext, guildID *discord.Snowflake, emojiID discord.Snowflake) *discord.Emoji {
@@ -23,7 +23,7 @@ func FetchEmoji(ctx *EventContext, e *discord.Emoji) (emoji *discord.Emoji, err 
 
 	emoji, err = ctx.Sandwich.GRPCInterface.FetchEmojiByID(ctx, *e.GuildID, e.ID)
 	if err != nil {
-		return e, xerrors.Errorf("Failed to fetch emoji: %v", err)
+		return e, errors.Errorf("Failed to fetch emoji: %v", err)
 	}
 
 	if emoji == nil {

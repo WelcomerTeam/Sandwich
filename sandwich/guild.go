@@ -2,7 +2,7 @@ package internal
 
 import (
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 // NewGuild creates a new partial guild. Use Fetch() to populate the guild.
@@ -19,7 +19,7 @@ func FetchGuild(ctx *EventContext, g *discord.Guild) (guild *discord.Guild, err 
 
 	guild, err = ctx.Sandwich.GRPCInterface.FetchGuildByID(ctx, g.ID)
 	if err != nil {
-		return g, xerrors.Errorf("Failed to fetch guild: %v", err)
+		return g, errors.Errorf("Failed to fetch guild: %v", err)
 	}
 
 	if guild == nil {
@@ -50,7 +50,7 @@ func FetchGuildMember(ctx *EventContext, gm *discord.GuildMember) (guildMember *
 
 	guildMember, err = ctx.Sandwich.GRPCInterface.FetchMemberByID(ctx, *gm.GuildID, gm.User.ID)
 	if err != nil {
-		return gm, xerrors.Errorf("Failed to fetch member: %v", err)
+		return gm, errors.Errorf("Failed to fetch member: %v", err)
 	}
 
 	if guildMember == nil {

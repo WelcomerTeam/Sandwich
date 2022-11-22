@@ -2,7 +2,7 @@ package internal
 
 import (
 	"github.com/WelcomerTeam/Discord/discord"
-	"golang.org/x/xerrors"
+	"github.com/pkg/errors"
 )
 
 func NewUser(ctx *EventContext, userID discord.Snowflake) *discord.User {
@@ -18,7 +18,7 @@ func FetchUser(ctx *EventContext, u *discord.User, createDMChannel bool) (user *
 
 	user, err = ctx.Sandwich.GRPCInterface.FetchUserByID(ctx, u.ID, createDMChannel)
 	if err != nil {
-		return u, xerrors.Errorf("Failed to fetch user: %v", err)
+		return u, errors.Errorf("Failed to fetch user: %v", err)
 	}
 
 	if user == nil {

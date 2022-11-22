@@ -2,10 +2,11 @@ package mqclients
 
 import (
 	"context"
-	redis "github.com/go-redis/redis/v8"
-	gotils_strconv "github.com/savsgio/gotils/strconv"
-	"golang.org/x/xerrors"
 	"strconv"
+
+	redis "github.com/go-redis/redis/v8"
+	"github.com/pkg/errors"
+	gotils_strconv "github.com/savsgio/gotils/strconv"
 )
 
 func init() {
@@ -49,13 +50,13 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 	var address string
 
 	if address, ok = GetEntry(args, "Address").(string); !ok {
-		return xerrors.New("redisMQ connect: string type assertion failed for Address")
+		return errors.New("redisMQ connect: string type assertion failed for Address")
 	}
 
 	var password string
 
 	if password, ok = GetEntry(args, "Password").(string); !ok {
-		return xerrors.New("redisMQ connect: string type assertion failed for Password")
+		return errors.New("redisMQ connect: string type assertion failed for Password")
 	}
 
 	var db int
@@ -63,7 +64,7 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 	if dbStr, ok := GetEntry(args, "DB").(string); !ok {
 		db, err = strconv.Atoi(dbStr)
 		if err != nil {
-			return xerrors.Errorf("redisMQ connect db atoi: %w", err)
+			return errors.Errorf("redisMQ connect db atoi: %w", err)
 		}
 	}
 
@@ -75,7 +76,7 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 
 	err = redisMQ.redisClient.Ping(ctx).Err()
 	if err != nil {
-		return xerrors.Errorf("redisMQ connect ping: %w", err)
+		return errors.Errorf("redisMQ connect ping: %w", err)
 	}
 
 	return nil
