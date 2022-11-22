@@ -279,7 +279,7 @@ func (ic *InteractionCommandable) IsGroup() bool {
 }
 
 // Invoke handles the execution of a command or a group.
-func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (resp *InteractionResponse, err error) {
+func (ic *InteractionCommandable) Invoke(ctx *InteractionContext) (resp *discord.InteractionResponse, err error) {
 	if len(ctx.CommandTree) > 0 {
 		if ic.IsGroup() {
 			branch := ctx.commandBranch[0]
@@ -387,7 +387,7 @@ func (ic *InteractionCommandable) transform(ctx *InteractionContext, argumentPar
 		return nil, ErrConverterNotFound
 	}
 
-	rawOption, ok := ctx.rawOptions[argumentParameter.Name]
+	rawOption, ok := ctx.RawOptions[argumentParameter.Name]
 	if !ok || rawOption == nil {
 		if argumentParameter.Required {
 			return nil, ErrMissingRequiredArgument
@@ -412,7 +412,7 @@ type InteractionContext struct {
 
 	currentParameter *ArgumentParameter
 
-	rawOptions map[string]*discord.InteractionDataOption
+	RawOptions map[string]*discord.InteractionDataOption
 
 	Arguments map[string]*Argument
 }
@@ -427,7 +427,7 @@ func NewInteractionContext(eventContext *EventContext, bot *Bot, interaction *di
 
 		InteractionCommand: nil,
 
-		rawOptions: extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)),
+		RawOptions: extractOptions(interaction.Data.Options, make(map[string]*discord.InteractionDataOption)),
 
 		Arguments: make(map[string]*Argument),
 	}
@@ -445,12 +445,7 @@ func extractOptions(options []*discord.InteractionDataOption, optionsMap map[str
 	return optionsMap
 }
 
-type InteractionHandler func(ctx *InteractionContext) (resp *InteractionResponse, err error)
-
-type InteractionResponse struct {
-	Type discord.InteractionCallbackType
-	Data discord.InteractionCallbackData
-}
+type InteractionHandler func(ctx *InteractionContext) (resp *discord.InteractionResponse, err error)
 
 // MustGetArgument returns an argument based on its name. Panics on error.
 func (ctx *InteractionContext) MustGetArgument(name string) (a *Argument) {
