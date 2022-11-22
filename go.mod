@@ -3,7 +3,7 @@ module github.com/WelcomerTeam/Sandwich
 go 1.18
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02
+	github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/json-iterator/go v1.1.12
@@ -41,6 +41,6 @@ require (
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.2.0 // indirect
-	google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a // indirect
+	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )

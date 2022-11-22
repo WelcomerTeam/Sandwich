@@ -1,6 +1,6 @@
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02 h1:z9revI2ZVYJlwMoWZyA0k4zsJKPi44smYS+iDXvOIqE=
-github.com/WelcomerTeam/Discord v0.0.0-20221122123646-78f6f0473d02/go.mod h1:xx2AEDJzKQSegernYkY2wWFPa1FgND52NxxPtqjx1s8=
+github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe h1:p5eqJ2jc1AwYf8/9qKP2GjVRnS3NGCB4oRkOlIfOmcA=
+github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe/go.mod h1:ysN7+TdHdLMW8tfXUocG5UB0KgWCbdowa0AwkeY8vFs=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1 h1:V7sCcIPxIuTIle3NrBUgYzXaHFI8sbvmyN9/nsIZiQY=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1/go.mod h1:2sWYSq+XdLGTli1YoNZS4x4B+RJqc4ECKxOzaiW7aAY=
 github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878/go.mod h1:3AMJUQhVx52RsWOnlkpikZr01T/yAVN2gn0861vByNg=
@@ -183,8 +183,8 @@ golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 h1:go1bK/D/BFZV2I8cIQd1NKEZ+0owSTG1fDTci4IqFcE=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
-google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a h1:GH6UPn3ixhWcKDhpnEC55S75cerLPdpp3hrhfKYjZgw=
-google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a/go.mod h1:1vXfmgAz9N9Jx0QA82PqRVauvCz1SGSz739p0f183jM=
+google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 h1:a2S6M0+660BgMNl++4JPlcAO/CjkqYItDEZwkoDQK7c=
+google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6/go.mod h1:rZS5c/ZVYMaOGBfO68GWtjOw/eLaZM1X6iVtgjZ+EWg=
 google.golang.org/grpc v1.51.0 h1:E1eGv1FTqoLIdnBCZufiSHgKjlqG6fKFf6pPWtMTh8U=
 google.golang.org/grpc v1.51.0/go.mod h1:wgNDFcnuBGmxLKI/qn4T+m5BtEBYXJPvibbUPsAIPww=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
