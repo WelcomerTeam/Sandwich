@@ -231,7 +231,7 @@ func (bot *Bot) Invoke(ctx *CommandContext) (err error) {
 
 // Invoke invokes the command given under the context and handles any extra internal
 // dispatch mechanisms.
-func (bot *Bot) InvokeInteraction(ctx *InteractionContext) (resp *InteractionResponse, err error) {
+func (bot *Bot) InvokeInteraction(ctx *InteractionContext) (resp *discord.InteractionResponse, err error) {
 	return ctx.InteractionCommand.Invoke(ctx)
 }
 
@@ -255,7 +255,7 @@ func (bot *Bot) ProcessCommands(eventCtx *EventContext, message discord.Message)
 }
 
 // ProcessInteraction processes the interaction that has been registered to the bot.
-func (bot *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Interaction) (resp *InteractionResponse, err error) {
+func (bot *Bot) ProcessInteraction(eventCtx *EventContext, interaction discord.Interaction) (resp *discord.InteractionResponse, err error) {
 	interactionCtx, err := bot.GetInteractionContext(eventCtx, interaction)
 	if err != nil {
 		return nil, err
