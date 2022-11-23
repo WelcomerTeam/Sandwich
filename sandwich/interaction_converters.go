@@ -155,7 +155,7 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 	var result *discord.Guild
 
 	if match == "" {
-		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext, argument)
+		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext.ToGRPCContext(), argument)
 		if err != nil {
 			return nil, errors.Errorf("Failed to fetch guild: %v", err)
 		}
@@ -277,7 +277,7 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 	if result == nil {
 		if match == "" {
 			if ctx.GuildID != nil {
-				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
+				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext.ToGRPCContext(), *ctx.GuildID, argument)
 				if err != nil {
 					return nil, errors.Errorf("Failed to fetch emoji: %v", err)
 				}

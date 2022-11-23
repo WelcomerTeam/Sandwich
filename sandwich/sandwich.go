@@ -144,11 +144,11 @@ func (s *Sandwich) FetchIdentifier(context context.Context, applicationName stri
 	s.lastIdentifierRequestMu.RUnlock()
 
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
-		identifiers, err := s.GRPCInterface.FetchConsumerConfiguration(&EventContext{
+		identifiers, err := s.GRPCInterface.FetchConsumerConfiguration((&EventContext{
 			Sandwich: s,
 			Session:  discord.NewSession(context, "", s.RESTInterface, s.Logger),
 			Context:  context,
-		}, "")
+		}).ToGRPCContext(), "")
 		if err != nil {
 			return nil, false, errors.Errorf("Failed to fetch consumer configuration: %v", err)
 		}
@@ -193,6 +193,15 @@ type EventContext struct {
 	Guild *discord.Guild
 
 	payload *sandwich_structs.SandwichPayload
+}
+
+func (eventCtx *EventContext) ToGRPCContext() *GRPCContext {
+	return &GRPCContext{
+		Context:        eventCtx.Context,
+		Logger:         eventCtx.Logger,
+		SandwichClient: eventCtx.Sandwich.SandwichClient,
+		GRPCInterface:  eventCtx.Sandwich.GRPCInterface,
+	}
 }
 
 func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {

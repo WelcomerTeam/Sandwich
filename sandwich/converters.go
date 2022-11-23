@@ -128,7 +128,7 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 
 	if match == "" {
 		if ctx.GuildID != nil {
-			members, err := ctx.EventContext.Sandwich.GRPCInterface.FetchMembersByName(ctx.EventContext, *ctx.GuildID, argument)
+			members, err := ctx.EventContext.Sandwich.GRPCInterface.FetchMembersByName(ctx.EventContext.ToGRPCContext(), *ctx.GuildID, argument)
 			if err != nil {
 				return nil, errors.Errorf("Failed to fetch member: %v", err)
 			}
@@ -200,7 +200,7 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 		}
 
 		if len(arg) > 5 && arg[len(arg)-5] == '#' {
-			users, err := ctx.EventContext.Sandwich.GRPCInterface.FetchUserByName(ctx.EventContext, arg, false)
+			users, err := ctx.EventContext.Sandwich.GRPCInterface.FetchUserByName(ctx.EventContext.ToGRPCContext(), ctx.EventContext.Identifier.Token, arg, false)
 			if err != nil {
 				return nil, errors.Errorf("Failed to fetch user: %v", err)
 			}
@@ -243,7 +243,7 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 	var result *discord.Guild
 
 	if match == "" {
-		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext, argument)
+		guilds, err := ctx.EventContext.Sandwich.GRPCInterface.FetchGuildsByName(ctx.EventContext.ToGRPCContext(), argument)
 		if err != nil {
 			return nil, errors.Errorf("Failed to fetch guild: %v", err)
 		}
@@ -285,7 +285,7 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 
 	if match == "" {
 		if ctx.GuildID != nil {
-			roles, err := ctx.EventContext.Sandwich.GRPCInterface.FetchRolesByName(ctx.EventContext, *ctx.GuildID, argument)
+			roles, err := ctx.EventContext.Sandwich.GRPCInterface.FetchRolesByName(ctx.EventContext.ToGRPCContext(), *ctx.GuildID, argument)
 			if err != nil {
 				return nil, errors.Errorf("Failed to fetch role: %v", err)
 			}
@@ -404,7 +404,7 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 	if result == nil {
 		if match == "" {
 			if ctx.GuildID != nil {
-				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext, *ctx.GuildID, argument)
+				emojis, err := ctx.EventContext.Sandwich.GRPCInterface.FetchEmojisByName(ctx.EventContext.ToGRPCContext(), *ctx.GuildID, argument)
 				if err != nil {
 					return nil, errors.Errorf("Failed to fetch emoji: %v", err)
 				}

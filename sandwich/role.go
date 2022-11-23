@@ -21,7 +21,7 @@ func FetchRole(ctx *EventContext, r *discord.Role) (role *discord.Role, err erro
 		return r, ErrFetchMissingGuild
 	}
 
-	role, err = ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx, *r.GuildID, r.ID)
+	role, err = ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx.ToGRPCContext(), *r.GuildID, r.ID)
 	if err != nil {
 		return r, errors.Errorf("Failed to fetch role: %v", err)
 	}

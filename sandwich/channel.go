@@ -21,7 +21,7 @@ func FetchChannel(ctx *EventContext, c *discord.Channel) (channel *discord.Chann
 		return nil, ErrFetchMissingGuild
 	}
 
-	channel, err = ctx.Sandwich.GRPCInterface.FetchChannelByID(ctx, *c.GuildID, c.ID)
+	channel, err = ctx.Sandwich.GRPCInterface.FetchChannelByID(ctx.ToGRPCContext(), *c.GuildID, c.ID)
 	if err != nil {
 		return nil, errors.Errorf("Failed to fetch channel: %v", err)
 	}

@@ -25,7 +25,8 @@ type InteractionCommandable struct {
 	Checks            []InteractionCheckFuncType
 	ArgumentParameter []ArgumentParameter
 
-	Handler InteractionHandler
+	Handler      InteractionHandler
+	ErrorHandler InteractionHandler
 
 	commands map[string]*InteractionCommandable
 	parent   *InteractionCommandable

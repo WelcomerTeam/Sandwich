@@ -16,7 +16,7 @@ func FetchUser(ctx *EventContext, u *discord.User, createDMChannel bool) (user *
 		return u, nil
 	}
 
-	user, err = ctx.Sandwich.GRPCInterface.FetchUserByID(ctx, u.ID, createDMChannel)
+	user, err = ctx.Sandwich.GRPCInterface.FetchUserByID(ctx.ToGRPCContext(), ctx.Identifier.Token, u.ID, createDMChannel)
 	if err != nil {
 		return u, errors.Errorf("Failed to fetch user: %v", err)
 	}

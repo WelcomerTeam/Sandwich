@@ -97,7 +97,7 @@ func NewSandwichHandlers() (h *Handlers) {
 
 	// Register events that are handled by default.
 	h.RegisterOnSandwichConfigurationReload(func(eventCtx *EventContext) (err error) {
-		identifiers, err := eventCtx.Sandwich.GRPCInterface.FetchConsumerConfiguration(eventCtx, "")
+		identifiers, err := eventCtx.Sandwich.GRPCInterface.FetchConsumerConfiguration(eventCtx.ToGRPCContext(), "")
 		if err != nil {
 			return errors.Errorf("Failed to fetch consumer configuration: %v", err)
 		}
