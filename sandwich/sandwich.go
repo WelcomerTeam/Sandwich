@@ -67,16 +67,6 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 }
 
 func (s *Sandwich) Close() (err error) {
-	wg := &sync.WaitGroup{}
-
-	s.botsMu.RLock()
-	for _, bot := range s.Bots {
-		wg.Add(1)
-
-		bot.Close(wg)
-	}
-	s.botsMu.RUnlock()
-
 	return
 }
 
