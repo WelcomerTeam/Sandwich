@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
 	"github.com/pkg/errors"
@@ -17,38 +16,38 @@ type GRPCContext struct {
 
 	Logger zerolog.Logger
 
-	SandwichClient protobuf.SandwichClient
+	SandwichClient sandwich_protobuf.SandwichClient
 	GRPCInterface  GRPC
 }
 
 type GRPC interface {
-	Listen(eventCtx *GRPCContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error)
-	PostAnalytics(eventCtx *GRPCContext, identifier string, data []byte) (err error)
+	Listen(grpcContext *GRPCContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error)
+	PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) (err error)
 
-	FetchGuildByID(eventCtx *GRPCContext, guildID discord.Snowflake) (guild *discord.Guild, err error)
-	FetchGuildsByName(eventCtx *GRPCContext, query string) (guilds []*discord.Guild, err error)
+	FetchGuildByID(grpcContext *GRPCContext, guildID discord.Snowflake) (guild *discord.Guild, err error)
+	FetchGuildsByName(grpcContext *GRPCContext, query string) (guilds []*discord.Guild, err error)
 
-	FetchChannelByID(eventCtx *GRPCContext, guildID discord.Snowflake, channelID discord.Snowflake) (channel *discord.Channel, err error)
-	FetchChannelsByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (channels []*discord.Channel, err error)
+	FetchChannelByID(grpcContext *GRPCContext, guildID discord.Snowflake, channelID discord.Snowflake) (channel *discord.Channel, err error)
+	FetchChannelsByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (channels []*discord.Channel, err error)
 
-	FetchRoleByID(eventCtx *GRPCContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *discord.Role, err error)
-	FetchRolesByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (roles []*discord.Role, err error)
+	FetchRoleByID(grpcContext *GRPCContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *discord.Role, err error)
+	FetchRolesByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (roles []*discord.Role, err error)
 
-	FetchEmojiByID(eventCtx *GRPCContext, guildID discord.Snowflake, emojiID discord.Snowflake) (emoji *discord.Emoji, err error)
-	FetchEmojisByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error)
+	FetchEmojiByID(grpcContext *GRPCContext, guildID discord.Snowflake, emojiID discord.Snowflake) (emoji *discord.Emoji, err error)
+	FetchEmojisByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error)
 
-	FetchMemberByID(eventCtx *GRPCContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error)
-	FetchMembersByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error)
+	FetchMemberByID(grpcContext *GRPCContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error)
+	FetchMembersByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error)
 
-	FetchUserByID(eventCtx *GRPCContext, token string, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error)
-	FetchUserByName(eventCtx *GRPCContext, token string, query string, createDMChannel bool) (users []*discord.User, err error)
+	FetchUserByID(grpcContext *GRPCContext, token string, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error)
+	FetchUserByName(grpcContext *GRPCContext, token string, query string, createDMChannel bool) (users []*discord.User, err error)
 
-	FetchConsumerConfiguration(eventCtx *GRPCContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error)
-	FetchMutualGuilds(eventCtx *GRPCContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error)
+	FetchConsumerConfiguration(grpcContext *GRPCContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error)
+	FetchMutualGuilds(grpcContext *GRPCContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error)
 
-	RequestGuildChunk(eventCtx *GRPCContext, guildID discord.Snowflake) (err error)
-	SendWebsocketMessage(eventCtx *GRPCContext, location Location, op int32, data []byte) (err error)
-	WhereIsGuild(eventCtx *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error)
+	RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) (err error)
+	SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) (err error)
+	WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error)
 }
 
 // Helper structure for SendWebsocketMessage and WhereIsGuild functions.
@@ -66,8 +65,8 @@ func NewDefaultGRPCClient() (grpcClient GRPC) {
 	return
 }
 
-func (grpcClient *DefaultGRPCClient) Listen(eventCtx *GRPCContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error) {
-	client, err = eventCtx.SandwichClient.Listen(eventCtx.Context, &sandwich_protobuf.ListenRequest{
+func (grpcClient *DefaultGRPCClient) Listen(grpcContext *GRPCContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error) {
+	client, err = grpcContext.SandwichClient.Listen(grpcContext.Context, &sandwich_protobuf.ListenRequest{
 		Identifier: identifier,
 	})
 	if err != nil {
@@ -77,8 +76,8 @@ func (grpcClient *DefaultGRPCClient) Listen(eventCtx *GRPCContext, identifier st
 	return
 }
 
-func (grpcClient *DefaultGRPCClient) PostAnalytics(eventCtx *GRPCContext, identifier string, data []byte) (err error) {
-	base, err := eventCtx.SandwichClient.PostAnalytics(eventCtx.Context, &sandwich_protobuf.PostAnalyticsRequest{
+func (grpcClient *DefaultGRPCClient) PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) (err error) {
+	base, err := grpcContext.SandwichClient.PostAnalytics(grpcContext.Context, &sandwich_protobuf.PostAnalyticsRequest{
 		Identifier: identifier,
 		Data:       data,
 	})
@@ -93,8 +92,8 @@ func (grpcClient *DefaultGRPCClient) PostAnalytics(eventCtx *GRPCContext, identi
 	return nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchGuildByID(eventCtx *GRPCContext, guildID discord.Snowflake) (guild *discord.Guild, err error) {
-	guildsResponse, err := eventCtx.SandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
+func (grpcClient *DefaultGRPCClient) FetchGuildByID(grpcContext *GRPCContext, guildID discord.Snowflake) (guild *discord.Guild, err error) {
+	guildsResponse, err := grpcContext.SandwichClient.FetchGuild(grpcContext.Context, &sandwich_protobuf.FetchGuildRequest{
 		GuildIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
@@ -105,15 +104,15 @@ func (grpcClient *DefaultGRPCClient) FetchGuildByID(eventCtx *GRPCContext, guild
 	if grpcGuild != nil {
 		guild, err = sandwich_protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Guild to Guild: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.Guild to Guild: %v", err)
 		}
 	}
 
 	return guild, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *GRPCContext, query string) (guilds []*discord.Guild, err error) {
-	guildsResponse, err := eventCtx.SandwichClient.FetchGuild(eventCtx.Context, &sandwich_protobuf.FetchGuildRequest{
+func (grpcClient *DefaultGRPCClient) FetchGuildsByName(grpcContext *GRPCContext, query string) (guilds []*discord.Guild, err error) {
+	guildsResponse, err := grpcContext.SandwichClient.FetchGuild(grpcContext.Context, &sandwich_protobuf.FetchGuildRequest{
 		Query: query,
 	})
 	if err != nil {
@@ -125,7 +124,7 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *GRPCContext, qu
 	for _, grpcGuild := range guildsResponse.Guilds {
 		guild, err := sandwich_protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
 
 			continue
 		}
@@ -136,8 +135,8 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(eventCtx *GRPCContext, qu
 	return sortGuilds(guilds, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchChannelByID(eventCtx *GRPCContext, guildID discord.Snowflake, channelID discord.Snowflake) (channel *discord.Channel, err error) {
-	channelsResponse, err := eventCtx.SandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
+func (grpcClient *DefaultGRPCClient) FetchChannelByID(grpcContext *GRPCContext, guildID discord.Snowflake, channelID discord.Snowflake) (channel *discord.Channel, err error) {
+	channelsResponse, err := grpcContext.SandwichClient.FetchGuildChannels(grpcContext.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
 		GuildID:    int64(guildID),
 		ChannelIDs: []int64{int64(channelID)},
 	})
@@ -149,15 +148,15 @@ func (grpcClient *DefaultGRPCClient) FetchChannelByID(eventCtx *GRPCContext, gui
 	if grpcChannel != nil {
 		channel, err = sandwich_protobuf.GRPCToChannel(grpcChannel)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Channel to Channel: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.Channel to Channel: %v", err)
 		}
 	}
 
 	return channel, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (channels []*discord.Channel, err error) {
-	channelsResponse, err := eventCtx.SandwichClient.FetchGuildChannels(eventCtx.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
+func (grpcClient *DefaultGRPCClient) FetchChannelsByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (channels []*discord.Channel, err error) {
+	channelsResponse, err := grpcContext.SandwichClient.FetchGuildChannels(grpcContext.Context, &sandwich_protobuf.FetchGuildChannelsRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -170,7 +169,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *GRPCContext, 
 	for _, grpcChannel := range channelsResponse.GuildChannels {
 		channel, err := sandwich_protobuf.GRPCToChannel(grpcChannel)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Channel to Channel")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.Channel to Channel")
 
 			continue
 		}
@@ -181,8 +180,8 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(eventCtx *GRPCContext, 
 	return sortChannels(channels, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *GRPCContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *discord.Role, err error) {
-	rolesResponse, err := eventCtx.SandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
+func (grpcClient *DefaultGRPCClient) FetchRoleByID(grpcContext *GRPCContext, guildID discord.Snowflake, roleID discord.Snowflake) (role *discord.Role, err error) {
+	rolesResponse, err := grpcContext.SandwichClient.FetchGuildRoles(grpcContext.Context, &sandwich_protobuf.FetchGuildRolesRequest{
 		GuildID: int64(guildID),
 		RoleIDs: []int64{int64(guildID)},
 	})
@@ -194,15 +193,15 @@ func (grpcClient *DefaultGRPCClient) FetchRoleByID(eventCtx *GRPCContext, guildI
 	if grpcRole != nil {
 		role, err = sandwich_protobuf.GRPCToRole(grpcRole)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Role to Role: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.Role to Role: %v", err)
 		}
 	}
 
 	return role, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (roles []*discord.Role, err error) {
-	rolesResponse, err := eventCtx.SandwichClient.FetchGuildRoles(eventCtx.Context, &sandwich_protobuf.FetchGuildRolesRequest{
+func (grpcClient *DefaultGRPCClient) FetchRolesByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (roles []*discord.Role, err error) {
+	rolesResponse, err := grpcContext.SandwichClient.FetchGuildRoles(grpcContext.Context, &sandwich_protobuf.FetchGuildRolesRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -215,7 +214,7 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *GRPCContext, gui
 	for _, grpcRole := range rolesResponse.GuildRoles {
 		role, err := sandwich_protobuf.GRPCToRole(grpcRole)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Role to Role")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.Role to Role")
 
 			continue
 		}
@@ -226,8 +225,8 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(eventCtx *GRPCContext, gui
 	return sortRoles(roles, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchEmojiByID(eventCtx *GRPCContext, guildID discord.Snowflake, emojiID discord.Snowflake) (emoji *discord.Emoji, err error) {
-	emojisResponse, err := eventCtx.SandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
+func (grpcClient *DefaultGRPCClient) FetchEmojiByID(grpcContext *GRPCContext, guildID discord.Snowflake, emojiID discord.Snowflake) (emoji *discord.Emoji, err error) {
+	emojisResponse, err := grpcContext.SandwichClient.FetchGuildEmojis(grpcContext.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
 		GuildID:  int64(guildID),
 		EmojiIDs: []int64{int64(guildID)},
 	})
@@ -239,15 +238,15 @@ func (grpcClient *DefaultGRPCClient) FetchEmojiByID(eventCtx *GRPCContext, guild
 	if grpcEmoji != nil {
 		emoji, err = sandwich_protobuf.GRPCToEmoji(grpcEmoji)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.Emoji to Emoji: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.Emoji to Emoji: %v", err)
 		}
 	}
 
 	return emoji, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error) {
-	emojisResponse, err := eventCtx.SandwichClient.FetchGuildEmojis(eventCtx.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
+func (grpcClient *DefaultGRPCClient) FetchEmojisByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error) {
+	emojisResponse, err := grpcContext.SandwichClient.FetchGuildEmojis(grpcContext.Context, &sandwich_protobuf.FetchGuildEmojisRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -260,7 +259,7 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *GRPCContext, gu
 	for _, grpcEmoji := range emojisResponse.GuildEmojis {
 		emoji, err := sandwich_protobuf.GRPCToEmoji(grpcEmoji)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Emoji to Emoji")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.Emoji to Emoji")
 
 			continue
 		}
@@ -271,8 +270,8 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(eventCtx *GRPCContext, gu
 	return sortEmojis(emojis, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchMemberByID(eventCtx *GRPCContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error) {
-	membersResponse, err := eventCtx.SandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
+func (grpcClient *DefaultGRPCClient) FetchMemberByID(grpcContext *GRPCContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error) {
+	membersResponse, err := grpcContext.SandwichClient.FetchGuildMembers(grpcContext.Context, &sandwich_protobuf.FetchGuildMembersRequest{
 		GuildID: int64(guildID),
 		UserIDs: []int64{int64(memberID)},
 	})
@@ -284,15 +283,15 @@ func (grpcClient *DefaultGRPCClient) FetchMemberByID(eventCtx *GRPCContext, guil
 	if grpcMember != nil {
 		member, err = sandwich_protobuf.GRPCToGuildMember(grpcMember)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.GuildMember to GuildMember: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.GuildMember to GuildMember: %v", err)
 		}
 	}
 
 	return member, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error) {
-	membersResponse, err := eventCtx.SandwichClient.FetchGuildMembers(eventCtx.Context, &sandwich_protobuf.FetchGuildMembersRequest{
+func (grpcClient *DefaultGRPCClient) FetchMembersByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error) {
+	membersResponse, err := grpcContext.SandwichClient.FetchGuildMembers(grpcContext.Context, &sandwich_protobuf.FetchGuildMembersRequest{
 		GuildID: int64(guildID),
 		Query:   query,
 	})
@@ -305,7 +304,7 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *GRPCContext, g
 	for _, grpcMember := range membersResponse.GuildMembers {
 		member, err := sandwich_protobuf.GRPCToGuildMember(grpcMember)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.GuildMember to GuildMember")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.GuildMember to GuildMember")
 
 			continue
 		}
@@ -316,8 +315,8 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(eventCtx *GRPCContext, g
 	return sortMembers(members, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchUserByID(eventCtx *GRPCContext, token string, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error) {
-	usersResponse, err := eventCtx.SandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
+func (grpcClient *DefaultGRPCClient) FetchUserByID(grpcContext *GRPCContext, token string, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error) {
+	usersResponse, err := grpcContext.SandwichClient.FetchUsers(grpcContext.Context, &sandwich_protobuf.FetchUsersRequest{
 		UserIDs:         []int64{int64(userID)},
 		CreateDMChannel: createDMChannel,
 		Token:           token,
@@ -330,15 +329,15 @@ func (grpcClient *DefaultGRPCClient) FetchUserByID(eventCtx *GRPCContext, token 
 	if grpcUser != nil {
 		user, err = sandwich_protobuf.GRPCToUser(grpcUser)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert sandwich_protobuf.User to User: %v", err)
+			return nil, errors.Errorf("Failed to convert protobuf.User to User: %v", err)
 		}
 	}
 
 	return user, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *GRPCContext, token string, query string, createDMChannel bool) (users []*discord.User, err error) {
-	usersResponse, err := eventCtx.SandwichClient.FetchUsers(eventCtx.Context, &sandwich_protobuf.FetchUsersRequest{
+func (grpcClient *DefaultGRPCClient) FetchUserByName(grpcContext *GRPCContext, token string, query string, createDMChannel bool) (users []*discord.User, err error) {
+	usersResponse, err := grpcContext.SandwichClient.FetchUsers(grpcContext.Context, &sandwich_protobuf.FetchUsersRequest{
 		Query:           query,
 		CreateDMChannel: createDMChannel,
 		Token:           token,
@@ -352,7 +351,7 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *GRPCContext, toke
 	for _, grpcUser := range usersResponse.Users {
 		user, err := sandwich_protobuf.GRPCToUser(grpcUser)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.User to User")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.User to User")
 
 			continue
 		}
@@ -363,8 +362,8 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(eventCtx *GRPCContext, toke
 	return sortUsers(users, query), nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(eventCtx *GRPCContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error) {
-	consumerConfiguration, err := eventCtx.SandwichClient.FetchConsumerConfiguration(eventCtx.Context, &sandwich_protobuf.FetchConsumerConfigurationRequest{
+func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(grpcContext *GRPCContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error) {
+	consumerConfiguration, err := grpcContext.SandwichClient.FetchConsumerConfiguration(grpcContext.Context, &sandwich_protobuf.FetchConsumerConfigurationRequest{
 		Identifier: identifier,
 	})
 	if err != nil {
@@ -381,8 +380,8 @@ func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(eventCtx *GRPCCo
 	return identifiers, nil
 }
 
-func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *GRPCContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error) {
-	mutualGuilds, err := eventCtx.SandwichClient.FetchMutualGuilds(eventCtx.Context, &sandwich_protobuf.FetchMutualGuildsRequest{
+func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(grpcContext *GRPCContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error) {
+	mutualGuilds, err := grpcContext.SandwichClient.FetchMutualGuilds(grpcContext.Context, &sandwich_protobuf.FetchMutualGuildsRequest{
 		UserID: int64(userID),
 		Expand: expand,
 	})
@@ -395,7 +394,7 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *GRPCContext, us
 	for _, grpcGuild := range mutualGuilds.Guilds {
 		guild, err := sandwich_protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
+			grpcContext.Logger.Warn().Err(err).Msg("Failed to convert pb.Guild to Guild")
 
 			continue
 		}
@@ -406,8 +405,8 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(eventCtx *GRPCContext, us
 	return guilds, nil
 }
 
-func (grpcClient *DefaultGRPCClient) RequestGuildChunk(eventCtx *GRPCContext, guildID discord.Snowflake) (err error) {
-	baseResponse, err := eventCtx.SandwichClient.RequestGuildChunk(eventCtx.Context, &sandwich_protobuf.RequestGuildChunkRequest{
+func (grpcClient *DefaultGRPCClient) RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) (err error) {
+	baseResponse, err := grpcContext.SandwichClient.RequestGuildChunk(grpcContext.Context, &sandwich_protobuf.RequestGuildChunkRequest{
 		GuildId: int64(guildID),
 	})
 	if err != nil {
@@ -425,8 +424,8 @@ func (grpcClient *DefaultGRPCClient) RequestGuildChunk(eventCtx *GRPCContext, gu
 	return nil
 }
 
-func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(eventCtx *GRPCContext, location Location, op int32, data []byte) (err error) {
-	baseResponse, err := eventCtx.SandwichClient.SendWebsocketMessage(eventCtx.Context, &sandwich_protobuf.SendWebsocketMessageRequest{
+func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) (err error) {
+	baseResponse, err := grpcContext.SandwichClient.SendWebsocketMessage(grpcContext.Context, &sandwich_protobuf.SendWebsocketMessageRequest{
 		Manager:       location.Manager,
 		ShardGroup:    location.ShardGroup,
 		Shard:         location.ShardID,
@@ -448,8 +447,8 @@ func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(eventCtx *GRPCContext,
 	return nil
 }
 
-func (grpcClient *DefaultGRPCClient) WhereIsGuild(eventCtx *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error) {
-	locationResponse, err := eventCtx.SandwichClient.WhereIsGuild(eventCtx.Context, &sandwich_protobuf.WhereIsGuildRequest{
+func (grpcClient *DefaultGRPCClient) WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error) {
+	locationResponse, err := grpcContext.SandwichClient.WhereIsGuild(grpcContext.Context, &sandwich_protobuf.WhereIsGuildRequest{
 		GuildID: int64(guildID),
 	})
 	if err != nil {
