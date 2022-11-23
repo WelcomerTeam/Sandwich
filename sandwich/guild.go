@@ -12,21 +12,21 @@ func NewGuild(ctx *EventContext, guildID discord.Snowflake) *discord.Guild {
 	}
 }
 
-func FetchGuild(ctx *EventContext, g *discord.Guild) (guild *discord.Guild, err error) {
-	if g.Name != "" {
-		return g, nil
+func FetchGuild(ctx *EventContext, guild *discord.Guild) (*discord.Guild, error) {
+	if guild.Name != "" {
+		return guild, nil
 	}
 
-	guild, err = ctx.Sandwich.GRPCInterface.FetchGuildByID(ctx.ToGRPCContext(), g.ID)
+	guild, err := ctx.Sandwich.GRPCInterface.FetchGuildByID(ctx.ToGRPCContext(), guild.ID)
 	if err != nil {
-		return g, errors.Errorf("Failed to fetch guild: %v", err)
+		return guild, errors.Errorf("Failed to fetch guild: %v", err)
 	}
 
 	if guild == nil {
-		return g, ErrGuildNotFound
+		return guild, ErrGuildNotFound
 	}
 
-	return
+	return guild, nil
 }
 
 // NewGuildMember creates a new partial guild member. Use Fetch() to populate the member.
@@ -39,23 +39,23 @@ func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discor
 	}
 }
 
-func FetchGuildMember(ctx *EventContext, gm *discord.GuildMember) (guildMember *discord.GuildMember, err error) {
-	if gm.User.Username != "" {
-		return gm, nil
+func FetchGuildMember(ctx *EventContext, guildMember *discord.GuildMember) (*discord.GuildMember, error) {
+	if guildMember.User.Username != "" {
+		return guildMember, nil
 	}
 
-	if gm.GuildID == nil {
-		return gm, ErrFetchMissingGuild
+	if guildMember.GuildID == nil {
+		return guildMember, ErrFetchMissingGuild
 	}
 
-	guildMember, err = ctx.Sandwich.GRPCInterface.FetchMemberByID(ctx.ToGRPCContext(), *gm.GuildID, gm.User.ID)
+	guildMember, err := ctx.Sandwich.GRPCInterface.FetchMemberByID(ctx.ToGRPCContext(), *guildMember.GuildID, guildMember.User.ID)
 	if err != nil {
-		return gm, errors.Errorf("Failed to fetch member: %v", err)
+		return guildMember, errors.Errorf("Failed to fetch member: %v", err)
 	}
 
 	if guildMember == nil {
-		return gm, ErrMemberNotFound
+		return guildMember, ErrMemberNotFound
 	}
 
-	return
+	return guildMember, nil
 }

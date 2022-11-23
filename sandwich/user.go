@@ -11,24 +11,24 @@ func NewUser(ctx *EventContext, userID discord.Snowflake) *discord.User {
 	}
 }
 
-func FetchUser(ctx *EventContext, u *discord.User, createDMChannel bool) (user *discord.User, err error) {
-	if u.Username != "" || (createDMChannel && u.DMChannelID != nil) {
-		return u, nil
+func FetchUser(ctx *EventContext, user *discord.User, createDMChannel bool) (*discord.User, error) {
+	if user.Username != "" || (createDMChannel && user.DMChannelID != nil) {
+		return user, nil
 	}
 
-	user, err = ctx.Sandwich.GRPCInterface.FetchUserByID(ctx.ToGRPCContext(), ctx.Identifier.Token, u.ID, createDMChannel)
+	user, err := ctx.Sandwich.GRPCInterface.FetchUserByID(ctx.ToGRPCContext(), ctx.Identifier.Token, user.ID, createDMChannel)
 	if err != nil {
-		return u, errors.Errorf("Failed to fetch user: %v", err)
+		return user, errors.Errorf("Failed to fetch user: %v", err)
 	}
 
 	if user == nil {
-		user, err = discord.GetUser(ctx.Session, u.ID)
+		user, err = discord.GetUser(ctx.Session, user.ID)
 		if err != nil {
-			return u, ErrUserNotFound
+			return user, ErrUserNotFound
 		}
 
 		return user, nil
 	}
 
-	return
+	return user, nil
 }

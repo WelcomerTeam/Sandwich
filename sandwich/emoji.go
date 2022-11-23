@@ -12,23 +12,23 @@ func NewEmoji(ctx *EventContext, guildID *discord.Snowflake, emojiID discord.Sno
 	}
 }
 
-func FetchEmoji(ctx *EventContext, e *discord.Emoji) (emoji *discord.Emoji, err error) {
-	if e.Name != "" {
-		return e, nil
+func FetchEmoji(ctx *EventContext, emoji *discord.Emoji) (*discord.Emoji, error) {
+	if emoji.Name != "" {
+		return emoji, nil
 	}
 
-	if e.GuildID == nil {
-		return e, ErrFetchMissingGuild
+	if emoji.GuildID == nil {
+		return emoji, ErrFetchMissingGuild
 	}
 
-	emoji, err = ctx.Sandwich.GRPCInterface.FetchEmojiByID(ctx.ToGRPCContext(), *e.GuildID, e.ID)
+	emoji, err := ctx.Sandwich.GRPCInterface.FetchEmojiByID(ctx.ToGRPCContext(), *emoji.GuildID, emoji.ID)
 	if err != nil {
-		return e, errors.Errorf("Failed to fetch emoji: %v", err)
+		return emoji, errors.Errorf("Failed to fetch emoji: %v", err)
 	}
 
 	if emoji == nil {
-		return e, ErrEmojiNotFound
+		return emoji, ErrEmojiNotFound
 	}
 
-	return
+	return emoji, nil
 }

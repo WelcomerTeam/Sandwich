@@ -12,16 +12,16 @@ func NewChannel(ctx *EventContext, guildID *discord.Snowflake, channelID discord
 	}
 }
 
-func FetchChannel(ctx *EventContext, c *discord.Channel) (channel *discord.Channel, err error) {
-	if c.Name != "" {
-		return
+func FetchChannel(ctx *EventContext, channel *discord.Channel) (*discord.Channel, error) {
+	if channel.Name != "" {
+		return channel, nil
 	}
 
-	if c.GuildID == nil {
-		return nil, ErrFetchMissingGuild
+	if channel.GuildID == nil {
+		return channel, ErrFetchMissingGuild
 	}
 
-	channel, err = ctx.Sandwich.GRPCInterface.FetchChannelByID(ctx.ToGRPCContext(), *c.GuildID, c.ID)
+	channel, err := ctx.Sandwich.GRPCInterface.FetchChannelByID(ctx.ToGRPCContext(), *channel.GuildID, channel.ID)
 	if err != nil {
 		return nil, errors.Errorf("Failed to fetch channel: %v", err)
 	}
@@ -30,5 +30,5 @@ func FetchChannel(ctx *EventContext, c *discord.Channel) (channel *discord.Chann
 		return nil, ErrChannelNotFound
 	}
 
-	return
+	return channel, nil
 }

@@ -12,23 +12,23 @@ func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowf
 	}
 }
 
-func FetchRole(ctx *EventContext, r *discord.Role) (role *discord.Role, err error) {
-	if r.Name != "" {
-		return
+func FetchRole(ctx *EventContext, role *discord.Role) (*discord.Role, error) {
+	if role.Name != "" {
+		return role, nil
 	}
 
-	if r.GuildID == nil {
-		return r, ErrFetchMissingGuild
+	if role.GuildID == nil {
+		return role, ErrFetchMissingGuild
 	}
 
-	role, err = ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx.ToGRPCContext(), *r.GuildID, r.ID)
+	role, err := ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx.ToGRPCContext(), *role.GuildID, role.ID)
 	if err != nil {
-		return r, errors.Errorf("Failed to fetch role: %v", err)
+		return role, errors.Errorf("Failed to fetch role: %v", err)
 	}
 
 	if role == nil {
-		return r, ErrRoleNotFound
+		return role, ErrRoleNotFound
 	}
 
-	return
+	return role, nil
 }
