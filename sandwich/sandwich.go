@@ -46,7 +46,8 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 	s = &Sandwich{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
-		Bots: make(map[string]*Bot),
+		botsMu: sync.RWMutex{},
+		Bots:   make(map[string]*Bot),
 
 		SandwichEvents: NewSandwichHandlers(),
 
@@ -94,7 +95,7 @@ func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload sandwich
 
 func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
 	s.botsMu.RLock()
-	b, ok := s.Bots[payload.Metadata.Identifier]
+	bot, ok := s.Bots[payload.Metadata.Identifier]
 	s.botsMu.RUnlock()
 
 	if !ok {
@@ -108,11 +109,11 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sand
 
 	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
-	return b.Dispatch(&EventContext{
+	return bot.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: s,
 		Session:  discord.NewSession(context, "", s.RESTInterface, logger),
-		Handlers: b.Handlers,
+		Handlers: bot.Handlers,
 		Context:  context,
 		payload:  &payload,
 	}, payload)
@@ -201,6 +202,8 @@ func (eventCtx *EventContext) ToGRPCContext() *GRPCContext {
 		Logger:         eventCtx.Logger,
 		SandwichClient: eventCtx.Sandwich.SandwichClient,
 		GRPCInterface:  eventCtx.Sandwich.GRPCInterface,
+		Session:        eventCtx.Session,
+		Identifier:     eventCtx.Identifier,
 	}
 }
 

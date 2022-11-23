@@ -349,7 +349,7 @@ func constructCommandTree(options []*discord.InteractionDataOption, tree []strin
 
 // CanRun checks all global bot checks and returns if the message passes them all.
 // If an error occurs, the message will be treated as not being able to run.
-func (bot *Bot) CanRun(ctx *CommandContext) (canRun bool, err error) {
+func (bot *Bot) CanRun(ctx *CommandContext) (bool, error) {
 	for _, check := range bot.Commands.Checks {
 		canRun, err := check(ctx)
 		if err != nil {

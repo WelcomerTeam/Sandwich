@@ -18,6 +18,9 @@ type GRPCContext struct {
 
 	SandwichClient sandwich_protobuf.SandwichClient
 	GRPCInterface  GRPC
+
+	Session    *discord.Session
+	Identifier *sandwich_structs.ManagerConsumerConfiguration
 }
 
 type GRPC interface {

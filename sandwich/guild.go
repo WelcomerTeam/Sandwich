@@ -6,18 +6,18 @@ import (
 )
 
 // NewGuild creates a new partial guild. Use Fetch() to populate the guild.
-func NewGuild(ctx *EventContext, guildID discord.Snowflake) *discord.Guild {
+func NewGuild(guildID discord.Snowflake) *discord.Guild {
 	return &discord.Guild{
 		ID: guildID,
 	}
 }
 
-func FetchGuild(ctx *EventContext, guild *discord.Guild) (*discord.Guild, error) {
+func FetchGuild(ctx *GRPCContext, guild *discord.Guild) (*discord.Guild, error) {
 	if guild.Name != "" {
 		return guild, nil
 	}
 
-	guild, err := ctx.Sandwich.GRPCInterface.FetchGuildByID(ctx.ToGRPCContext(), guild.ID)
+	guild, err := ctx.GRPCInterface.FetchGuildByID(ctx, guild.ID)
 	if err != nil {
 		return guild, errors.Errorf("Failed to fetch guild: %v", err)
 	}
@@ -30,7 +30,7 @@ func FetchGuild(ctx *EventContext, guild *discord.Guild) (*discord.Guild, error)
 }
 
 // NewGuildMember creates a new partial guild member. Use Fetch() to populate the member.
-func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discord.Snowflake) *discord.GuildMember {
+func NewGuildMember(guildID *discord.Snowflake, userID discord.Snowflake) *discord.GuildMember {
 	return &discord.GuildMember{
 		User: &discord.User{
 			ID: userID,
@@ -39,7 +39,7 @@ func NewGuildMember(ctx *EventContext, guildID *discord.Snowflake, userID discor
 	}
 }
 
-func FetchGuildMember(ctx *EventContext, guildMember *discord.GuildMember) (*discord.GuildMember, error) {
+func FetchGuildMember(ctx *GRPCContext, guildMember *discord.GuildMember) (*discord.GuildMember, error) {
 	if guildMember.User.Username != "" {
 		return guildMember, nil
 	}
@@ -48,7 +48,7 @@ func FetchGuildMember(ctx *EventContext, guildMember *discord.GuildMember) (*dis
 		return guildMember, ErrFetchMissingGuild
 	}
 
-	guildMember, err := ctx.Sandwich.GRPCInterface.FetchMemberByID(ctx.ToGRPCContext(), *guildMember.GuildID, guildMember.User.ID)
+	guildMember, err := ctx.GRPCInterface.FetchMemberByID(ctx, *guildMember.GuildID, guildMember.User.ID)
 	if err != nil {
 		return guildMember, errors.Errorf("Failed to fetch member: %v", err)
 	}

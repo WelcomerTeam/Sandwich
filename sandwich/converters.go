@@ -140,9 +140,9 @@ func HandleArgumentTypeMember(ctx *CommandContext, argument string) (out interfa
 	} else {
 		userID, _ := strconv.ParseInt(match, 10, 64)
 
-		result = NewGuildMember(ctx.EventContext, ctx.GuildID, discord.Snowflake(userID))
+		result = NewGuildMember(ctx.GuildID, discord.Snowflake(userID))
 
-		result, err = FetchGuildMember(ctx.EventContext, result)
+		result, err = FetchGuildMember(ctx.EventContext.ToGRPCContext(), result)
 		if err != nil && !errors.Is(err, ErrMemberNotFound) {
 			return nil, err
 		}
@@ -181,9 +181,9 @@ func HandleArgumentTypeUser(ctx *CommandContext, argument string) (out interface
 		}
 
 		if result == nil {
-			result = NewUser(ctx.EventContext, discord.Snowflake(userID))
+			result = NewUser(discord.Snowflake(userID))
 
-			result, err = FetchUser(ctx.EventContext, result, false)
+			result, err = FetchUser(ctx.EventContext.ToGRPCContext(), result, false)
 			if err != nil && !errors.Is(err, ErrUserNotFound) {
 				return nil, err
 			}
@@ -254,9 +254,9 @@ func HandleArgumentTypeGuild(ctx *CommandContext, argument string) (out interfac
 	} else {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
 
-		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
+		result = NewGuild(discord.Snowflake(guildID))
 
-		result, err = FetchGuild(ctx.EventContext, result)
+		result, err = FetchGuild(ctx.EventContext.ToGRPCContext(), result)
 		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
@@ -297,9 +297,9 @@ func HandleArgumentTypeRole(ctx *CommandContext, argument string) (out interface
 	} else {
 		roleID, _ := strconv.ParseInt(match, 10, 64)
 
-		result = NewRole(ctx.EventContext, ctx.GuildID, discord.Snowflake(roleID))
+		result = NewRole(ctx.GuildID, discord.Snowflake(roleID))
 
-		result, err = FetchRole(ctx.EventContext, result)
+		result, err = FetchRole(ctx.EventContext.ToGRPCContext(), result)
 		if err != nil && !errors.Is(err, ErrRoleNotFound) {
 			return nil, err
 		}
@@ -416,11 +416,11 @@ func HandleArgumentTypeEmoji(ctx *CommandContext, argument string) (out interfac
 		} else {
 			emojiID, _ := strconv.ParseInt(match, 10, 64)
 
-			result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
+			result = NewEmoji(ctx.GuildID, discord.Snowflake(emojiID))
 		}
 	}
 
-	result, err = FetchEmoji(ctx.EventContext, result)
+	result, err = FetchEmoji(ctx.EventContext.ToGRPCContext(), result)
 	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, err
 	}

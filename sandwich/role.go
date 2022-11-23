@@ -5,14 +5,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewRole(ctx *EventContext, guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
+func NewRole(guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
 	return &discord.Role{
 		ID:      roleID,
 		GuildID: guildID,
 	}
 }
 
-func FetchRole(ctx *EventContext, role *discord.Role) (*discord.Role, error) {
+func FetchRole(ctx *GRPCContext, role *discord.Role) (*discord.Role, error) {
 	if role.Name != "" {
 		return role, nil
 	}
@@ -21,7 +21,7 @@ func FetchRole(ctx *EventContext, role *discord.Role) (*discord.Role, error) {
 		return role, ErrFetchMissingGuild
 	}
 
-	role, err := ctx.Sandwich.GRPCInterface.FetchRoleByID(ctx.ToGRPCContext(), *role.GuildID, role.ID)
+	role, err := ctx.GRPCInterface.FetchRoleByID(ctx, *role.GuildID, role.ID)
 	if err != nil {
 		return role, errors.Errorf("Failed to fetch role: %v", err)
 	}

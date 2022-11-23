@@ -79,9 +79,9 @@ func findChannel(ctx *CommandContext, argument string, channelTypes ...discord.C
 	} else {
 		channelID, _ := strconv.ParseInt(match, 10, 64)
 
-		result := NewChannel(ctx.EventContext, ctx.GuildID, discord.Snowflake(channelID))
+		result := NewChannel(ctx.GuildID, discord.Snowflake(channelID))
 
-		result, err = FetchChannel(ctx.EventContext, result)
+		result, err = FetchChannel(ctx.EventContext.ToGRPCContext(), result)
 		if err != nil && !errors.Is(err, ErrChannelNotFound) {
 			return nil, err
 		}

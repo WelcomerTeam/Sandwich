@@ -376,7 +376,7 @@ func NewCommandContext(eventContext *EventContext, bot *Bot, message *discord.Me
 		Message: message,
 
 		Guild:   eventContext.Guild,
-		Channel: NewChannel(eventContext, message.GuildID, message.ChannelID),
+		Channel: NewChannel(message.GuildID, message.ChannelID),
 
 		Prefix:  "",
 		Command: nil,

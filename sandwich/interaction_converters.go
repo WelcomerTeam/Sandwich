@@ -166,9 +166,9 @@ func HandleInteractionArgumentTypeGuild(ctx *InteractionContext, option *discord
 	} else {
 		guildID, _ := strconv.ParseInt(match, 10, 64)
 
-		result = NewGuild(ctx.EventContext, discord.Snowflake(guildID))
+		result = NewGuild(discord.Snowflake(guildID))
 
-		result, err = FetchGuild(ctx.EventContext, result)
+		result, err = FetchGuild(ctx.EventContext.ToGRPCContext(), result)
 		if err != nil && !errors.Is(err, ErrGuildNotFound) {
 			return nil, err
 		}
@@ -289,11 +289,11 @@ func HandleInteractionArgumentTypeEmoji(ctx *InteractionContext, option *discord
 		} else {
 			emojiID, _ := strconv.ParseInt(match, 10, 64)
 
-			result = NewEmoji(ctx.EventContext, ctx.GuildID, discord.Snowflake(emojiID))
+			result = NewEmoji(ctx.GuildID, discord.Snowflake(emojiID))
 		}
 	}
 
-	result, err = FetchEmoji(ctx.EventContext, result)
+	result, err = FetchEmoji(ctx.EventContext.ToGRPCContext(), result)
 	if err != nil && !errors.Is(err, ErrEmojiNotFound) && !errors.Is(err, ErrFetchMissingGuild) {
 		return nil, err
 	}
