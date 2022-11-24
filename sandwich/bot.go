@@ -1,11 +1,15 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/rs/zerolog"
 )
 
 type Bot struct {
 	Logger zerolog.Logger
+
+	Cogs map[string]Cog
 
 	*Handlers
 }
@@ -13,10 +17,52 @@ type Bot struct {
 func NewBot(logger zerolog.Logger) *Bot {
 	bot := &Bot{
 		Logger:   logger,
+		Cogs:     make(map[string]Cog),
 		Handlers: NewDiscordHandlers(),
 	}
 
 	return bot
+}
+
+// Cogs
+
+func (bot *Bot) MustRegisterCog(cog Cog) {
+	if err := bot.RegisterCog(cog); err != nil {
+		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
+	}
+}
+
+func (bot *Bot) RegisterCog(cog Cog) (err error) {
+	cogInfo := cog.CogInfo()
+
+	if _, ok := bot.Cogs[cogInfo.Name]; ok {
+		return ErrCogAlreadyRegistered
+	}
+
+	err = cog.RegisterCog(bot)
+	if err != nil {
+		bot.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
+
+		return
+	}
+
+	bot.Cogs[cogInfo.Name] = cog
+
+	bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded cog")
+
+	if cast, ok := cog.(CogWithBotLoad); ok {
+		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
+
+		cast.BotLoad(bot)
+	}
+
+	if cast, ok := cog.(CogWithEvents); ok {
+		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has events")
+
+		bot.RegisterCogEvents(cast.GetEventHandlers())
+	}
+
+	return nil
 }
 
 func (bot *Bot) RegisterCogEvents(events *Handlers) {
