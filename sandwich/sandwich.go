@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
 	"runtime/debug"
 	"sync"
+	"syscall"
 	"time"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
@@ -66,24 +69,95 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 	return
 }
 
-func (s *Sandwich) Close() (err error) {
-	return
+func (s *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) error {
+
+	// Signal
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+
+	// Register message channels
+	grpcMessages := make(chan *protobuf.ListenResponse)
+
+	go func() {
+		for {
+			grpcListener, err := s.SandwichClient.Listen(ctx, &protobuf.ListenRequest{
+				Identifier: "",
+			})
+			if err != nil {
+				s.Logger.Warn().Err(err).Msg("Failed to listen to grpc")
+
+				time.Sleep(time.Second)
+			} else {
+				for {
+					var lr protobuf.ListenResponse
+
+					err = grpcListener.RecvMsg(&lr)
+					if err != nil {
+						if errors.Is(err, context.Canceled) {
+							return
+						}
+
+						s.Logger.Warn().Err(err).Msg("Failed to receive grpc message")
+
+						break
+					} else {
+						grpcMessages <- &lr
+					}
+				}
+			}
+		}
+	}()
+
+	// Event Loop
+eventLoop:
+	for {
+		select {
+		case grpcMessage := <-grpcMessages:
+			var payload sandwich_structs.SandwichPayload
+
+			err := jsoniter.Unmarshal(grpcMessage.Data, &payload)
+			if err != nil {
+				s.Logger.Warn().Err(err).Msg("Failed to unmarshal grpc message")
+			} else {
+				err = s.DispatchGRPCPayload(ctx, payload)
+				if err != nil {
+					s.Logger.Warn().Err(err).Msg("Failed to dispatch grpc payload")
+				}
+			}
+		case stanMessage := <-channel:
+			var payload sandwich_structs.SandwichPayload
+
+			err := jsoniter.Unmarshal(stanMessage, &payload)
+			if err != nil {
+				s.Logger.Warn().Err(err).Msg("Failed to unmarshal stan message")
+			} else {
+				err = s.DispatchSandwichPayload(ctx, payload)
+				if err != nil {
+					s.Logger.Warn().Err(err).Msg("Failed to dispatch sandwich payload")
+				}
+			}
+		case <-signalCh:
+			break eventLoop
+		}
+	}
+
+	return nil
 }
 
-func (s *Sandwich) DispatchGRPCPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) (err error) {
 	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
 	return s.SandwichEvents.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: s,
-		Session:  discord.NewSession(context, "", s.RESTInterface, logger),
+		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
 		Handlers: s.SandwichEvents,
-		Context:  context,
+		Context:  ctx,
 		payload:  &payload,
 	}, payload)
 }
 
-func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sandwich_structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) (err error) {
 	s.botsMu.RLock()
 	bot, ok := s.Bots[payload.Metadata.Identifier]
 	s.botsMu.RUnlock()
@@ -102,9 +176,9 @@ func (s *Sandwich) DispatchSandwichPayload(context context.Context, payload sand
 	return bot.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: s,
-		Session:  discord.NewSession(context, "", s.RESTInterface, logger),
+		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
 		Handlers: bot.Handlers,
-		Context:  context,
+		Context:  ctx,
 		payload:  &payload,
 	}, payload)
 }
@@ -121,7 +195,7 @@ func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventCont
 	fmt.Println(string(debug.Stack()))
 }
 
-func (s *Sandwich) FetchIdentifier(context context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
+func (s *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
 	s.identifiersMu.RLock()
 	identifier, ok = s.Identifiers[applicationName]
 	s.identifiersMu.RUnlock()
@@ -137,8 +211,8 @@ func (s *Sandwich) FetchIdentifier(context context.Context, applicationName stri
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
 		identifiers, err := s.GRPCInterface.FetchConsumerConfiguration((&EventContext{
 			Sandwich: s,
-			Session:  discord.NewSession(context, "", s.RESTInterface, s.Logger),
-			Context:  context,
+			Session:  discord.NewSession(ctx, "", s.RESTInterface, s.Logger),
+			Context:  ctx,
 		}).ToGRPCContext(), "")
 		if err != nil {
 			return nil, false, errors.Errorf("Failed to fetch consumer configuration: %v", err)
