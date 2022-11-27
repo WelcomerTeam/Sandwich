@@ -44,7 +44,7 @@ func (kafkaMQ *KafkaMQClient) Cluster() string {
 	return kafkaMQ.cluster
 }
 
-func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) (err error) {
+func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) error {
 	var ok bool
 
 	var address string
@@ -58,7 +58,7 @@ func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, ar
 	return nil
 }
 
-func (kafkaMQ *KafkaMQClient) Subscribe(ctx context.Context, channelName string) (err error) {
+func (kafkaMQ *KafkaMQClient) Subscribe(ctx context.Context, channelName string) error {
 	if kafkaMQ.reader != nil {
 		kafkaMQ.Unsubscribe()
 	}

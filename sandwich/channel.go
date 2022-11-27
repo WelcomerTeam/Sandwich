@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"github.com/pkg/errors"
 )
 
 func NewChannel(guildID *discord.Snowflake, channelID discord.Snowflake) *discord.Channel {
@@ -23,7 +24,7 @@ func FetchChannel(ctx *GRPCContext, channel *discord.Channel) (*discord.Channel,
 
 	channel, err := ctx.GRPCInterface.FetchChannelByID(ctx, *channel.GuildID, channel.ID)
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch channel: %v", err)
+		return nil, fmt.Errorf("failed to fetch channel: %w", err)
 	}
 
 	if channel == nil {

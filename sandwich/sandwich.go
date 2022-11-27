@@ -52,7 +52,7 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 		botsMu: sync.RWMutex{},
 		Bots:   make(map[string]*Bot),
 
-		SandwichEvents: NewSandwichHandlers(),
+		SandwichEvents: newSandwichHandlers(),
 
 		identifiersMu: sync.RWMutex{},
 		Identifiers:   make(map[string]*sandwich_structs.ManagerConsumerConfiguration),
@@ -119,10 +119,7 @@ eventLoop:
 			if err != nil {
 				s.Logger.Warn().Err(err).Msg("Failed to unmarshal grpc message")
 			} else {
-				err = s.DispatchGRPCPayload(ctx, payload)
-				if err != nil {
-					s.Logger.Warn().Err(err).Msg("Failed to dispatch grpc payload")
-				}
+				s.DispatchGRPCPayload(ctx, payload)
 			}
 		case stanMessage := <-channel:
 			var payload sandwich_structs.SandwichPayload
@@ -144,10 +141,10 @@ eventLoop:
 	return nil
 }
 
-func (s *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) {
 	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
-	return s.SandwichEvents.Dispatch(&EventContext{
+	s.SandwichEvents.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: s,
 		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
@@ -155,9 +152,11 @@ func (s *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_str
 		Context:  ctx,
 		payload:  &payload,
 	}, payload)
+
+	return
 }
 
-func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) (err error) {
+func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) error {
 	s.botsMu.RLock()
 	bot, ok := s.Bots[payload.Metadata.Identifier]
 	s.botsMu.RUnlock()
@@ -173,7 +172,7 @@ func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich
 
 	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
-	return bot.Dispatch(&EventContext{
+	bot.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: s,
 		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
@@ -181,6 +180,8 @@ func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich
 		Context:  ctx,
 		payload:  &payload,
 	}, payload)
+
+	return nil
 }
 
 func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
@@ -215,7 +216,7 @@ func (s *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) 
 			Context:  ctx,
 		}).ToGRPCContext(), "")
 		if err != nil {
-			return nil, false, errors.Errorf("Failed to fetch consumer configuration: %v", err)
+			return nil, false, fmt.Errorf("failed to fetch consumer configuration: %w", err)
 		}
 
 		s.identifiersMu.Lock()
@@ -279,13 +280,13 @@ func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
 	return nil
 }
 
-func (eventCtx *EventContext) decodeContent(msg sandwich_structs.SandwichPayload, out interface{}) (err error) {
-	err = jsoniter.Unmarshal(msg.Data, &out)
+func (eventCtx *EventContext) decodeContent(msg sandwich_structs.SandwichPayload, out interface{}) error {
+	err := jsoniter.Unmarshal(msg.Data, &out)
 	if err != nil {
-		return errors.Errorf("Failed to unmarshal gateway payload: %v", err)
+		return errors.Errorf("failed to unmarshal gateway payload: %w", err)
 	}
 
-	return
+	return nil
 }
 
 func (eventCtx *EventContext) decodeExtra(msg sandwich_structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
@@ -299,7 +300,7 @@ func (eventCtx *EventContext) decodeExtra(msg sandwich_structs.SandwichPayload, 
 
 		err = jsoniter.Unmarshal(val, &out)
 		if err != nil {
-			return ok, errors.Errorf("Failed to unmarshal extra: %v", err)
+			return ok, fmt.Errorf("failed to unmarshal extra: %w", err)
 		}
 	}
 

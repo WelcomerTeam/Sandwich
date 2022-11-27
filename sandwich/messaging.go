@@ -2,7 +2,7 @@ package internal
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	messaging "github.com/WelcomerTeam/Sandwich/messaging"
 )
@@ -12,8 +12,8 @@ type MQClient interface {
 	Channel() string
 	Cluster() string
 
-	Connect(ctx context.Context, clientName string, args map[string]interface{}) (err error)
-	Subscribe(ctx context.Context, channel string) (err error)
+	Connect(ctx context.Context, clientName string, args map[string]interface{}) error
+	Subscribe(ctx context.Context, channel string) error
 	Unsubscribe()
 	Chan() chan []byte
 }
@@ -27,6 +27,6 @@ func NewMQClient(mqType string) (MQClient, error) {
 	case "redis":
 		return messaging.NewRedisMQClient(), nil
 	default:
-		return nil, errors.New("No MQ client named " + mqType)
+		panic(fmt.Sprintf(`NewMQClient(%s): no mq with this name`, mqType))
 	}
 }

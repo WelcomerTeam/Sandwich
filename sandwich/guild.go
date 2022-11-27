@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"github.com/pkg/errors"
 )
 
 // NewGuild creates a new partial guild. Use Fetch() to populate the guild.
@@ -19,7 +20,7 @@ func FetchGuild(ctx *GRPCContext, guild *discord.Guild) (*discord.Guild, error) 
 
 	guild, err := ctx.GRPCInterface.FetchGuildByID(ctx, guild.ID)
 	if err != nil {
-		return guild, errors.Errorf("Failed to fetch guild: %v", err)
+		return guild, fmt.Errorf("failed to fetch guild: %w", err)
 	}
 
 	if guild == nil {
@@ -50,7 +51,7 @@ func FetchGuildMember(ctx *GRPCContext, guildMember *discord.GuildMember) (*disc
 
 	guildMember, err := ctx.GRPCInterface.FetchMemberByID(ctx, *guildMember.GuildID, guildMember.User.ID)
 	if err != nil {
-		return guildMember, errors.Errorf("Failed to fetch member: %v", err)
+		return guildMember, fmt.Errorf("failed to fetch member: %w", err)
 	}
 
 	if guildMember == nil {

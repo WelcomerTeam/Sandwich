@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"github.com/pkg/errors"
 )
 
 func NewRole(guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
@@ -23,7 +24,7 @@ func FetchRole(ctx *GRPCContext, role *discord.Role) (*discord.Role, error) {
 
 	role, err := ctx.GRPCInterface.FetchRoleByID(ctx, *role.GuildID, role.ID)
 	if err != nil {
-		return role, errors.Errorf("Failed to fetch role: %v", err)
+		return role, fmt.Errorf("failed to fetch role: %w", err)
 	}
 
 	if role == nil {

@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
@@ -25,7 +26,7 @@ type GRPCContext struct {
 
 type GRPC interface {
 	Listen(grpcContext *GRPCContext, identifier string) (client sandwich_protobuf.Sandwich_ListenClient, err error)
-	PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) (err error)
+	PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) error
 
 	FetchGuildByID(grpcContext *GRPCContext, guildID discord.Snowflake) (guild *discord.Guild, err error)
 	FetchGuildsByName(grpcContext *GRPCContext, query string) (guilds []*discord.Guild, err error)
@@ -48,8 +49,8 @@ type GRPC interface {
 	FetchConsumerConfiguration(grpcContext *GRPCContext, identifier string) (identifiers *sandwich_structs.SandwichConsumerConfiguration, err error)
 	FetchMutualGuilds(grpcContext *GRPCContext, userID discord.Snowflake, expand bool) (guilds []*discord.Guild, err error)
 
-	RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) (err error)
-	SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) (err error)
+	RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) error
+	SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) error
 	WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error)
 }
 
@@ -73,19 +74,19 @@ func (grpcClient *DefaultGRPCClient) Listen(grpcContext *GRPCContext, identifier
 		Identifier: identifier,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to listen: %v", err)
+		return nil, fmt.Errorf("failed to listen: %w", err)
 	}
 
 	return
 }
 
-func (grpcClient *DefaultGRPCClient) PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) (err error) {
+func (grpcClient *DefaultGRPCClient) PostAnalytics(grpcContext *GRPCContext, identifier string, data []byte) error {
 	base, err := grpcContext.SandwichClient.PostAnalytics(grpcContext.Context, &sandwich_protobuf.PostAnalyticsRequest{
 		Identifier: identifier,
 		Data:       data,
 	})
 	if err != nil {
-		return errors.Errorf("Failed to post analytics: %v", err)
+		return fmt.Errorf("failed to post analytics: %w", err)
 	}
 
 	if !base.Ok {
@@ -100,14 +101,14 @@ func (grpcClient *DefaultGRPCClient) FetchGuildByID(grpcContext *GRPCContext, gu
 		GuildIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch guilds: %v", err)
+		return nil, fmt.Errorf("failed to fetch guilds: %w", err)
 	}
 
 	grpcGuild := guildsResponse.Guilds[int64(guildID)]
 	if grpcGuild != nil {
 		guild, err = sandwich_protobuf.GRPCToGuild(grpcGuild)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.Guild to Guild: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.Guild to Guild: %w", err)
 		}
 	}
 
@@ -119,7 +120,7 @@ func (grpcClient *DefaultGRPCClient) FetchGuildsByName(grpcContext *GRPCContext,
 		Query: query,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch guilds: %v", err)
+		return nil, fmt.Errorf("failed to fetch guilds: %w", err)
 	}
 
 	guilds = make([]*discord.Guild, 0, len(guildsResponse.Guilds))
@@ -144,14 +145,14 @@ func (grpcClient *DefaultGRPCClient) FetchChannelByID(grpcContext *GRPCContext, 
 		ChannelIDs: []int64{int64(channelID)},
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch channels: %v", err)
+		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
 
 	grpcChannel := channelsResponse.GuildChannels[int64(channelID)]
 	if grpcChannel != nil {
 		channel, err = sandwich_protobuf.GRPCToChannel(grpcChannel)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.Channel to Channel: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.Channel to Channel: %w", err)
 		}
 	}
 
@@ -164,7 +165,7 @@ func (grpcClient *DefaultGRPCClient) FetchChannelsByName(grpcContext *GRPCContex
 		Query:   query,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch channels: %v", err)
+		return nil, fmt.Errorf("failed to fetch channels: %w", err)
 	}
 
 	channels = make([]*discord.Channel, 0, len(channelsResponse.GuildChannels))
@@ -189,14 +190,14 @@ func (grpcClient *DefaultGRPCClient) FetchRoleByID(grpcContext *GRPCContext, gui
 		RoleIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch roles: %v", err)
+		return nil, fmt.Errorf("failed to fetch roles: %w", err)
 	}
 
 	grpcRole := rolesResponse.GuildRoles[int64(guildID)]
 	if grpcRole != nil {
 		role, err = sandwich_protobuf.GRPCToRole(grpcRole)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.Role to Role: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.Role to Role: %w", err)
 		}
 	}
 
@@ -209,7 +210,7 @@ func (grpcClient *DefaultGRPCClient) FetchRolesByName(grpcContext *GRPCContext, 
 		Query:   query,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch roles: %v", err)
+		return nil, fmt.Errorf("failed to fetch roles: %w", err)
 	}
 
 	roles = make([]*discord.Role, 0, len(rolesResponse.GuildRoles))
@@ -234,14 +235,14 @@ func (grpcClient *DefaultGRPCClient) FetchEmojiByID(grpcContext *GRPCContext, gu
 		EmojiIDs: []int64{int64(guildID)},
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch emojis: %v", err)
+		return nil, fmt.Errorf("failed to fetch emojis: %w", err)
 	}
 
 	grpcEmoji := emojisResponse.GuildEmojis[int64(guildID)]
 	if grpcEmoji != nil {
 		emoji, err = sandwich_protobuf.GRPCToEmoji(grpcEmoji)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.Emoji to Emoji: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.Emoji to Emoji: %w", err)
 		}
 	}
 
@@ -254,7 +255,7 @@ func (grpcClient *DefaultGRPCClient) FetchEmojisByName(grpcContext *GRPCContext,
 		Query:   query,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch emojis: %v", err)
+		return nil, fmt.Errorf("failed to fetch emojis: %w", err)
 	}
 
 	emojis = make([]*discord.Emoji, 0, len(emojisResponse.GuildEmojis))
@@ -279,14 +280,14 @@ func (grpcClient *DefaultGRPCClient) FetchMemberByID(grpcContext *GRPCContext, g
 		UserIDs: []int64{int64(memberID)},
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch members: %v", err)
+		return nil, fmt.Errorf("failed to fetch members: %w", err)
 	}
 
 	grpcMember := membersResponse.GuildMembers[int64(memberID)]
 	if grpcMember != nil {
 		member, err = sandwich_protobuf.GRPCToGuildMember(grpcMember)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.GuildMember to GuildMember: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.GuildMember to GuildMember: %w", err)
 		}
 	}
 
@@ -299,7 +300,7 @@ func (grpcClient *DefaultGRPCClient) FetchMembersByName(grpcContext *GRPCContext
 		Query:   query,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch members: %v", err)
+		return nil, fmt.Errorf("failed to fetch members: %w", err)
 	}
 
 	members = make([]*discord.GuildMember, 0, len(membersResponse.GuildMembers))
@@ -325,14 +326,14 @@ func (grpcClient *DefaultGRPCClient) FetchUserByID(grpcContext *GRPCContext, tok
 		Token:           token,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch users: %v", err)
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
 
 	grpcUser := usersResponse.Users[int64(userID)]
 	if grpcUser != nil {
 		user, err = sandwich_protobuf.GRPCToUser(grpcUser)
 		if err != nil {
-			return nil, errors.Errorf("Failed to convert protobuf.User to User: %v", err)
+			return nil, fmt.Errorf("failed to convert protobuf.User to User: %w", err)
 		}
 	}
 
@@ -346,7 +347,7 @@ func (grpcClient *DefaultGRPCClient) FetchUserByName(grpcContext *GRPCContext, t
 		Token:           token,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch users: %v", err)
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
 
 	users = make([]*discord.User, 0, len(usersResponse.Users))
@@ -370,14 +371,14 @@ func (grpcClient *DefaultGRPCClient) FetchConsumerConfiguration(grpcContext *GRP
 		Identifier: identifier,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch consumer configuration: %v", err)
+		return nil, fmt.Errorf("failed to fetch consumer configuration: %w", err)
 	}
 
 	identifiers = &sandwich_structs.SandwichConsumerConfiguration{}
 
 	err = json.Unmarshal(consumerConfiguration.File, &identifiers)
 	if err != nil {
-		return nil, errors.Errorf("Failed to unmarshal consumer configuration: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal consumer configuration: %w", err)
 	}
 
 	return identifiers, nil
@@ -389,7 +390,7 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(grpcContext *GRPCContext,
 		Expand: expand,
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch mutual guilds: %v", err)
+		return nil, fmt.Errorf("failed to fetch mutual guilds: %w", err)
 	}
 
 	guilds = make([]*discord.Guild, 0, len(mutualGuilds.Guilds))
@@ -408,12 +409,12 @@ func (grpcClient *DefaultGRPCClient) FetchMutualGuilds(grpcContext *GRPCContext,
 	return guilds, nil
 }
 
-func (grpcClient *DefaultGRPCClient) RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) (err error) {
+func (grpcClient *DefaultGRPCClient) RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) error {
 	baseResponse, err := grpcContext.SandwichClient.RequestGuildChunk(grpcContext.Context, &sandwich_protobuf.RequestGuildChunkRequest{
 		GuildId: int64(guildID),
 	})
 	if err != nil {
-		return errors.Errorf("Failed to request guild chunk: %v", err)
+		return fmt.Errorf("failed to request guild chunk: %w", err)
 	}
 
 	if baseResponse.Error != "" {
@@ -427,7 +428,7 @@ func (grpcClient *DefaultGRPCClient) RequestGuildChunk(grpcContext *GRPCContext,
 	return nil
 }
 
-func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) (err error) {
+func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) error {
 	baseResponse, err := grpcContext.SandwichClient.SendWebsocketMessage(grpcContext.Context, &sandwich_protobuf.SendWebsocketMessageRequest{
 		Manager:       location.Manager,
 		ShardGroup:    location.ShardGroup,
@@ -436,7 +437,7 @@ func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(grpcContext *GRPCConte
 		Data:          data,
 	})
 	if err != nil {
-		return errors.Errorf("Failed to send websocket message: %v", err)
+		return fmt.Errorf("failed to send websocket message: %w", err)
 	}
 
 	if baseResponse.Error != "" {
@@ -455,7 +456,7 @@ func (grpcClient *DefaultGRPCClient) WhereIsGuild(grpcContext *GRPCContext, guil
 		GuildID: int64(guildID),
 	})
 	if err != nil {
-		return nil, errors.Errorf("Failed to fetch guild locations: %v", err)
+		return nil, fmt.Errorf("failed to fetch guild locations: %w", err)
 	}
 
 	locations = make([]*Location, 0, len(locationResponse.Locations))

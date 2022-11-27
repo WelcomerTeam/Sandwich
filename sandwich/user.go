@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/WelcomerTeam/Discord/discord"
-	"github.com/pkg/errors"
 )
 
 func NewUser(userID discord.Snowflake) *discord.User {
@@ -18,7 +19,7 @@ func FetchUser(ctx *GRPCContext, user *discord.User, createDMChannel bool) (*dis
 
 	user, err := ctx.GRPCInterface.FetchUserByID(ctx, ctx.Identifier.Token, user.ID, createDMChannel)
 	if err != nil {
-		return user, errors.Errorf("Failed to fetch user: %v", err)
+		return user, fmt.Errorf("failed to fetch user: %w", err)
 	}
 
 	if user == nil {

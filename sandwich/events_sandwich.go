@@ -724,13 +724,13 @@ func (h *Handlers) RegisterOnGuildLeaveEvent(event OnGuildLeaveFuncType) {
 	eventName := discord.DiscordEventGuildLeave
 
 	h.eventHandlersMu.RLock()
-	eh := h.EventHandlers[eventName]
+	eventHandler := h.EventHandlers[eventName]
 	h.eventHandlersMu.RUnlock()
 
-	eh.eventsMu.Lock()
-	eh.Events = append(eh.Events, event)
+	eventHandler.eventsMu.Lock()
+	eventHandler.Events = append(eventHandler.Events, event)
 
-	eh.eventsMu.Unlock()
+	eventHandler.eventsMu.Unlock()
 }
 
 // RegisterOnGuildUnavailableEvent adds a new event handler for the GUILD_UNAVAILABLE event.

@@ -2,6 +2,7 @@ package mqclients
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/nats-io/nats.go"
@@ -44,7 +45,7 @@ func (stanMQ *StanMQClient) Cluster() string {
 	return stanMQ.cluster
 }
 
-func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) (err error) {
+func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) error {
 	var ok bool
 
 	var address string
@@ -69,6 +70,7 @@ func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args
 	stanMQ.channel = channel
 
 	var useNatsConnection bool
+	var err error
 
 	if useNatsConnectionStr, ok := GetEntry(args, "UseNATSConnection").(string); ok {
 		if useNatsConnection, err = strconv.ParseBool(useNatsConnectionStr); err != nil {
@@ -103,17 +105,20 @@ func (stanMQ *StanMQClient) Connect(ctx context.Context, clientName string, args
 	return nil
 }
 
-func (stanMQ *StanMQClient) Subscribe(ctx context.Context, channelName string) (err error) {
+func (stanMQ *StanMQClient) Subscribe(ctx context.Context, channelName string) error {
 	if stanMQ.subscription != nil {
 		stanMQ.Unsubscribe()
 	}
 
 	handler := func(msg *stan.Msg) { stanMQ.msgChannel <- msg.Data }
 	sub, err := stanMQ.StanClient.Subscribe(channelName, handler)
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to scan client: %w", err)
+	}
 
 	stanMQ.subscription = &sub
 
-	return
+	return nil
 }
 
 func (stanMQ *StanMQClient) Unsubscribe() {

@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"fmt"
+
 	discord "github.com/WelcomerTeam/Discord/discord"
-	"github.com/pkg/errors"
 )
 
 func NewEmoji(guildID *discord.Snowflake, emojiID discord.Snowflake) *discord.Emoji {
@@ -23,7 +24,7 @@ func FetchEmoji(ctx *GRPCContext, emoji *discord.Emoji) (*discord.Emoji, error) 
 
 	emoji, err := ctx.GRPCInterface.FetchEmojiByID(ctx, *emoji.GuildID, emoji.ID)
 	if err != nil {
-		return emoji, errors.Errorf("Failed to fetch emoji: %v", err)
+		return emoji, fmt.Errorf("failed to fetch emoji: %w", err)
 	}
 
 	if emoji == nil {

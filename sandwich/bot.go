@@ -18,7 +18,7 @@ func NewBot(logger zerolog.Logger) *Bot {
 	bot := &Bot{
 		Logger:   logger,
 		Cogs:     make(map[string]Cog),
-		Handlers: NewDiscordHandlers(),
+		Handlers: newDiscordHandlers(),
 	}
 
 	return bot
@@ -32,18 +32,17 @@ func (bot *Bot) MustRegisterCog(cog Cog) {
 	}
 }
 
-func (bot *Bot) RegisterCog(cog Cog) (err error) {
+func (bot *Bot) RegisterCog(cog Cog) error {
 	cogInfo := cog.CogInfo()
 
 	if _, ok := bot.Cogs[cogInfo.Name]; ok {
 		return ErrCogAlreadyRegistered
 	}
 
-	err = cog.RegisterCog(bot)
-	if err != nil {
+	if err := cog.RegisterCog(bot); err != nil {
 		bot.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
 
-		return
+		return fmt.Errorf("failed to register cog: %w", err)
 	}
 
 	bot.Cogs[cogInfo.Name] = cog
