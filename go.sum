@@ -1,8 +1,12 @@
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe h1:p5eqJ2jc1AwYf8/9qKP2GjVRnS3NGCB4oRkOlIfOmcA=
 github.com/WelcomerTeam/Discord v0.0.0-20221120230352-3e8b87c2a9fe/go.mod h1:ysN7+TdHdLMW8tfXUocG5UB0KgWCbdowa0AwkeY8vFs=
+github.com/WelcomerTeam/Discord v0.0.0-20221125141653-240921554909 h1:RdTfJViMub1pbf2BRWoCjvkj9pCGMBcxxoZxP/uifyw=
+github.com/WelcomerTeam/Discord v0.0.0-20221125141653-240921554909/go.mod h1:xx2AEDJzKQSegernYkY2wWFPa1FgND52NxxPtqjx1s8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1 h1:V7sCcIPxIuTIle3NrBUgYzXaHFI8sbvmyN9/nsIZiQY=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221015084336-940d166d77e1/go.mod h1:2sWYSq+XdLGTli1YoNZS4x4B+RJqc4ECKxOzaiW7aAY=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9 h1:7yKab/Lo3nuwGHvRJk123VDXpGHHGB9DrhKJj5iLHHg=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20221122124504-51003afb72e9/go.mod h1:WB2nxQU1T3vaP9V5TzxNKVsUip4GcPttjL5KVv1VKSA=
 github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878/go.mod h1:3AMJUQhVx52RsWOnlkpikZr01T/yAVN2gn0861vByNg=
 github.com/armon/go-metrics v0.4.1 h1:hR91U9KYmb6bLBYLQjyM+3j+rcd/UhE+G78SFnF8gJA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
