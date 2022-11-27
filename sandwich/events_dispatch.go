@@ -141,19 +141,35 @@ type EventParser func(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 // Discord Events.
 
-// RegisterEventHandler adds a new event handler. If there is already
-// an event registered with the name, it is overridden.
-func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *EventHandler {
+func (h *Handlers) ensureEvent(eventName string) {
 	h.eventHandlersMu.Lock()
 	defer h.eventHandlersMu.Unlock()
 
-	eventHandler := &EventHandler{
-		eventName: eventName,
-		eventsMu:  sync.RWMutex{},
-		Events:    make([]interface{}, 0),
-		Parser:    parser,
-		_handlers: h,
+	_, ok := h.EventHandlers[eventName]
+	if !ok {
+		eventHandler := &EventHandler{
+			eventName: eventName,
+			eventsMu:  sync.RWMutex{},
+			Events:    make([]interface{}, 0),
+			Parser:    nil,
+			_handlers: h,
+		}
+
+		h.EventHandlers[eventName] = eventHandler
 	}
+}
+
+// RegisterEventHandler adds a new event handler. If there is already
+// an event registered with the name, it is overridden.
+func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *EventHandler {
+	h.ensureEvent(eventName)
+
+	eventHandler, ok := h.EventHandlers[eventName]
+	if !ok {
+		panic(fmt.Sprintf(`handlers.RegisterEventHandler(%s, %v): event not registered`, eventName, parser))
+	}
+
+	eventHandler.Parser = parser
 
 	h.EventHandlers[eventName] = eventHandler
 
