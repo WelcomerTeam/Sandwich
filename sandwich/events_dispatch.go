@@ -147,13 +147,6 @@ func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event int
 
 	_, ok := h.EventHandlers[eventName]
 	if !ok {
-		if parser == nil {
-			panic(fmt.Sprintf(
-				"ensureEvent(%s, %v, %v): attempt to ensure event with no parser",
-				eventName, parser, event,
-			))
-		}
-
 		eventHandler := &EventHandler{
 			eventName: eventName,
 			EventsMu:  sync.RWMutex{},
@@ -166,6 +159,7 @@ func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event int
 	}
 
 	eventHandler := h.EventHandlers[eventName]
+	h.eventHandlersMu.RUnlock()
 
 	if eventHandler != nil {
 		eventHandler.EventsMu.Lock()
