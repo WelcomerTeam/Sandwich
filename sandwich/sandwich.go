@@ -45,8 +45,8 @@ type Sandwich struct {
 	GRPCInterface  GRPC
 }
 
-func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer) (s *Sandwich) {
-	s = &Sandwich{
+func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer) *Sandwich {
+	sandwich := &Sandwich{
 		Logger: zerolog.New(logger).With().Timestamp().Logger(),
 
 		botsMu: sync.RWMutex{},
@@ -66,10 +66,10 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 		GRPCInterface:  NewDefaultGRPCClient(),
 	}
 
-	return
+	return sandwich
 }
 
-func (s *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) error {
+func (sandwich *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) error {
 
 	// Signal
 	signalCh := make(chan os.Signal, 1)
@@ -80,28 +80,28 @@ func (s *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) err
 
 	go func() {
 		for {
-			grpcListener, err := s.SandwichClient.Listen(ctx, &protobuf.ListenRequest{
+			grpcListener, err := sandwich.SandwichClient.Listen(ctx, &protobuf.ListenRequest{
 				Identifier: "",
 			})
 			if err != nil {
-				s.Logger.Warn().Err(err).Msg("Failed to listen to grpc")
+				sandwich.Logger.Warn().Err(err).Msg("Failed to listen to grpc")
 
 				time.Sleep(time.Second)
 			} else {
 				for {
-					var lr protobuf.ListenResponse
+					var listenResponse protobuf.ListenResponse
 
-					err = grpcListener.RecvMsg(&lr)
+					err = grpcListener.RecvMsg(&listenResponse)
 					if err != nil {
 						if errors.Is(err, context.Canceled) {
 							return
 						}
 
-						s.Logger.Warn().Err(err).Msg("Failed to receive grpc message")
+						sandwich.Logger.Warn().Err(err).Msg("Failed to receive grpc message")
 
 						break
 					} else {
-						grpcMessages <- &lr
+						grpcMessages <- &listenResponse
 					}
 				}
 			}
@@ -117,20 +117,20 @@ eventLoop:
 
 			err := jsoniter.Unmarshal(grpcMessage.Data, &payload)
 			if err != nil {
-				s.Logger.Warn().Err(err).Msg("Failed to unmarshal grpc message")
+				sandwich.Logger.Warn().Err(err).Msg("Failed to unmarshal grpc message")
 			} else {
-				s.DispatchGRPCPayload(ctx, payload)
+				sandwich.DispatchGRPCPayload(ctx, payload)
 			}
 		case stanMessage := <-channel:
 			var payload sandwich_structs.SandwichPayload
 
 			err := jsoniter.Unmarshal(stanMessage, &payload)
 			if err != nil {
-				s.Logger.Warn().Err(err).Msg("Failed to unmarshal stan message")
+				sandwich.Logger.Warn().Err(err).Msg("Failed to unmarshal stan message")
 			} else {
-				err = s.DispatchSandwichPayload(ctx, payload)
+				err = sandwich.DispatchSandwichPayload(ctx, payload)
 				if err != nil {
-					s.Logger.Warn().Err(err).Msg("Failed to dispatch sandwich payload")
+					sandwich.Logger.Warn().Err(err).Msg("Failed to dispatch sandwich payload")
 				}
 			}
 		case <-signalCh:
@@ -141,28 +141,26 @@ eventLoop:
 	return nil
 }
 
-func (s *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) {
-	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
+func (sandwich *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) {
+	logger := sandwich.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
-	s.SandwichEvents.Dispatch(&EventContext{
+	sandwich.SandwichEvents.Dispatch(&EventContext{
 		Logger:   logger,
-		Sandwich: s,
-		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
-		Handlers: s.SandwichEvents,
+		Sandwich: sandwich,
+		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
+		Handlers: sandwich.SandwichEvents,
 		Context:  ctx,
 		payload:  &payload,
 	}, payload)
-
-	return
 }
 
-func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) error {
-	s.botsMu.RLock()
-	bot, ok := s.Bots[payload.Metadata.Identifier]
-	s.botsMu.RUnlock()
+func (sandwich *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich_structs.SandwichPayload) error {
+	sandwich.botsMu.RLock()
+	bot, ok := sandwich.Bots[payload.Metadata.Identifier]
+	sandwich.botsMu.RUnlock()
 
 	if !ok {
-		s.Logger.Debug().
+		sandwich.Logger.Debug().
 			Str("identifier", payload.Metadata.Identifier).
 			Str("application", payload.Metadata.Application).
 			Msg(ErrInvalidIdentifier.Error())
@@ -170,12 +168,12 @@ func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich
 		return ErrInvalidIdentifier
 	}
 
-	logger := s.Logger.With().Str("application", payload.Metadata.Application).Logger()
+	logger := sandwich.Logger.With().Str("application", payload.Metadata.Application).Logger()
 
 	bot.Dispatch(&EventContext{
 		Logger:   logger,
-		Sandwich: s,
-		Session:  discord.NewSession(ctx, "", s.RESTInterface, logger),
+		Sandwich: sandwich,
+		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
 		Handlers: bot.Handlers,
 		Context:  ctx,
 		payload:  &payload,
@@ -184,51 +182,51 @@ func (s *Sandwich) DispatchSandwichPayload(ctx context.Context, payload sandwich
 	return nil
 }
 
-func (s *Sandwich) RegisterBot(identifier string, bot *Bot) {
-	s.botsMu.Lock()
-	s.Bots[identifier] = bot
-	s.botsMu.Unlock()
+func (sandwich *Sandwich) RegisterBot(identifier string, bot *Bot) {
+	sandwich.botsMu.Lock()
+	sandwich.Bots[identifier] = bot
+	sandwich.botsMu.Unlock()
 }
 
-func (s *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_structs.SandwichPayload) {
-	s.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
+func (sandwich *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_structs.SandwichPayload) {
+	sandwich.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
 
 	fmt.Println(string(debug.Stack()))
 }
 
-func (s *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
-	s.identifiersMu.RLock()
-	identifier, ok = s.Identifiers[applicationName]
-	s.identifiersMu.RUnlock()
+func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *sandwich_structs.ManagerConsumerConfiguration, ok bool, err error) {
+	sandwich.identifiersMu.RLock()
+	identifier, ok = sandwich.Identifiers[applicationName]
+	sandwich.identifiersMu.RUnlock()
 
 	if ok {
 		return identifier, true, nil
 	}
 
-	s.lastIdentifierRequestMu.RLock()
-	lastRequest, ok := s.LastIdentifierRequest[applicationName]
-	s.lastIdentifierRequestMu.RUnlock()
+	sandwich.lastIdentifierRequestMu.RLock()
+	lastRequest, ok := sandwich.LastIdentifierRequest[applicationName]
+	sandwich.lastIdentifierRequestMu.RUnlock()
 
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
-		identifiers, err := s.GRPCInterface.FetchConsumerConfiguration((&EventContext{
-			Sandwich: s,
-			Session:  discord.NewSession(ctx, "", s.RESTInterface, s.Logger),
+		identifiers, err := sandwich.GRPCInterface.FetchConsumerConfiguration((&EventContext{
+			Sandwich: sandwich,
+			Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, sandwich.Logger),
 			Context:  ctx,
 		}).ToGRPCContext(), "")
 		if err != nil {
 			return nil, false, fmt.Errorf("failed to fetch consumer configuration: %w", err)
 		}
 
-		s.identifiersMu.Lock()
-		s.Identifiers = map[string]*sandwich_structs.ManagerConsumerConfiguration{}
+		sandwich.identifiersMu.Lock()
+		sandwich.Identifiers = map[string]*sandwich_structs.ManagerConsumerConfiguration{}
 
 		for k := range identifiers.Identifiers {
 			v := identifiers.Identifiers[k]
-			s.Identifiers[k] = &v
+			sandwich.Identifiers[k] = &v
 		}
-		s.identifiersMu.Unlock()
+		sandwich.identifiersMu.Unlock()
 
-		identifier, ok = s.Identifiers[applicationName]
+		identifier, ok = sandwich.Identifiers[applicationName]
 		if !ok {
 			return nil, false, ErrInvalidApplication
 		}
@@ -280,16 +278,16 @@ func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
 	return nil
 }
 
-func (eventCtx *EventContext) decodeContent(msg sandwich_structs.SandwichPayload, out interface{}) error {
+func (eventCtx *EventContext) DecodeContent(msg sandwich_structs.SandwichPayload, out interface{}) error {
 	err := jsoniter.Unmarshal(msg.Data, &out)
 	if err != nil {
-		return errors.Errorf("failed to unmarshal gateway payload: %w", err)
+		return errors.Errorf("failed to unmarshal gateway payload: %v", err)
 	}
 
 	return nil
 }
 
-func (eventCtx *EventContext) decodeExtra(msg sandwich_structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
+func (eventCtx *EventContext) DecodeExtra(msg sandwich_structs.SandwichPayload, key string, out interface{}) (ok bool, err error) {
 	val, ok := msg.Extra[key]
 	if ok {
 		if len(val) == 0 {
