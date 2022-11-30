@@ -141,7 +141,7 @@ type EventParser func(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 // Discord Events.
 
-func (h *Handlers) ensureEvent(eventName string, parser EventParser, event interface{}) *EventHandler {
+func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event interface{}) *EventHandler {
 	h.eventHandlersMu.Lock()
 	defer h.eventHandlersMu.Unlock()
 
@@ -181,7 +181,7 @@ func (h *Handlers) ensureEvent(eventName string, parser EventParser, event inter
 // RegisterEventHandler adds a new event handler. If there is already
 // an event registered with the name, it is overridden.
 func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *EventHandler {
-	return h.ensureEvent(eventName, parser, nil)
+	return h.RegisterEvent(eventName, parser, nil)
 }
 
 // Dispatch dispatches a payload. All dispatched events will be sent through a goroutine, so
