@@ -165,9 +165,7 @@ func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event int
 		h.EventHandlers[eventName] = eventHandler
 	}
 
-	h.eventHandlersMu.RLock()
 	eventHandler := h.EventHandlers[eventName]
-	h.eventHandlersMu.RUnlock()
 
 	if eventHandler != nil {
 		eventHandler.EventsMu.Lock()
