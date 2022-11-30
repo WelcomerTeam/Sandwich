@@ -8,7 +8,7 @@ import (
 )
 
 // sortGuilds returns Guilds in order of most similar to the query passed.
-func sortGuilds(source []*discord.Guild, query string) (sorted []*discord.Guild) {
+func sortGuilds(source []*discord.Guild, query string) []*discord.Guild {
 	if len(source) < 2 {
 		return source
 	}
@@ -21,7 +21,7 @@ func sortGuilds(source []*discord.Guild, query string) (sorted []*discord.Guild)
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.Guild, 0, len(source))
+	sorted := make([]*discord.Guild, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -33,7 +33,7 @@ func sortGuilds(source []*discord.Guild, query string) (sorted []*discord.Guild)
 }
 
 // sortChannels returns Channels in order of most similar to the query passed.
-func sortChannels(source []*discord.Channel, query string) (sorted []*discord.Channel) {
+func sortChannels(source []*discord.Channel, query string) []*discord.Channel {
 	if len(source) < 2 {
 		return source
 	}
@@ -46,7 +46,7 @@ func sortChannels(source []*discord.Channel, query string) (sorted []*discord.Ch
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.Channel, 0, len(source))
+	sorted := make([]*discord.Channel, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -58,7 +58,7 @@ func sortChannels(source []*discord.Channel, query string) (sorted []*discord.Ch
 }
 
 // sortRoles returns Roles in order of most similar to the query passed.
-func sortRoles(source []*discord.Role, query string) (sorted []*discord.Role) {
+func sortRoles(source []*discord.Role, query string) []*discord.Role {
 	if len(source) < 2 {
 		return source
 	}
@@ -71,7 +71,7 @@ func sortRoles(source []*discord.Role, query string) (sorted []*discord.Role) {
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.Role, 0, len(source))
+	sorted := make([]*discord.Role, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -83,7 +83,7 @@ func sortRoles(source []*discord.Role, query string) (sorted []*discord.Role) {
 }
 
 // sortEmojis returns Emojis in order of most similar to the query passed.
-func sortEmojis(source []*discord.Emoji, query string) (sorted []*discord.Emoji) {
+func sortEmojis(source []*discord.Emoji, query string) []*discord.Emoji {
 	if len(source) < 2 {
 		return source
 	}
@@ -96,7 +96,7 @@ func sortEmojis(source []*discord.Emoji, query string) (sorted []*discord.Emoji)
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.Emoji, 0, len(source))
+	sorted := make([]*discord.Emoji, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -108,7 +108,7 @@ func sortEmojis(source []*discord.Emoji, query string) (sorted []*discord.Emoji)
 }
 
 // sortMembers returns Members in order of most similar to the query passed.
-func sortMembers(source []*discord.GuildMember, query string) (sorted []*discord.GuildMember) {
+func sortMembers(source []*discord.GuildMember, query string) []*discord.GuildMember {
 	if len(source) < 2 {
 		return source
 	}
@@ -121,7 +121,7 @@ func sortMembers(source []*discord.GuildMember, query string) (sorted []*discord
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.GuildMember, 0, len(source))
+	sorted := make([]*discord.GuildMember, 0, len(source))
 
 	sort.Sort(ranks)
 
@@ -133,7 +133,7 @@ func sortMembers(source []*discord.GuildMember, query string) (sorted []*discord
 }
 
 // sortUsers returns Users in order of most similar to the query passed.
-func sortUsers(source []*discord.User, query string) (sorted []*discord.User) {
+func sortUsers(source []*discord.User, query string) []*discord.User {
 	if len(source) < 2 {
 		return source
 	}
@@ -146,7 +146,7 @@ func sortUsers(source []*discord.User, query string) (sorted []*discord.User) {
 		ranks = append(ranks, rank)
 	}
 
-	sorted = make([]*discord.User, 0, len(source))
+	sorted := make([]*discord.User, 0, len(source))
 
 	sort.Sort(ranks)
 
