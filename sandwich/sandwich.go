@@ -150,7 +150,7 @@ func (sandwich *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandw
 		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
 		Handlers: sandwich.SandwichEvents,
 		Context:  ctx,
-		payload:  &payload,
+		Payload:  &payload,
 	}, payload)
 }
 
@@ -176,7 +176,7 @@ func (sandwich *Sandwich) DispatchSandwichPayload(ctx context.Context, payload s
 		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
 		Handlers: bot.Handlers,
 		Context:  ctx,
-		payload:  &payload,
+		Payload:  &payload,
 	}, payload)
 
 	return nil
@@ -256,7 +256,7 @@ type EventContext struct {
 
 	Guild *discord.Guild
 
-	payload *sandwich_structs.SandwichPayload
+	Payload *sandwich_structs.SandwichPayload
 }
 
 func (eventCtx *EventContext) ToGRPCContext() *GRPCContext {
@@ -271,8 +271,8 @@ func (eventCtx *EventContext) ToGRPCContext() *GRPCContext {
 }
 
 func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
-	if eventCtx.payload != nil {
-		return eventCtx.payload.Trace
+	if eventCtx.Payload != nil {
+		return eventCtx.Payload.Trace
 	}
 
 	return nil
