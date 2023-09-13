@@ -41,6 +41,7 @@ type GRPC interface {
 	FetchEmojisByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (emojis []*discord.Emoji, err error)
 
 	FetchMemberByID(grpcContext *GRPCContext, guildID discord.Snowflake, memberID discord.Snowflake) (member *discord.GuildMember, err error)
+	FetchMembersByID(grpcContext *GRPCContext, guildID discord.Snowflake, memberIDs []discord.Snowflake) (members []*discord.GuildMember, err error)
 	FetchMembersByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error)
 
 	FetchUserByID(grpcContext *GRPCContext, token string, userID discord.Snowflake, createDMChannel bool) (user *discord.User, err error)
