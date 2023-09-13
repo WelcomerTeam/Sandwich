@@ -294,6 +294,34 @@ func (grpcClient *DefaultGRPCClient) FetchMemberByID(grpcContext *GRPCContext, g
 	return member, nil
 }
 
+func (grpcClient *DefaultGRPCClient) FetchMembersByID(grpcContext *GRPCContext, guildID discord.Snowflake, memberIDs []discord.Snowflake) (members []*discord.GuildMember, err error) {
+	userIDs := make([]int64, 0, len(memberIDs))
+	for _, userID := range memberIDs {
+		userIDs = append(userIDs, int64(userID))
+	}
+
+	membersResponse, err := grpcContext.SandwichClient.FetchGuildMembers(grpcContext.Context, &sandwich_protobuf.FetchGuildMembersRequest{
+		GuildID: int64(guildID),
+		UserIDs: userIDs,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch members: %w", err)
+	}
+
+	members = make([]*discord.GuildMember, 0, len(membersResponse.GuildMembers))
+
+	for _, grpcMember := range membersResponse.GuildMembers {
+		member, err := sandwich_protobuf.GRPCToGuildMember(grpcMember)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert protobuf.GuildMember to GuildMember: %w", err)
+		}
+
+		members = append(members, member)
+	}
+
+	return members, nil
+}
+
 func (grpcClient *DefaultGRPCClient) FetchMembersByName(grpcContext *GRPCContext, guildID discord.Snowflake, query string) (members []*discord.GuildMember, err error) {
 	membersResponse, err := grpcContext.SandwichClient.FetchGuildMembers(grpcContext.Context, &sandwich_protobuf.FetchGuildMembersRequest{
 		GuildID: int64(guildID),
