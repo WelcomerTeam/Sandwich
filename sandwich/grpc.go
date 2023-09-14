@@ -52,14 +52,19 @@ type GRPC interface {
 
 	RequestGuildChunk(grpcContext *GRPCContext, guildID discord.Snowflake) error
 	SendWebsocketMessage(grpcContext *GRPCContext, location Location, op int32, data []byte) error
-	WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error)
+	WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location_GuildMember, err error)
 }
 
 // Helper structure for SendWebsocketMessage and WhereIsGuild functions.
 type Location struct {
-	Manager    string
-	ShardGroup int32
-	ShardID    int32
+	Manager     string
+	ShardGroup  int32
+	ShardID     int32
+}
+
+type Location_GuildMember struct {
+	Location
+	GuildMember *discord.GuildMember
 }
 
 type DefaultGRPCClient struct{}
@@ -480,7 +485,7 @@ func (grpcClient *DefaultGRPCClient) SendWebsocketMessage(grpcContext *GRPCConte
 	return nil
 }
 
-func (grpcClient *DefaultGRPCClient) WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location, err error) {
+func (grpcClient *DefaultGRPCClient) WhereIsGuild(grpcContext *GRPCContext, guildID discord.Snowflake) (locations []*Location_GuildMember, err error) {
 	locationResponse, err := grpcContext.SandwichClient.WhereIsGuild(grpcContext.Context, &sandwich_protobuf.WhereIsGuildRequest{
 		GuildID: int64(guildID),
 	})
@@ -488,13 +493,17 @@ func (grpcClient *DefaultGRPCClient) WhereIsGuild(grpcContext *GRPCContext, guil
 		return nil, fmt.Errorf("failed to fetch guild locations: %w", err)
 	}
 
-	locations = make([]*Location, 0, len(locationResponse.Locations))
+	locations = make([]*Location_GuildMember, 0, len(locationResponse.Locations))
 
 	for _, grpcLocation := range locationResponse.Locations {
-		locations = append(locations, &Location{
-			Manager:    grpcLocation.Manager,
-			ShardGroup: grpcLocation.ShardGroup,
-			ShardID:    grpcLocation.ShardId,
+		guildMember, _ := sandwich_protobuf.GRPCToGuildMember(grpcLocation.GuildMember)
+		locations = append(locations, &Location_GuildMember{
+			Location: Location{
+				Manager:    grpcLocation.Manager,
+				ShardGroup: grpcLocation.ShardGroup,
+				ShardID:    grpcLocation.ShardId,
+			},
+			GuildMember: guildMember,
 		})
 	}
 
