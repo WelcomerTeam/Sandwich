@@ -147,7 +147,7 @@ func (sandwich *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandw
 	sandwich.SandwichEvents.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: sandwich,
-		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
+		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
 		Handlers: sandwich.SandwichEvents,
 		Context:  ctx,
 		Payload:  &payload,
@@ -173,7 +173,7 @@ func (sandwich *Sandwich) DispatchSandwichPayload(ctx context.Context, payload s
 	bot.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: sandwich,
-		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, logger),
+		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
 		Handlers: bot.Handlers,
 		Context:  ctx,
 		Payload:  &payload,
@@ -210,7 +210,7 @@ func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName s
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
 		identifiers, err := sandwich.GRPCInterface.FetchConsumerConfiguration((&EventContext{
 			Sandwich: sandwich,
-			Session:  discord.NewSession(ctx, "", sandwich.RESTInterface, sandwich.Logger),
+			Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
 			Context:  ctx,
 		}).ToGRPCContext(), "")
 		if err != nil {
