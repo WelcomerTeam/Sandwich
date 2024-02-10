@@ -160,7 +160,7 @@ func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event int
 
 	eventHandler := h.EventHandlers[eventName]
 
-	if eventHandler != nil {
+	if event != nil {
 		eventHandler.EventsMu.Lock()
 		eventHandler.Events = append(eventHandler.Events, event)
 		eventHandler.EventsMu.Unlock()
@@ -246,7 +246,7 @@ func OnReady(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) e
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnReadyFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
 		}
 	}
 
@@ -267,7 +267,7 @@ func OnResumed(eventCtx *EventContext, payload sandwich_structs.SandwichPayload)
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnResumedFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
 		}
 	}
 
@@ -292,7 +292,7 @@ func OnApplicationCommandCreate(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandCreatePayload))
 		}
 	}
 
@@ -317,7 +317,7 @@ func OnApplicationCommandUpdate(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandUpdatePayload))
 		}
 	}
 
@@ -342,7 +342,7 @@ func OnApplicationCommandDelete(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnApplicationCommandDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *applicationCommandDeletePayload))
 		}
 	}
 
@@ -367,7 +367,7 @@ func OnChannelCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelCreatePayload))
 		}
 	}
 
@@ -397,7 +397,7 @@ func OnChannelUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *channelUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *channelUpdatePayload))
 		}
 	}
 
@@ -422,7 +422,7 @@ func OnChannelDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *channelDeletePayload))
 		}
 	}
 
@@ -447,7 +447,7 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnChannelPinsUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, channelPinsUpdatePayload.LastPinTimestamp))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, channelPinsUpdatePayload.LastPinTimestamp))
 		}
 	}
 
@@ -472,7 +472,7 @@ func OnThreadCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadCreatePayload))
 		}
 	}
 
@@ -502,7 +502,7 @@ func OnThreadUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *threadUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeChannel, *threadUpdatePayload))
 		}
 	}
 
@@ -527,7 +527,7 @@ func OnThreadDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *threadDeletePayload))
 		}
 	}
 
@@ -545,7 +545,7 @@ type OnThreadDeleteFuncType func(eventCtx *EventContext, thread discord.Channel)
 
 // 	for _, event := range eventCtx.EventHandler.Events {
 // 		if f, ok := event.(OnThreadListSyncFuncType); ok {
-// 			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel()))
+// 			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, Channel()))
 // 		}
 // 	}
 //
@@ -572,7 +572,7 @@ func OnThreadMemberUpdate(eventCtx *EventContext, payload sandwich_structs.Sandw
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadMemberUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, *threadMemberUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, *threadMemberUpdatePayload))
 		}
 	}
 
@@ -607,7 +607,7 @@ func OnThreadMembersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnThreadMembersUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, addedUsers, removedUsers))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, addedUsers, removedUsers))
 		}
 	}
 
@@ -668,7 +668,7 @@ func OnGuildUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuild, guild))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuild, guild))
 		}
 	}
 
@@ -711,7 +711,7 @@ func OnGuildBanAdd(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildBanAddFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, user))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, user))
 		}
 	}
 
@@ -738,7 +738,7 @@ func OnGuildBanRemove(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildBanRemoveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, user))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, user))
 		}
 	}
 
@@ -771,7 +771,7 @@ func OnGuildEmojisUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildEmojisUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, before, after))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, before, after))
 		}
 	}
 
@@ -804,7 +804,7 @@ func OnGuildStickersUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildStickersUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, before, after))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, before, after))
 		}
 	}
 
@@ -827,7 +827,7 @@ func OnGuildIntegrationsUpdate(eventCtx *EventContext, payload sandwich_structs.
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildIntegrationsUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
 		}
 	}
 
@@ -850,7 +850,7 @@ func OnGuildMemberAdd(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberAddFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberAddPayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberAddPayload))
 		}
 	}
 
@@ -873,7 +873,7 @@ func OnGuildMemberRemove(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberRemoveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberRemovePayload.User))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildMemberRemovePayload.User))
 		}
 	}
 
@@ -901,7 +901,7 @@ func OnGuildMemberUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildMemberUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuildMember, *guildMemberUpdatePayload.GuildMember))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuildMember, *guildMemberUpdatePayload.GuildMember))
 		}
 	}
 
@@ -926,7 +926,7 @@ func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildRoleCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildRoleCreatePayload))
 		}
 	}
 
@@ -956,7 +956,7 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeRole, *guildRoleUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeRole, *guildRoleUpdatePayload))
 		}
 	}
 
@@ -979,7 +979,7 @@ func OnGuildRoleDelete(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guildRoleDeletePayload.RoleID))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guildRoleDeletePayload.RoleID))
 		}
 	}
 
@@ -1004,7 +1004,7 @@ func OnIntegrationCreate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnIntegrationCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *integrationCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *integrationCreatePayload))
 		}
 	}
 
@@ -1034,7 +1034,7 @@ func OnIntegrationUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnIntegrationUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeIntegration, *integrationUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeIntegration, *integrationUpdatePayload))
 		}
 	}
 
@@ -1062,7 +1062,7 @@ func OnIntegrationDelete(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnIntegrationDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, integrationDeletePayload.ID, applicationID))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, integrationDeletePayload.ID, applicationID))
 		}
 	}
 
@@ -1087,7 +1087,7 @@ func OnInteractionCreate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInteractionCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *interactionCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *interactionCreatePayload))
 		}
 	}
 
@@ -1112,7 +1112,7 @@ func OnInviteCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInviteCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteCreatePayload))
 		}
 	}
 
@@ -1137,7 +1137,7 @@ func OnInviteDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPay
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnInviteDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *inviteDeletePayload))
 		}
 	}
 
@@ -1162,7 +1162,7 @@ func OnMessageCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *messageCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *messageCreatePayload))
 		}
 	}
 
@@ -1192,7 +1192,7 @@ func OnMessageUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeMessage, *messageUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeMessage, *messageUpdatePayload))
 		}
 	}
 
@@ -1219,7 +1219,7 @@ func OnMessageDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageDeletePayload.ID))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageDeletePayload.ID))
 		}
 	}
 
@@ -1246,7 +1246,7 @@ func OnMessageDeleteBulk(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageDeleteBulkFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageDeleteBulkPayload.IDs))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageDeleteBulkPayload.IDs))
 		}
 	}
 
@@ -1271,7 +1271,7 @@ func OnMessageReactionAdd(eventCtx *EventContext, payload sandwich_structs.Sandw
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionAddFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionAddPayload.MessageID, *messageReactionAddPayload.Emoji, *messageReactionAddPayload.Member))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionAddPayload.MessageID, *messageReactionAddPayload.Emoji, *messageReactionAddPayload.Member))
 		}
 	}
 
@@ -1300,7 +1300,7 @@ func OnMessageReactionRemove(eventCtx *EventContext, payload sandwich_structs.Sa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionRemoveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemovePayload.MessageID, emoji, user))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemovePayload.MessageID, emoji, user))
 		}
 	}
 
@@ -1325,7 +1325,7 @@ func OnMessageReactionRemoveAll(eventCtx *EventContext, payload sandwich_structs
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionRemoveAllFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveAllPayload.MessageID))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveAllPayload.MessageID))
 		}
 	}
 
@@ -1352,7 +1352,7 @@ func OnMessageReactionRemoveEmoji(eventCtx *EventContext, payload sandwich_struc
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnMessageReactionRemoveEmojiFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveEmojiPayload.MessageID, *messageReactionRemoveEmojiPayload.Emoji))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, messageReactionRemoveEmojiPayload.MessageID, *messageReactionRemoveEmojiPayload.Emoji))
 		}
 	}
 
@@ -1375,7 +1375,7 @@ func OnPresenceUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnPresenceUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *presenceUpdatePayload.User, presenceUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *presenceUpdatePayload.User, presenceUpdatePayload))
 		}
 	}
 
@@ -1398,7 +1398,7 @@ func OnStageInstanceCreate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceCreateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceCreatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceCreatePayload))
 		}
 	}
 
@@ -1421,7 +1421,7 @@ func OnStageInstanceUpdate(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceUpdatePayload))
 		}
 	}
 
@@ -1442,7 +1442,7 @@ func OnStageInstanceDelete(eventCtx *EventContext, payload sandwich_structs.Sand
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnStageInstanceDeleteFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *stageInstanceDeletePayload))
 		}
 	}
 
@@ -1481,7 +1481,7 @@ func OnTypingStart(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnTypingStartFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, member, user, timestamp))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel, member, user, timestamp))
 		}
 	}
 
@@ -1507,7 +1507,7 @@ func OnUserUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPaylo
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnUserUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeUser, *userUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeUser, *userUpdatePayload))
 		}
 	}
 
@@ -1532,7 +1532,7 @@ func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwic
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnVoiceStateUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *voiceStateUpdatePayload.Member, *voiceStateUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *voiceStateUpdatePayload.Member, *voiceStateUpdatePayload))
 		}
 	}
 
@@ -1555,7 +1555,7 @@ func OnVoiceServerUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnVoiceServerUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, voiceServerUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, voiceServerUpdatePayload))
 		}
 	}
 
@@ -1580,7 +1580,7 @@ func OnWebhookUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnWebhookUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, channel))
 		}
 	}
 
@@ -1604,7 +1604,7 @@ func OnGuildJoin(eventCtx *EventContext, payload sandwich_structs.SandwichPayloa
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildJoinFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guild))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guild))
 		}
 	}
 
@@ -1628,7 +1628,7 @@ func OnGuildAvailable(eventCtx *EventContext, payload sandwich_structs.SandwichP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildJoinFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guild))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guild))
 		}
 	}
 
@@ -1651,7 +1651,7 @@ func OnGuildLeave(eventCtx *EventContext, payload sandwich_structs.SandwichPaylo
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildLeaveFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
 		}
 	}
 
@@ -1674,7 +1674,7 @@ func OnGuildUnavailable(eventCtx *EventContext, payload sandwich_structs.Sandwic
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildUnavailableFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *guildDeletePayload))
 		}
 	}
 
@@ -1692,7 +1692,7 @@ func OnSandwichConfigurationReload(eventCtx *EventContext, payload sandwich_stru
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnSandwichConfigurationReloadFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx))
 		}
 	}
 
@@ -1713,7 +1713,7 @@ func OnSandwichShardStatusUpdate(eventCtx *EventContext, payload sandwich_struct
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnSandwichShardStatusUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(
 				eventCtx,
 				shardStatusUpdatePayload.Manager,
 				shardStatusUpdatePayload.ShardGroup,
@@ -1739,7 +1739,7 @@ func OnSandwichShardGroupStatusUpdate(eventCtx *EventContext, payload sandwich_s
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnSandwichShardGroupStatusUpdateFuncType); ok {
-			return eventCtx.Handlers.WrapFuncType(eventCtx, f(
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(
 				eventCtx,
 				shardGroupStatusUpdatePayload.Manager,
 				shardGroupStatusUpdatePayload.ShardGroup,
