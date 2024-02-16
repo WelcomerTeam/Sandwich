@@ -1527,19 +1527,24 @@ func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwic
 		eventCtx.Guild = NewGuild(*voiceStateUpdatePayload.GuildID)
 	}
 
+	var beforeVoiceState discord.VoiceState
+	if _, err := eventCtx.DecodeExtra(payload, "before", &beforeVoiceState); err != nil {
+		return fmt.Errorf("failed to unmarshal extra: %w", err)
+	}
+
 	eventCtx.EventHandler.EventsMu.RLock()
 	defer eventCtx.EventHandler.EventsMu.RUnlock()
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnVoiceStateUpdateFuncType); ok {
-			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *voiceStateUpdatePayload.Member, *voiceStateUpdatePayload))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, *voiceStateUpdatePayload.Member, beforeVoiceState, *voiceStateUpdatePayload))
 		}
 	}
 
 	return nil
 }
 
-type OnVoiceStateUpdateFuncType func(eventCtx *EventContext, member discord.GuildMember, voice discord.VoiceState) error
+type OnVoiceStateUpdateFuncType func(eventCtx *EventContext, member discord.GuildMember, before discord.VoiceState, after discord.VoiceState) error
 
 // OnVoiceServerUpdate.
 func OnVoiceServerUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
