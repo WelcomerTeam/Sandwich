@@ -1525,6 +1525,7 @@ func OnVoiceStateUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwic
 
 	if voiceStateUpdatePayload.GuildID != nil {
 		eventCtx.Guild = NewGuild(*voiceStateUpdatePayload.GuildID)
+		voiceStateUpdatePayload.Member.GuildID = voiceStateUpdatePayload.GuildID
 	}
 
 	var beforeVoiceState discord.VoiceState
