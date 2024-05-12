@@ -78,7 +78,7 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 		ctx,
 		jetstreamMQ.channel,
 		jetstream.OrderedConsumerConfig{
-			FilterSubjects: []string{jetstreamMQ.channel + "." + channelName},
+			FilterSubjects: []string{jetstreamMQ.channel + ".*"},
 		},
 	)
 	if err != nil {
