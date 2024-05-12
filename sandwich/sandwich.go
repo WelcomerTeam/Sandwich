@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +15,6 @@ import (
 	discord "github.com/WelcomerTeam/Discord/discord"
 	protobuf "github.com/WelcomerTeam/Sandwich-Daemon/protobuf"
 	sandwich_structs "github.com/WelcomerTeam/Sandwich-Daemon/structs"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -115,7 +115,7 @@ eventLoop:
 		case grpcMessage := <-grpcMessages:
 			var payload sandwich_structs.SandwichPayload
 
-			err := jsoniter.Unmarshal(grpcMessage.Data, &payload)
+			err := json.Unmarshal(grpcMessage.Data, &payload)
 			if err != nil {
 				sandwich.Logger.Warn().Err(err).Msg("Failed to unmarshal grpc message")
 			} else {
@@ -124,7 +124,7 @@ eventLoop:
 		case stanMessage := <-channel:
 			var payload sandwich_structs.SandwichPayload
 
-			err := jsoniter.Unmarshal(stanMessage, &payload)
+			err := json.Unmarshal(stanMessage, &payload)
 			if err != nil {
 				sandwich.Logger.Warn().Err(err).Msg("Failed to unmarshal stan message")
 			} else {
@@ -279,7 +279,7 @@ func (eventCtx *EventContext) Trace() sandwich_structs.SandwichTrace {
 }
 
 func (eventCtx *EventContext) DecodeContent(msg sandwich_structs.SandwichPayload, out interface{}) error {
-	err := jsoniter.Unmarshal(msg.Data, &out)
+	err := json.Unmarshal(msg.Data, &out)
 	if err != nil {
 		return errors.Errorf("failed to unmarshal gateway payload: %v", err)
 	}
@@ -296,7 +296,7 @@ func (eventCtx *EventContext) DecodeExtra(msg sandwich_structs.SandwichPayload, 
 			return
 		}
 
-		err = jsoniter.Unmarshal(val, &out)
+		err = json.Unmarshal(val, &out)
 		if err != nil {
 			return ok, fmt.Errorf("failed to unmarshal extra: %w", err)
 		}

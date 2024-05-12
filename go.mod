@@ -5,10 +5,9 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20240310114051-2a2497c4bbb8
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20240512111942-7ba180e39722
+	github.com/WelcomerTeam/Discord v0.0.0-20240512183153-c1cea3c12cb0
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20240512185213-73615e5ec7cd
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/json-iterator/go v1.1.12
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/nats-io/nats.go v1.34.1
 	github.com/pkg/errors v0.9.1
@@ -24,8 +23,6 @@ require (
 	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
