@@ -65,7 +65,7 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 	if dbStr, ok := GetEntry(args, "DB").(string); !ok {
 		db, err = strconv.Atoi(dbStr)
 		if err != nil {
-			return errors.Errorf("redisMQ connect db atoi: %w", err)
+			return errors.Errorf("redisMQ connect db atoi: %v", err)
 		}
 	}
 
@@ -77,7 +77,7 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 
 	err = redisMQ.redisClient.Ping(ctx).Err()
 	if err != nil {
-		return errors.Errorf("redisMQ connect ping: %w", err)
+		return errors.Errorf("redisMQ connect ping: %v", err)
 	}
 
 	return nil
@@ -85,7 +85,7 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 
 func (redisMQ *RedisMQClient) Subscribe(ctx context.Context, channel string) error {
 	if redisMQ.pubsub != nil {
-		redisMQ.Unsubscribe()
+		redisMQ.Unsubscribe(ctx)
 	}
 
 	redisMQ.pubsub = redisMQ.redisClient.Subscribe(ctx, channel)
@@ -102,7 +102,7 @@ func (redisMQ *RedisMQClient) Subscribe(ctx context.Context, channel string) err
 	return nil
 }
 
-func (redisMQ *RedisMQClient) Unsubscribe() {
+func (redisMQ *RedisMQClient) Unsubscribe(ctx context.Context) {
 	if redisMQ.pubsub != nil {
 		pubsub := redisMQ.pubsub
 		pubsub.Close()

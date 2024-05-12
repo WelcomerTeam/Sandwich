@@ -60,7 +60,7 @@ func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, ar
 
 func (kafkaMQ *KafkaMQClient) Subscribe(ctx context.Context, channelName string) error {
 	if kafkaMQ.reader != nil {
-		kafkaMQ.Unsubscribe()
+		kafkaMQ.Unsubscribe(ctx)
 	}
 
 	kafkaMQ.reader = kafka.NewReader(kafka.ReaderConfig{
@@ -84,7 +84,7 @@ func (kafkaMQ *KafkaMQClient) Subscribe(ctx context.Context, channelName string)
 	return nil
 }
 
-func (kafkaMQ *KafkaMQClient) Unsubscribe() {
+func (kafkaMQ *KafkaMQClient) Unsubscribe(ctx context.Context) {
 	if kafkaMQ.reader != nil {
 		reader := kafkaMQ.reader
 		reader.Close()

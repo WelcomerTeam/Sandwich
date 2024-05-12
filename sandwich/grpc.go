@@ -57,9 +57,9 @@ type GRPC interface {
 
 // Helper structure for SendWebsocketMessage and WhereIsGuild functions.
 type Location struct {
-	Manager     string
-	ShardGroup  int32
-	ShardID     int32
+	Manager    string
+	ShardGroup int32
+	ShardID    int32
 }
 
 type Location_GuildMember struct {
