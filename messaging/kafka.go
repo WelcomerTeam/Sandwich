@@ -15,9 +15,8 @@ func init() {
 type KafkaMQClient struct {
 	KafkaClient *kafka.Reader
 
-	channel string
-	cluster string
 	address string
+	channel string
 
 	reader *kafka.Reader
 
@@ -38,10 +37,6 @@ func (kafkaMQ *KafkaMQClient) String() string {
 
 func (kafkaMQ *KafkaMQClient) Channel() string {
 	return kafkaMQ.channel
-}
-
-func (kafkaMQ *KafkaMQClient) Cluster() string {
-	return kafkaMQ.cluster
 }
 
 func (kafkaMQ *KafkaMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) error {

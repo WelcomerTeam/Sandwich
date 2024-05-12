@@ -14,12 +14,10 @@ func init() {
 }
 
 type RedisMQClient struct {
-	redisClient *redis.Client
+	RedisClient *redis.Client
+	PubSub      *redis.PubSub
 
 	channel string
-	cluster string
-
-	pubsub *redis.PubSub
 
 	msgChannel chan []byte
 }
@@ -38,10 +36,6 @@ func (redisMQ *RedisMQClient) String() string {
 
 func (redisMQ *RedisMQClient) Channel() string {
 	return redisMQ.channel
-}
-
-func (redisMQ *RedisMQClient) Cluster() string {
-	return redisMQ.cluster
 }
 
 func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) error {
@@ -69,13 +63,13 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 		}
 	}
 
-	redisMQ.redisClient = redis.NewClient(&redis.Options{
+	redisMQ.RedisClient = redis.NewClient(&redis.Options{
 		Addr:     address,
 		Password: password,
 		DB:       db,
 	})
 
-	err = redisMQ.redisClient.Ping(ctx).Err()
+	err = redisMQ.RedisClient.Ping(ctx).Err()
 	if err != nil {
 		return errors.Errorf("redisMQ connect ping: %v", err)
 	}
@@ -84,14 +78,14 @@ func (redisMQ *RedisMQClient) Connect(ctx context.Context, clientName string, ar
 }
 
 func (redisMQ *RedisMQClient) Subscribe(ctx context.Context, channel string) error {
-	if redisMQ.pubsub != nil {
+	if redisMQ.PubSub != nil {
 		redisMQ.Unsubscribe(ctx)
 	}
 
-	redisMQ.pubsub = redisMQ.redisClient.Subscribe(ctx, channel)
+	redisMQ.PubSub = redisMQ.RedisClient.Subscribe(ctx, channel)
 
 	go func(redisMQ *RedisMQClient) {
-		channel := redisMQ.pubsub.Channel()
+		channel := redisMQ.PubSub.Channel()
 
 		for {
 			msg := <-channel
@@ -103,12 +97,12 @@ func (redisMQ *RedisMQClient) Subscribe(ctx context.Context, channel string) err
 }
 
 func (redisMQ *RedisMQClient) Unsubscribe(ctx context.Context) {
-	if redisMQ.pubsub != nil {
-		pubsub := redisMQ.pubsub
+	if redisMQ.PubSub != nil {
+		pubsub := redisMQ.PubSub
 		pubsub.Close()
 	}
 
-	redisMQ.pubsub = nil
+	redisMQ.PubSub = nil
 }
 
 func (redisMQ *RedisMQClient) Chan() (ch chan []byte) {

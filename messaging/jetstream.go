@@ -15,12 +15,11 @@ func init() {
 
 type JetstreamMQClient struct {
 	JetStreamClient jetstream.JetStream `json:"-"`
+	ConsumeContext  *jetstream.ConsumeContext
 
 	channel string
-	cluster string
 
-	consumeContext *jetstream.ConsumeContext
-	msgChannel     chan []byte
+	msgChannel chan []byte
 }
 
 func NewJetstreamMQClient() (mqC *JetstreamMQClient) {
@@ -39,10 +38,6 @@ func (jetstreamMQ *JetstreamMQClient) Channel() string {
 	return jetstreamMQ.channel
 }
 
-func (jetstreamMQ *JetstreamMQClient) Cluster() string {
-	return jetstreamMQ.cluster
-}
-
 func (jetstreamMQ *JetstreamMQClient) Connect(ctx context.Context, clientName string, args map[string]interface{}) error {
 	var ok bool
 
@@ -52,19 +47,12 @@ func (jetstreamMQ *JetstreamMQClient) Connect(ctx context.Context, clientName st
 		return errors.New("jetstreamMQ connect: string type assertion failed for Address")
 	}
 
-	var cluster string
-
-	if cluster, ok = GetEntry(args, "Cluster").(string); !ok {
-		return errors.New("jetstreamMQ connect: string type assertion failed for Cluster")
-	}
-
 	var channel string
 
 	if channel, ok = GetEntry(args, "Channel").(string); !ok {
 		return errors.New("jetstreamMQ connect: string type assertion failed for Channel")
 	}
 
-	jetstreamMQ.cluster = cluster
 	jetstreamMQ.channel = channel
 
 	nc, err := nats.Connect(address)
@@ -81,12 +69,16 @@ func (jetstreamMQ *JetstreamMQClient) Connect(ctx context.Context, clientName st
 }
 
 func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName string) error {
-	if jetstreamMQ.consumeContext != nil {
+	if jetstreamMQ.ConsumeContext != nil {
 		jetstreamMQ.Unsubscribe(ctx)
 	}
 
 	handler := func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data() }
-	consumer, err := jetstreamMQ.JetStreamClient.CreateConsumer(ctx, channelName, jetstream.ConsumerConfig{})
+	consumer, err := jetstreamMQ.JetStreamClient.CreateConsumer(
+		ctx,
+		jetstreamMQ.channel+"."+channelName,
+		jetstream.ConsumerConfig{},
+	)
 	if err != nil {
 		return fmt.Errorf("failed to create jetstream consumer: %w", err)
 	}
@@ -96,18 +88,18 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 		return fmt.Errorf("failed to create consume context: %w", err)
 	}
 
-	jetstreamMQ.consumeContext = &consumeContext
+	jetstreamMQ.ConsumeContext = &consumeContext
 
 	return nil
 }
 
 func (jetstreamMQ *JetstreamMQClient) Unsubscribe(ctx context.Context) {
-	if jetstreamMQ.consumeContext != nil {
-		consumeContext := *jetstreamMQ.consumeContext
+	if jetstreamMQ.ConsumeContext != nil {
+		consumeContext := *jetstreamMQ.ConsumeContext
 		consumeContext.Drain()
 	}
 
-	jetstreamMQ.consumeContext = nil
+	jetstreamMQ.ConsumeContext = nil
 }
 
 func (jetstreamMQ *JetstreamMQClient) Chan() (ch chan []byte) {

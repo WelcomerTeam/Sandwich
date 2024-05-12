@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/WelcomerTeam/Discord v0.0.0-20240512183153-c1cea3c12cb0
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20240512185213-73615e5ec7cd
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20240512203318-371766fc1709
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/nats-io/nats.go v1.34.1

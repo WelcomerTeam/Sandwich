@@ -10,7 +10,6 @@ import (
 type MQClient interface {
 	String() string
 	Channel() string
-	Cluster() string
 
 	Connect(ctx context.Context, clientName string, args map[string]interface{}) error
 	Subscribe(ctx context.Context, channel string) error
