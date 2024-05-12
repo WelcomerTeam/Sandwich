@@ -74,10 +74,12 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 	}
 
 	handler := func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data() }
-	consumer, err := jetstreamMQ.JetStreamClient.CreateConsumer(
+	consumer, err := jetstreamMQ.JetStreamClient.OrderedConsumer(
 		ctx,
-		jetstreamMQ.channel+"."+channelName,
-		jetstream.ConsumerConfig{},
+		jetstreamMQ.channel,
+		jetstream.OrderedConsumerConfig{
+			FilterSubjects: []string{jetstreamMQ.channel + "." + channelName},
+		},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create jetstream consumer: %w", err)
