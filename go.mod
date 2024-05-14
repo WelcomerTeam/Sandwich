@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20240512183153-c1cea3c12cb0
+	github.com/WelcomerTeam/Discord v0.0.0-20240514163306-3aed427237a5
 	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20240512203318-371766fc1709
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/lithammer/fuzzysearch v1.1.8
@@ -30,6 +30,6 @@ require (
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240509183442-62759503f434 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240513163218-0867130af1f8 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 )
