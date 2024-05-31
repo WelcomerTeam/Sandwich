@@ -17,18 +17,20 @@ func FetchUser(ctx *GRPCContext, user *discord.User, createDMChannel bool) (*dis
 		return user, nil
 	}
 
-	user, err := ctx.GRPCInterface.FetchUserByID(ctx, ctx.Identifier.Token, user.ID, createDMChannel)
+	grpcUser, err := ctx.GRPCInterface.FetchUserByID(ctx, ctx.Identifier.Token, user.ID, createDMChannel)
 	if err != nil {
 		return user, fmt.Errorf("failed to fetch user: %w", err)
 	}
 
-	if user == nil {
+	if grpcUser == nil {
 		user, err = discord.GetUser(ctx.Session, user.ID)
 		if err != nil {
 			return user, ErrUserNotFound
 		}
 
 		return user, nil
+	} else {
+		user = grpcUser
 	}
 
 	return user, nil
