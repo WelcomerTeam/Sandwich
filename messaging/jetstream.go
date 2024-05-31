@@ -76,12 +76,25 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 		jetstreamMQ.Unsubscribe(ctx)
 	}
 
-	handler := func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data() }
+	useInterestPolicy := mustParseBool(os.Getenv("JETSTREAM_USE_INTEREST_POLICY"))
+	useSingleAck := mustParseBool(os.Getenv("JETSTREAM_USE_SINGLE_ACK"))
+
+	var handler func(msg jetstream.Msg)
+
+	if useInterestPolicy {
+		handler = func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data() }
+	} else {
+		if useSingleAck {
+			handler = func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data(); _ = msg.Ack() }
+		} else {
+			handler = func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data(); _ = msg.DoubleAck(ctx) }
+		}
+	}
 
 	var consumer jetstream.Consumer
 	var err error
 
-	if v := mustParseBool(os.Getenv("JETSTREAM_USE_INTEREST_POLICY")); v {
+	if useInterestPolicy {
 		consumer, err = jetstreamMQ.JetStreamClient.OrderedConsumer(
 			ctx,
 			jetstreamMQ.channel,
