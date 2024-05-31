@@ -3,9 +3,12 @@ package mqclients
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/nats-io/nuid"
 	"github.com/pkg/errors"
 )
 
@@ -74,13 +77,31 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 	}
 
 	handler := func(msg jetstream.Msg) { jetstreamMQ.msgChannel <- msg.Data() }
-	consumer, err := jetstreamMQ.JetStreamClient.OrderedConsumer(
-		ctx,
-		jetstreamMQ.channel,
-		jetstream.OrderedConsumerConfig{
-			FilterSubjects: []string{jetstreamMQ.channel + ".*"},
-		},
-	)
+
+	var consumer jetstream.Consumer
+	var err error
+
+	if v := mustParseBool(os.Getenv("JETSTREAM_USE_INTEREST_POLICY")); v {
+		consumer, err = jetstreamMQ.JetStreamClient.OrderedConsumer(
+			ctx,
+			jetstreamMQ.channel,
+			jetstream.OrderedConsumerConfig{
+				FilterSubjects: []string{jetstreamMQ.channel + ".*"},
+			},
+		)
+	} else {
+		consumer, err = jetstreamMQ.JetStreamClient.CreateOrUpdateConsumer(
+			ctx,
+			jetstreamMQ.channel,
+			jetstream.ConsumerConfig{
+				Name:           nuid.Next(),
+				DeliverPolicy:  jetstream.DeliverAllPolicy,
+				AckPolicy:      jetstream.AckExplicitPolicy,
+				FilterSubjects: []string{jetstreamMQ.channel + ".*"},
+			},
+		)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to create jetstream consumer: %w", err)
 	}
@@ -106,4 +127,10 @@ func (jetstreamMQ *JetstreamMQClient) Unsubscribe(ctx context.Context) {
 
 func (jetstreamMQ *JetstreamMQClient) Chan() (ch chan []byte) {
 	return jetstreamMQ.msgChannel
+}
+
+func mustParseBool(str string) bool {
+	boolean, _ := strconv.ParseBool(str)
+
+	return boolean
 }
