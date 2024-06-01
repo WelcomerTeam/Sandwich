@@ -103,16 +103,23 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 			},
 		)
 	} else {
-		consumer, err = jetstreamMQ.JetStreamClient.CreateOrUpdateConsumer(
-			ctx,
-			jetstreamMQ.channel,
-			jetstream.ConsumerConfig{
-				Name:           nuid.Next(),
-				DeliverPolicy:  jetstream.DeliverAllPolicy,
-				AckPolicy:      jetstream.AckExplicitPolicy,
-				FilterSubjects: []string{jetstreamMQ.channel + ".*"},
-			},
-		)
+		for {
+			consumer, err = jetstreamMQ.JetStreamClient.CreateOrUpdateConsumer(
+				ctx,
+				jetstreamMQ.channel,
+				jetstream.ConsumerConfig{
+					Name:           fmt.Sprintf("%s-%s", "sandwich", nuid.Next()),
+					DeliverPolicy:  jetstream.DeliverAllPolicy,
+					AckPolicy:      jetstream.AckExplicitPolicy,
+					FilterSubjects: []string{jetstreamMQ.channel + ".*"},
+				},
+			)
+
+			// If the consumer already exists, try again with a new NUID.
+			if err == nil || !errors.Is(err, jetstream.ErrConsumerExists) {
+				break
+			}
+		}
 	}
 
 	if err != nil {
