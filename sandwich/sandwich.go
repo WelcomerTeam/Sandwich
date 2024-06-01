@@ -21,7 +21,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.4.1"
+const VERSION = "0.5"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -43,6 +43,8 @@ type Sandwich struct {
 
 	SandwichClient protobuf.SandwichClient
 	GRPCInterface  GRPC
+
+	ErrorOnInvalidIdentifier bool
 }
 
 func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterface, logger io.Writer) *Sandwich {
@@ -64,9 +66,15 @@ func NewSandwich(conn grpc.ClientConnInterface, restInterface discord.RESTInterf
 
 		SandwichClient: protobuf.NewSandwichClient(conn),
 		GRPCInterface:  NewDefaultGRPCClient(),
+
+		ErrorOnInvalidIdentifier: false,
 	}
 
 	return sandwich
+}
+
+func (sandwich *Sandwich) SetErrorOnInvalidIdentifier(value bool) {
+	sandwich.ErrorOnInvalidIdentifier = value
 }
 
 func (sandwich *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) error {
@@ -160,12 +168,16 @@ func (sandwich *Sandwich) DispatchSandwichPayload(ctx context.Context, payload s
 	sandwich.botsMu.RUnlock()
 
 	if !ok {
-		sandwich.Logger.Debug().
-			Str("identifier", payload.Metadata.Identifier).
-			Str("application", payload.Metadata.Application).
-			Msg(ErrInvalidIdentifier.Error())
+		if !sandwich.ErrorOnInvalidIdentifier {
+			return nil
+		} else {
+			sandwich.Logger.Debug().
+				Str("identifier", payload.Metadata.Identifier).
+				Str("application", payload.Metadata.Application).
+				Msg(ErrInvalidIdentifier.Error())
 
-		return ErrInvalidIdentifier
+			return ErrInvalidIdentifier
+		}
 	}
 
 	logger := sandwich.Logger.With().Str("application", payload.Metadata.Application).Logger()
