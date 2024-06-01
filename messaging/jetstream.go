@@ -8,7 +8,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
-	"github.com/nats-io/nuid"
 	"github.com/pkg/errors"
 )
 
@@ -108,7 +107,7 @@ func (jetstreamMQ *JetstreamMQClient) Subscribe(ctx context.Context, channelName
 				ctx,
 				jetstreamMQ.channel,
 				jetstream.ConsumerConfig{
-					Name:           fmt.Sprintf("%s-%s", "sandwich", nuid.Next()),
+					Name:           "sandwich",
 					DeliverPolicy:  jetstream.DeliverAllPolicy,
 					AckPolicy:      jetstream.AckExplicitPolicy,
 					FilterSubjects: []string{jetstreamMQ.channel + ".*"},
