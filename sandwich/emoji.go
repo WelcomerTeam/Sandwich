@@ -22,12 +22,14 @@ func FetchEmoji(ctx *GRPCContext, emoji *discord.Emoji) (*discord.Emoji, error) 
 		return emoji, ErrFetchMissingGuild
 	}
 
-	emoji, err := ctx.GRPCInterface.FetchEmojiByID(ctx, *emoji.GuildID, emoji.ID)
+	gEmoji, err := ctx.GRPCInterface.FetchEmojiByID(ctx, *emoji.GuildID, emoji.ID)
 	if err != nil {
 		return emoji, fmt.Errorf("failed to fetch emoji: %w", err)
 	}
 
-	if emoji == nil {
+	emoji = &gEmoji
+
+	if emoji.ID.IsNil() {
 		return emoji, ErrEmojiNotFound
 	}
 

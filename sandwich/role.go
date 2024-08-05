@@ -22,12 +22,14 @@ func FetchRole(ctx *GRPCContext, role *discord.Role) (*discord.Role, error) {
 		return role, ErrFetchMissingGuild
 	}
 
-	role, err := ctx.GRPCInterface.FetchRoleByID(ctx, *role.GuildID, role.ID)
+	gRole, err := ctx.GRPCInterface.FetchRoleByID(ctx, *role.GuildID, role.ID)
 	if err != nil {
 		return role, fmt.Errorf("failed to fetch role: %w", err)
 	}
 
-	if role == nil {
+	role = &gRole
+
+	if role.ID.IsNil() {
 		return role, ErrRoleNotFound
 	}
 

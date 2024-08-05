@@ -22,12 +22,14 @@ func FetchChannel(ctx *GRPCContext, channel *discord.Channel) (*discord.Channel,
 		return channel, ErrFetchMissingGuild
 	}
 
-	channel, err := ctx.GRPCInterface.FetchChannelByID(ctx, *channel.GuildID, channel.ID)
+	gChannel, err := ctx.GRPCInterface.FetchChannelByID(ctx, *channel.GuildID, channel.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channel: %w", err)
 	}
 
-	if channel == nil {
+	channel = &gChannel
+
+	if channel.ID.IsNil() {
 		return nil, ErrChannelNotFound
 	}
 
