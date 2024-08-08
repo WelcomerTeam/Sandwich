@@ -51,6 +51,7 @@ func newDiscordHandlers() *Handlers {
 	handler.RegisterEventHandler(discord.DiscordEventGuildCreate, OnGuildCreate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildUpdate, OnGuildUpdate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildDelete, OnGuildDelete)
+	handler.RegisterEventHandler(discord.DiscordEventGuildAuditLogEntryCreate, OnGuildAuditLogEntryCreate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildBanAdd, OnGuildBanAdd)
 	handler.RegisterEventHandler(discord.DiscordEventGuildBanRemove, OnGuildBanRemove)
 	handler.RegisterEventHandler(discord.DiscordEventGuildEmojisUpdate, OnGuildEmojisUpdate)
@@ -693,6 +694,29 @@ func OnGuildDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	}
 
 	return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_REMOVE", payload)
+}
+
+type OnGuildAuditLogEntryCreateFuncType func(eventCtx *EventContext, guildID discord.Snowflake, entry discord.AuditLogEntry) error
+
+// OnGuildAuditLogEntryCreate.
+func OnGuildAuditLogEntryCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+	var guildAuditLogEntryCreatePayload discord.GuildAuditLogEntryCreate
+	if err := eventCtx.DecodeContent(payload, &guildAuditLogEntryCreatePayload); err != nil {
+		return fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	eventCtx.Guild = NewGuild(guildAuditLogEntryCreatePayload.GuildID)
+
+	eventCtx.EventHandler.EventsMu.RLock()
+	defer eventCtx.EventHandler.EventsMu.RUnlock()
+
+	for _, event := range eventCtx.EventHandler.Events {
+		if f, ok := event.(OnGuildAuditLogEntryCreateFuncType); ok {
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guildAuditLogEntryCreatePayload.GuildID, guildAuditLogEntryCreatePayload.AuditLogEntry))
+		}
+	}
+
+	return nil
 }
 
 // OnGuildBanAdd.
