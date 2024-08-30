@@ -936,9 +936,7 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 		return fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	if guildRoleUpdatePayload.GuildID != nil {
-		eventCtx.Guild = NewGuild(*guildRoleUpdatePayload.GuildID)
-	}
+	eventCtx.Guild = NewGuild(guildRoleUpdatePayload.GuildID)
 
 	var beforeRole discord.Role
 	if _, err := eventCtx.DecodeExtra(payload, "before", &beforeRole); err != nil {
@@ -950,7 +948,7 @@ func OnGuildRoleUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwich
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleUpdateFuncType); ok {
-			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeRole, discord.Role(guildRoleUpdatePayload)))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeRole, guildRoleUpdatePayload.Role))
 		}
 	}
 
