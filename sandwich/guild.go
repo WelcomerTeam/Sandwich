@@ -18,12 +18,14 @@ func FetchGuild(ctx *GRPCContext, guild *discord.Guild) (*discord.Guild, error) 
 		return guild, nil
 	}
 
-	guild, err := ctx.GRPCInterface.FetchGuildByID(ctx, guild.ID)
+	gGuild, err := ctx.GRPCInterface.FetchGuildByID(ctx, guild.ID)
 	if err != nil {
 		return guild, fmt.Errorf("failed to fetch guild: %w", err)
 	}
 
-	if guild == nil {
+	guild = &gGuild
+
+	if guild.ID.IsNil() {
 		return guild, ErrGuildNotFound
 	}
 
@@ -49,12 +51,14 @@ func FetchGuildMember(ctx *GRPCContext, guildMember *discord.GuildMember) (*disc
 		return guildMember, ErrFetchMissingGuild
 	}
 
-	guildMember, err := ctx.GRPCInterface.FetchMemberByID(ctx, *guildMember.GuildID, guildMember.User.ID)
+	gGuildMember, err := ctx.GRPCInterface.FetchMemberByID(ctx, *guildMember.GuildID, guildMember.User.ID)
 	if err != nil {
 		return guildMember, fmt.Errorf("failed to fetch member: %w", err)
 	}
 
-	if guildMember == nil {
+	guildMember = &gGuildMember
+
+	if guildMember.User == nil || guildMember.User.ID.IsNil() {
 		return guildMember, ErrMemberNotFound
 	}
 
