@@ -76,6 +76,30 @@ func (h *Handlers) RegisterOnChannelPinsUpdateEvent(event OnChannelPinsUpdateFun
 	h.RegisterEvent(eventName, nil, event)
 }
 
+// RegisterOnEntitlementCreate adds a new event handler for the ENTITLEMENT_CREATE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnEntitlementCreate(event OnEntitlementCreateFuncType) {
+	eventName := discord.DiscordEventEntitlementCreate
+
+	h.RegisterEvent(eventName, nil, event)
+}
+
+// RegisterOnEntitlementUpdate adds a new event handler for the ENTITLEMENT_UPDATE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnEntitlementUpdate(event OnEntitlementCreateFuncType) {
+	eventName := discord.DiscordEventEntitlementUpdate
+
+	h.RegisterEvent(eventName, nil, event)
+}
+
+// RegisterOnEntitlementDelete adds a new event handler for the ENTITLEMENT_DELETE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnEntitlementDelete(event OnEntitlementCreateFuncType) {
+	eventName := discord.DiscordEventEntitlementDelete
+
+	h.RegisterEvent(eventName, nil, event)
+}
+
 // RegisterOnThreadCreateEvent adds a new event handler for the THREAD_CREATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnThreadCreateEvent(event OnThreadCreateFuncType) {
