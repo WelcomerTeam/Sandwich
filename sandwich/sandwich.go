@@ -21,7 +21,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "0.6.0"
+const VERSION = "0.7"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -78,7 +78,6 @@ func (sandwich *Sandwich) SetErrorOnInvalidIdentifier(value bool) {
 }
 
 func (sandwich *Sandwich) ListenToChannel(ctx context.Context, channel chan []byte) error {
-
 	// Signal
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
@@ -155,7 +154,7 @@ func (sandwich *Sandwich) DispatchGRPCPayload(ctx context.Context, payload sandw
 	sandwich.SandwichEvents.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: sandwich,
-		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
+		Session:  discord.NewSession("", sandwich.RESTInterface),
 		Handlers: sandwich.SandwichEvents,
 		Context:  ctx,
 		Payload:  &payload,
@@ -185,7 +184,7 @@ func (sandwich *Sandwich) DispatchSandwichPayload(ctx context.Context, payload s
 	bot.Dispatch(&EventContext{
 		Logger:   logger,
 		Sandwich: sandwich,
-		Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
+		Session:  discord.NewSession("", sandwich.RESTInterface),
 		Handlers: bot.Handlers,
 		Context:  ctx,
 		Payload:  &payload,
@@ -222,7 +221,7 @@ func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName s
 	if !ok || (ok && time.Now().Add(LastRequestTimeout).Before(lastRequest)) {
 		identifiers, err := sandwich.GRPCInterface.FetchConsumerConfiguration((&EventContext{
 			Sandwich: sandwich,
-			Session:  discord.NewSession(ctx, "", sandwich.RESTInterface),
+			Session:  discord.NewSession("", sandwich.RESTInterface),
 			Context:  ctx,
 		}).ToGRPCContext(), "")
 		if err != nil {
