@@ -42,6 +42,9 @@ func newDiscordHandlers() *Handlers {
 	handler.RegisterEventHandler(discord.DiscordEventChannelUpdate, OnChannelUpdate)
 	handler.RegisterEventHandler(discord.DiscordEventChannelDelete, OnChannelDelete)
 	handler.RegisterEventHandler(discord.DiscordEventChannelPinsUpdate, OnChannelPinsUpdate)
+	handler.RegisterEventHandler(discord.DiscordEventEntitlementCreate, OnEntitlementCreate)
+	handler.RegisterEventHandler(discord.DiscordEventEntitlementUpdate, OnEntitlementUpdate)
+	handler.RegisterEventHandler(discord.DiscordEventEntitlementDelete, OnEntitlementDelete)
 	handler.RegisterEventHandler(discord.DiscordEventThreadCreate, OnThreadCreate)
 	handler.RegisterEventHandler(discord.DiscordEventThreadUpdate, OnThreadUpdate)
 	handler.RegisterEventHandler(discord.DiscordEventThreadDelete, OnThreadDelete)
@@ -51,6 +54,7 @@ func newDiscordHandlers() *Handlers {
 	handler.RegisterEventHandler(discord.DiscordEventGuildCreate, OnGuildCreate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildUpdate, OnGuildUpdate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildDelete, OnGuildDelete)
+	handler.RegisterEventHandler(discord.DiscordEventGuildAuditLogEntryCreate, OnGuildAuditLogEntryCreate)
 	handler.RegisterEventHandler(discord.DiscordEventGuildBanAdd, OnGuildBanAdd)
 	handler.RegisterEventHandler(discord.DiscordEventGuildBanRemove, OnGuildBanRemove)
 	handler.RegisterEventHandler(discord.DiscordEventGuildEmojisUpdate, OnGuildEmojisUpdate)
@@ -458,6 +462,69 @@ func OnChannelPinsUpdate(eventCtx *EventContext, payload sandwich_structs.Sandwi
 
 type OnChannelPinsUpdateFuncType func(eventCtx *EventContext, channel *discord.Channel, lastPinTimestamp time.Time) error
 
+// OnEntitlementCreate.
+func OnEntitlementCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+	var entitlementPayload discord.Entitlement
+	if err := eventCtx.DecodeContent(payload, &entitlementPayload); err != nil {
+		return fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	eventCtx.EventHandler.EventsMu.RLock()
+	defer eventCtx.EventHandler.EventsMu.RUnlock()
+
+	for _, event := range eventCtx.EventHandler.Events {
+		if f, ok := event.(OnEntitlementCreateFuncType); ok {
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, entitlementPayload))
+		}
+	}
+
+	return nil
+}
+
+type OnEntitlementCreateFuncType func(eventCtx *EventContext, entitlement discord.Entitlement) error
+
+// OnEntitlementUpdate.
+func OnEntitlementUpdate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+	var entitlementPayload discord.Entitlement
+	if err := eventCtx.DecodeContent(payload, &entitlementPayload); err != nil {
+		return fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	eventCtx.EventHandler.EventsMu.RLock()
+	defer eventCtx.EventHandler.EventsMu.RUnlock()
+
+	for _, event := range eventCtx.EventHandler.Events {
+		if f, ok := event.(OnEntitlementUpdateFuncType); ok {
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, entitlementPayload))
+		}
+	}
+
+	return nil
+}
+
+type OnEntitlementUpdateFuncType func(eventCtx *EventContext, entitlement discord.Entitlement) error
+
+// OnEntitlementDelete.
+func OnEntitlementDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+	var entitlementPayload discord.Entitlement
+	if err := eventCtx.DecodeContent(payload, &entitlementPayload); err != nil {
+		return fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	eventCtx.EventHandler.EventsMu.RLock()
+	defer eventCtx.EventHandler.EventsMu.RUnlock()
+
+	for _, event := range eventCtx.EventHandler.Events {
+		if f, ok := event.(OnEntitlementDeleteFuncType); ok {
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, entitlementPayload))
+		}
+	}
+
+	return nil
+}
+
+type OnEntitlementDeleteFuncType func(eventCtx *EventContext, entitlement discord.Entitlement) error
+
 // OnThreadCreate.
 func OnThreadCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
 	var threadCreatePayload discord.ThreadCreate
@@ -693,6 +760,29 @@ func OnGuildDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	}
 
 	return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_REMOVE", payload)
+}
+
+type OnGuildAuditLogEntryCreateFuncType func(eventCtx *EventContext, guildID discord.Snowflake, entry discord.AuditLogEntry) error
+
+// OnGuildAuditLogEntryCreate.
+func OnGuildAuditLogEntryCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+	var guildAuditLogEntryCreatePayload discord.GuildAuditLogEntryCreate
+	if err := eventCtx.DecodeContent(payload, &guildAuditLogEntryCreatePayload); err != nil {
+		return fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	eventCtx.Guild = NewGuild(guildAuditLogEntryCreatePayload.GuildID)
+
+	eventCtx.EventHandler.EventsMu.RLock()
+	defer eventCtx.EventHandler.EventsMu.RUnlock()
+
+	for _, event := range eventCtx.EventHandler.Events {
+		if f, ok := event.(OnGuildAuditLogEntryCreateFuncType); ok {
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, guildAuditLogEntryCreatePayload.GuildID, guildAuditLogEntryCreatePayload.AuditLogEntry))
+		}
+	}
+
+	return nil
 }
 
 // OnGuildBanAdd.
