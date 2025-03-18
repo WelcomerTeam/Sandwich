@@ -5,8 +5,8 @@ go 1.23.0
 toolchain go1.23.1
 
 require (
-	github.com/WelcomerTeam/Discord v0.0.0-20250315090755-a93bc321fe5c
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315093219-f03512f69893
+	github.com/WelcomerTeam/Discord v0.0.0-20250316082708-323691d5cebf
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315135409-ce282e75b94a
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/nats-io/nats.go v1.39.1

@@ -1,7 +1,11 @@
 github.com/WelcomerTeam/Discord v0.0.0-20250315090755-a93bc321fe5c h1:2H9sIrVGvizIzarHOgPwBwXuTdXY9s9kX6vhD5HWVYI=
 github.com/WelcomerTeam/Discord v0.0.0-20250315090755-a93bc321fe5c/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
+github.com/WelcomerTeam/Discord v0.0.0-20250316082708-323691d5cebf h1:GJfLaPO7u5ziv0Bk1bnM4PZ/2T5z3GM9uWW2XZ3Ukq4=
+github.com/WelcomerTeam/Discord v0.0.0-20250316082708-323691d5cebf/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315093219-f03512f69893 h1:PhNmT1Fnr6QvbpAgZGs4GEIMcUMFudOdpZK1YAkguF4=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315093219-f03512f69893/go.mod h1:CMjzMljv3UJnRey2+q1UYXV3VDlPoD00nbkgXVl97l8=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315135409-ce282e75b94a h1:+Kd5JTyd1z95lhFVde148GsitTulbkAfO9KIU/1Yo/k=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250315135409-ce282e75b94a/go.mod h1:CMjzMljv3UJnRey2+q1UYXV3VDlPoD00nbkgXVl97l8=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=

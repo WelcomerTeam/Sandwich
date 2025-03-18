@@ -709,9 +709,9 @@ func OnGuildCreate(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	// Guilds. that are lazy loaded are not handled.
 
 	if unavailable {
-		return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_AVAILABLE", payload)
+		return eventCtx.Handlers.DispatchType(eventCtx, discord.DiscordEventGuildAvailable, payload)
 	} else if !lazy {
-		return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_JOIN", payload)
+		return eventCtx.Handlers.DispatchType(eventCtx, discord.DiscordEventGuildJoin, payload)
 	}
 
 	return nil
@@ -756,10 +756,10 @@ func OnGuildDelete(eventCtx *EventContext, payload sandwich_structs.SandwichPayl
 	eventCtx.Guild = NewGuild(guildDeletePayload.ID)
 
 	if guildDeletePayload.Unavailable {
-		return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_UNAVAILABLE", payload)
+		return eventCtx.Handlers.DispatchType(eventCtx, discord.DiscordEventGuildUnavailable, payload)
 	}
 
-	return eventCtx.Handlers.DispatchType(eventCtx, "GUILD_REMOVE", payload)
+	return eventCtx.Handlers.DispatchType(eventCtx, discord.DiscordEventGuildLeave, payload)
 }
 
 type OnGuildAuditLogEntryCreateFuncType func(eventCtx *EventContext, guildID discord.Snowflake, entry discord.AuditLogEntry) error
@@ -1743,21 +1743,29 @@ func OnGuildLeave(eventCtx *EventContext, payload sandwich_structs.SandwichPaylo
 		return fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	eventCtx.Guild = NewGuild(guildDeletePayload.ID)
+	var beforeGuild discord.Guild
+	if _, err := eventCtx.DecodeExtra(payload, "before", &beforeGuild); err != nil {
+		beforeGuild = discord.Guild{
+			ID:          guildDeletePayload.ID,
+			Unavailable: guildDeletePayload.Unavailable,
+		}
+	}
+
+	eventCtx.Guild = &beforeGuild
 
 	eventCtx.EventHandler.EventsMu.RLock()
 	defer eventCtx.EventHandler.EventsMu.RUnlock()
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildLeaveFuncType); ok {
-			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, discord.UnavailableGuild(guildDeletePayload)))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, beforeGuild))
 		}
 	}
 
 	return nil
 }
 
-type OnGuildLeaveFuncType func(eventCtx *EventContext, unavailableGuild discord.UnavailableGuild) error
+type OnGuildLeaveFuncType func(eventCtx *EventContext, guild discord.Guild) error
 
 // OnGuildUnavailable.
 func OnGuildUnavailable(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
@@ -1785,7 +1793,7 @@ type OnGuildUnavailableFuncType func(eventCtx *EventContext, unavailableGuild di
 // Sandwich Events.
 
 // OnSandwichConfigurationReload.
-func OnSandwichConfigurationReload(eventCtx *EventContext, payload sandwich_structs.SandwichPayload) error {
+func OnSandwichConfigurationReload(eventCtx *EventContext, _ sandwich_structs.SandwichPayload) error {
 	eventCtx.EventHandler.EventsMu.RLock()
 	defer eventCtx.EventHandler.EventsMu.RUnlock()
 
