@@ -148,6 +148,14 @@ func (h *Handlers) RegisterOnGuildUpdateEvent(event OnGuildUpdateFuncType) {
 	h.RegisterEvent(eventName, nil, event)
 }
 
+// RegisterOnAuditLogEntryCreateEvent adds a new event handler for the GUILD_AUDIT_LOG_ENTRY_CREATE event.
+// It does not override a handler and instead will add another handler.
+func (h *Handlers) RegisterOnAuditGuildAuditLogEntryCreateEvent(event OnGuildAuditLogEntryCreateFuncType) {
+	eventName := discord.DiscordEventGuildAuditLogEntryCreate
+
+	h.RegisterEvent(eventName, nil, event)
+}
+
 // RegisterOnGuildBanAddEvent adds a new event handler for the GUILD_BAN_ADD event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnGuildBanAddEvent(event OnGuildBanAddFuncType) {
