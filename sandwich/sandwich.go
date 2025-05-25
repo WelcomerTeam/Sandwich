@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"runtime/debug"
 	"sync"
 	"syscall"
 	"time"
@@ -198,9 +197,9 @@ func (sandwich *Sandwich) RegisterBot(identifier string, bot *Bot) {
 }
 
 func (sandwich *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_daemon.ProducedPayload) {
-	sandwich.Logger.Error().Interface("errorValue", errorValue).Str("type", payload.Type).Msg("Recovered panic on event dispatch")
-
-	fmt.Println(string(debug.Stack()))
+	sandwich.Logger.Error("Recovered panic on event dispatch",
+		"errorValue", errorValue,
+		"type", payload.Type)
 }
 
 func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *sandwich_protobuf.SandwichApplication, ok bool, err error) {

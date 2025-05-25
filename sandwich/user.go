@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
-	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
@@ -32,7 +31,7 @@ func FetchUser(ctx *GRPCContext, user *discord.User, createDMChannel bool) (*dis
 	}
 
 	if grpcUser.GetID() != 0 {
-		user := sandwich_daemon.PBToUser(grpcUser)
+		user := sandwich_protobuf.PBToUser(grpcUser)
 
 		if !user.ID.IsNil() {
 			return user, nil

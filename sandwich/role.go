@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
-	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
@@ -37,7 +36,7 @@ func FetchRole(ctx *GRPCContext, role *discord.Role) (*discord.Role, error) {
 		return nil, ErrRoleNotFound
 	}
 
-	role = sandwich_daemon.PBToRole(gRole)
+	role = sandwich_protobuf.PBToRole(gRole)
 
 	if role.ID.IsNil() {
 		return role, ErrRoleNotFound

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
-	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
@@ -37,7 +36,7 @@ func FetchChannel(ctx *GRPCContext, channel *discord.Channel) (*discord.Channel,
 		return nil, ErrChannelNotFound
 	}
 
-	channel = sandwich_daemon.PBToChannel(gChannel)
+	channel = sandwich_protobuf.PBToChannel(gChannel)
 
 	if channel.ID.IsNil() {
 		return nil, ErrChannelNotFound

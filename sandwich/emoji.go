@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
-	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
@@ -37,7 +36,7 @@ func FetchEmoji(ctx *GRPCContext, emoji *discord.Emoji) (*discord.Emoji, error) 
 		return nil, ErrEmojiNotFound
 	}
 
-	emoji = sandwich_daemon.PBToEmoji(gEmoji)
+	emoji = sandwich_protobuf.PBToEmoji(gEmoji)
 
 	if emoji.ID.IsNil() {
 		return emoji, ErrEmojiNotFound

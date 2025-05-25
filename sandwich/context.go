@@ -2,16 +2,16 @@ package internal
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/WelcomerTeam/Discord/discord"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
-	"github.com/rs/zerolog"
 )
 
 type GRPCContext struct {
 	context.Context
 
-	Logger zerolog.Logger
+	Logger *slog.Logger
 
 	SandwichClient sandwich_protobuf.SandwichClient
 

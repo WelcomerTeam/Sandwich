@@ -192,7 +192,7 @@ func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payloa
 	if payload.Metadata.Application != "" {
 		identifier, ok, err := eventCtx.Sandwich.FetchIdentifier(context.TODO(), payload.Metadata.Application)
 		if !ok || err != nil {
-			eventCtx.Logger.Warn().Err(err).Msg("Failed to fetch identifier for application")
+			eventCtx.Logger.Warn("Failed to fetch identifier for application", "error", err)
 
 			return err
 		}
@@ -203,22 +203,23 @@ func (h *Handlers) DispatchType(eventCtx *EventContext, eventName string, payloa
 		}
 	}
 
-	if eventHandler, ok := h.EventHandlers[eventName]; ok {
-		eventCtx.EventHandler = eventHandler
+	eventHandler, ok := h.EventHandlers[eventName]
+	if !ok {
+		eventCtx.Logger.Info("Unknown event handler", "type", payload.Type)
 
-		defer func() {
-			errorValue := recover()
-			if errorValue != nil {
-				eventCtx.Sandwich.RecoverEventPanic(errorValue, eventCtx, &payload)
-			}
-		}()
-
-		return eventHandler.Parser(eventCtx, payload)
+		return nil
 	}
 
-	eventCtx.Logger.Info().Str("type", payload.Type).Msg("Unknown event handler")
+	eventCtx.EventHandler = eventHandler
 
-	return ErrUnknownEvent
+	defer func() {
+		errorValue := recover()
+		if errorValue != nil {
+			eventCtx.Sandwich.RecoverEventPanic(errorValue, eventCtx, &payload)
+		}
+	}()
+
+	return eventHandler.Parser(eventCtx, payload)
 }
 
 // WrapFuncType handles the error of a FuncType if it returns an error.

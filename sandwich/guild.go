@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
-	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
@@ -32,7 +31,7 @@ func FetchGuild(ctx *GRPCContext, guild *discord.Guild) (*discord.Guild, error) 
 		return guild, ErrGuildNotFound
 	}
 
-	guild = sandwich_daemon.PBToGuild(gGuild)
+	guild = sandwich_protobuf.PBToGuild(gGuild)
 
 	if guild.ID.IsNil() {
 		return guild, ErrGuildNotFound
@@ -73,7 +72,7 @@ func FetchGuildMember(ctx *GRPCContext, guildMember *discord.GuildMember) (*disc
 		return nil, ErrMemberNotFound
 	}
 
-	guildMember = sandwich_daemon.PBToGuildMember(gGuildMember)
+	guildMember = sandwich_protobuf.PBToGuildMember(gGuildMember)
 
 	if guildMember.User == nil || guildMember.User.ID.IsNil() {
 		return guildMember, ErrMemberNotFound

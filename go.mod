@@ -6,10 +6,8 @@ toolchain go1.23.1
 
 require (
 	github.com/WelcomerTeam/Discord v0.0.0-20250522224859-48581d6270ea
-	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250523072928-e4e5170c5bcd
-	github.com/lithammer/fuzzysearch v1.1.8
+	github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250524094448-0c8b69fa8c09
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.34.0
 	google.golang.org/grpc v1.72.1
 )
 
@@ -18,8 +16,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.13 // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mhmtszr/concurrent-swiss-map v1.0.8 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
