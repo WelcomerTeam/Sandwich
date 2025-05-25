@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
+	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
+	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
 func NewChannel(guildID *discord.Snowflake, channelID discord.Snowflake) *discord.Channel {
@@ -22,12 +24,20 @@ func FetchChannel(ctx *GRPCContext, channel *discord.Channel) (*discord.Channel,
 		return channel, ErrFetchMissingGuild
 	}
 
-	gChannel, err := ctx.GRPCInterface.FetchChannelByID(ctx, *channel.GuildID, channel.ID)
+	gChannels, err := ctx.SandwichClient.FetchGuildChannel(ctx, &sandwich_protobuf.FetchGuildChannelRequest{
+		GuildId:    int64(*channel.GuildID),
+		ChannelIds: []int64{int64(channel.ID)},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch channel: %w", err)
 	}
 
-	channel = &gChannel
+	gChannel, ok := gChannels.GetChannels()[int64(channel.ID)]
+	if !ok {
+		return nil, ErrChannelNotFound
+	}
+
+	channel = sandwich_daemon.PBToChannel(gChannel)
 
 	if channel.ID.IsNil() {
 		return nil, ErrChannelNotFound

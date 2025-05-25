@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
+	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
+	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
 func NewRole(guildID *discord.Snowflake, roleID discord.Snowflake) *discord.Role {
@@ -22,12 +24,20 @@ func FetchRole(ctx *GRPCContext, role *discord.Role) (*discord.Role, error) {
 		return role, ErrFetchMissingGuild
 	}
 
-	gRole, err := ctx.GRPCInterface.FetchRoleByID(ctx, *role.GuildID, role.ID)
+	gRoles, err := ctx.SandwichClient.FetchGuildRole(ctx, &sandwich_protobuf.FetchGuildRoleRequest{
+		GuildId: int64(*role.GuildID),
+		RoleIds: []int64{int64(role.ID)},
+	})
 	if err != nil {
 		return role, fmt.Errorf("failed to fetch role: %w", err)
 	}
 
-	role = &gRole
+	gRole, ok := gRoles.GetRoles()[int64(role.ID)]
+	if !ok {
+		return nil, ErrRoleNotFound
+	}
+
+	role = sandwich_daemon.PBToRole(gRole)
 
 	if role.ID.IsNil() {
 		return role, ErrRoleNotFound

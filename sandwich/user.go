@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/WelcomerTeam/Discord/discord"
+	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
+	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
 func NewUser(userID discord.Snowflake) *discord.User {
@@ -17,19 +19,32 @@ func FetchUser(ctx *GRPCContext, user *discord.User, createDMChannel bool) (*dis
 		return user, nil
 	}
 
-	grpcUser, err := ctx.GRPCInterface.FetchUserByID(ctx, ctx.Identifier.Token, user.ID, createDMChannel)
+	grpcUsers, err := ctx.SandwichClient.FetchUser(ctx, &sandwich_protobuf.FetchUserRequest{
+		UserIds: []int64{int64(user.ID)},
+	})
 	if err != nil {
 		return user, fmt.Errorf("failed to fetch user: %w", err)
 	}
 
-	if grpcUser.ID.IsNil() {
-		user, err = discord.GetUser(ctx.Context, ctx.Session, user.ID)
-		if err != nil {
-			return user, ErrUserNotFound
-		}
-
-		return user, nil
+	grpcUser, ok := grpcUsers.GetUsers()[int64(user.ID)]
+	if !ok {
+		return nil, ErrUserNotFound
 	}
 
-	return &grpcUser, nil
+	if grpcUser.GetID() != 0 {
+		user := sandwich_daemon.PBToUser(grpcUser)
+
+		if !user.ID.IsNil() {
+			return user, nil
+		}
+	}
+
+	// Fetch user from discord, if not found in GRPC cache
+
+	user, err = discord.GetUser(ctx.Context, ctx.Session, user.ID)
+	if err != nil {
+		return user, ErrUserNotFound
+	}
+
+	return user, nil
 }

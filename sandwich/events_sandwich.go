@@ -1,6 +1,9 @@
 package internal
 
-import discord "github.com/WelcomerTeam/Discord/discord"
+import (
+	discord "github.com/WelcomerTeam/Discord/discord"
+	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
+)
 
 // Discord Events.
 
@@ -465,7 +468,7 @@ func (h *Handlers) RegisterOnGuildUnavailableEvent(event OnGuildUnavailableFuncT
 // RegisterOnSandwichConfigurationReload adds a new event handler for the SW_CONFIGURATION_RELOAD event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnSandwichConfigurationReload(event OnSandwichConfigurationReloadFuncType) {
-	eventName := "SW_CONFIGURATION_RELOAD"
+	eventName := sandwich_daemon.SandwichEventConfigUpdate
 
 	h.RegisterEvent(eventName, nil, event)
 }
@@ -473,15 +476,15 @@ func (h *Handlers) RegisterOnSandwichConfigurationReload(event OnSandwichConfigu
 // RegisterOnSandwichShardStatusUpdate adds a new event handler for the SW_SHARD_STATUS_UPDATE event.
 // It does not override a handler and instead will add another handler.
 func (h *Handlers) RegisterOnSandwichShardStatusUpdate(event OnSandwichShardStatusUpdateFuncType) {
-	eventName := "SW_SHARD_STATUS_UPDATE"
+	eventName := sandwich_daemon.SandwichShardStatusUpdate
 
 	h.RegisterEvent(eventName, nil, event)
 }
 
-// RegisterOnSandwichShardGroupStatusUpdate adds a new event handler for the SW_SHARD_GROUP_STATUS_UPDATE event.
+// RegisterOnSandwichApplicationStatusUpdate adds a new event handler for the SW_APPLICATION_STATUS_UPDATE event.
 // It does not override a handler and instead will add another handler.
-func (h *Handlers) RegisterOnSandwichShardGroupStatusUpdate(event OnSandwichShardGroupStatusUpdateFuncType) {
-	eventName := "SW_SHARD_GROUP_STATUS_UPDATE"
+func (h *Handlers) RegisterOnSandwichApplicationStatusUpdate(event OnSandwichApplicationStatusUpdateFuncType) {
+	eventName := sandwich_daemon.SandwichApplicationStatusUpdate
 
 	h.RegisterEvent(eventName, nil, event)
 }

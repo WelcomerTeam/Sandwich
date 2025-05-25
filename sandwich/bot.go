@@ -2,19 +2,18 @@ package internal
 
 import (
 	"fmt"
-
-	"github.com/rs/zerolog"
+	"log/slog"
 )
 
 type Bot struct {
-	Logger zerolog.Logger
+	Logger slog.Logger
 
 	Cogs map[string]Cog
 
 	*Handlers
 }
 
-func NewBot(logger zerolog.Logger) *Bot {
+func NewBot(logger slog.Logger) *Bot {
 	bot := &Bot{
 		Logger:   logger,
 		Cogs:     make(map[string]Cog),
@@ -40,23 +39,22 @@ func (bot *Bot) RegisterCog(cog Cog) error {
 	}
 
 	if err := cog.RegisterCog(bot); err != nil {
-		bot.Logger.Panic().Str("cog", cogInfo.Name).Err(err).Msg("Failed to register cog")
-
-		return fmt.Errorf("failed to register cog: %w", err)
+		bot.Logger.Error("Failed to register cog", "cog", cogInfo.Name, "error", err)
+		panic(fmt.Sprintf(`sandwich: RegisterCog(%v): %v`, cog, err.Error()))
 	}
 
 	bot.Cogs[cogInfo.Name] = cog
 
-	bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Loaded cog")
+	bot.Logger.Info("Loaded cog", "cog", cogInfo.Name)
 
 	if cast, ok := cog.(CogWithBotLoad); ok {
-		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has BotLoad")
+		bot.Logger.Info("Cog has BotLoad", "cog", cogInfo.Name)
 
 		cast.BotLoad(bot)
 	}
 
 	if cast, ok := cog.(CogWithEvents); ok {
-		bot.Logger.Info().Str("cog", cogInfo.Name).Msg("Cog has events")
+		bot.Logger.Info("Cog has events", "cog", cogInfo.Name)
 
 		bot.RegisterCogEvents(cast.GetEventHandlers())
 	}
@@ -78,17 +76,16 @@ func (bot *Bot) RegisterCogEvents(events *Handlers) {
 			if !ok {
 				bot.EventHandlers[eventHandler.eventName] = eventHandler
 
-				bot.Logger.Info().Str("event", eventHandler.eventName).Msg("Registered new event handler")
+				bot.Logger.Info("Registered new event handler", "event", eventHandler.eventName)
 			} else {
 				botEventHandler.EventsMu.Lock()
 				eventHandler.EventsMu.RLock()
 
 				botEventHandler.Events = append(botEventHandler.Events, eventHandler.Events...)
 
-				bot.Logger.Info().
-					Str("event", eventHandler.eventName).
-					Int("events", len(eventHandler.Events)).
-					Msg("Registered new events")
+				bot.Logger.Info("Registered new events",
+					"event", eventHandler.eventName,
+					"events", len(eventHandler.Events))
 
 				eventHandler.EventsMu.RUnlock()
 				botEventHandler.EventsMu.Unlock()

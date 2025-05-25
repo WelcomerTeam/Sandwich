@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	discord "github.com/WelcomerTeam/Discord/discord"
+	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
+	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
 // NewGuild creates a new partial guild. Use Fetch() to populate the guild.
@@ -18,12 +20,19 @@ func FetchGuild(ctx *GRPCContext, guild *discord.Guild) (*discord.Guild, error) 
 		return guild, nil
 	}
 
-	gGuild, err := ctx.GRPCInterface.FetchGuildByID(ctx, guild.ID)
+	gGuilds, err := ctx.SandwichClient.FetchGuild(ctx, &sandwich_protobuf.FetchGuildRequest{
+		GuildIds: []int64{int64(guild.ID)},
+	})
 	if err != nil {
 		return guild, fmt.Errorf("failed to fetch guild: %w", err)
 	}
 
-	guild = &gGuild
+	gGuild, ok := gGuilds.GetGuilds()[int64(guild.ID)]
+	if !ok {
+		return guild, ErrGuildNotFound
+	}
+
+	guild = sandwich_daemon.PBToGuild(gGuild)
 
 	if guild.ID.IsNil() {
 		return guild, ErrGuildNotFound
@@ -51,12 +60,20 @@ func FetchGuildMember(ctx *GRPCContext, guildMember *discord.GuildMember) (*disc
 		return guildMember, ErrFetchMissingGuild
 	}
 
-	gGuildMember, err := ctx.GRPCInterface.FetchMemberByID(ctx, *guildMember.GuildID, guildMember.User.ID)
+	gGuildMembers, err := ctx.SandwichClient.FetchGuildMember(ctx, &sandwich_protobuf.FetchGuildMemberRequest{
+		GuildId: int64(*guildMember.GuildID),
+		UserIds: []int64{int64(guildMember.User.ID)},
+	})
 	if err != nil {
 		return guildMember, fmt.Errorf("failed to fetch member: %w", err)
 	}
 
-	guildMember = &gGuildMember
+	gGuildMember, ok := gGuildMembers.GetGuildMembers()[int64(guildMember.User.ID)]
+	if !ok {
+		return nil, ErrMemberNotFound
+	}
+
+	guildMember = sandwich_daemon.PBToGuildMember(gGuildMember)
 
 	if guildMember.User == nil || guildMember.User.ID.IsNil() {
 		return guildMember, ErrMemberNotFound
