@@ -6,14 +6,14 @@ import (
 )
 
 type Bot struct {
-	Logger slog.Logger
+	Logger *slog.Logger
 
 	Cogs map[string]Cog
 
 	*Handlers
 }
 
-func NewBot(logger slog.Logger) *Bot {
+func NewBot(logger *slog.Logger) *Bot {
 	bot := &Bot{
 		Logger:   logger,
 		Cogs:     make(map[string]Cog),
