@@ -2,6 +2,8 @@ github.com/WelcomerTeam/Discord v0.0.0-20250522224859-48581d6270ea h1:lyFofn7brJ
 github.com/WelcomerTeam/Discord v0.0.0-20250522224859-48581d6270ea/go.mod h1:A3Pg/wPoP5r7TYMflf0dUVnBOoTi/liKFx/dFVFPfM8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250524094448-0c8b69fa8c09 h1:p4/R+gmWQ31KMHjrEShAUSmLNEUUb+Qd1F1WkByq/W8=
 github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250524094448-0c8b69fa8c09/go.mod h1:tcl/Dv9yDhodULt+bHk90Y0qtelaAyHcWKz/Y9FZDDU=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250526181236-2da744537022 h1:jkl+xH1JQa2IOueuty1Wd1y5QGeSsnf1S1cTy5/TinA=
+github.com/WelcomerTeam/Sandwich-Daemon v0.0.0-20250526181236-2da744537022/go.mod h1:tcl/Dv9yDhodULt+bHk90Y0qtelaAyHcWKz/Y9FZDDU=
 github.com/WelcomerTeam/czlib v0.0.0-20210907121728-d7ed7721c904 h1:WV4Ok6b0/kgczuLAgGTNtLVOB5JIqdfzJzgOpdlDM8Q=
 github.com/WelcomerTeam/czlib v0.0.0-20210907121728-d7ed7721c904/go.mod h1:rCfCrg0xPnEoVKPXk+GNyHgzTWMzJjhnPaAfDe7UPJE=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
@@ -66,6 +68,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237/go.mod h1:qQ0YXyHHx3XkvlzUtpXDkS29lDSafHMZBAZDc03LQ3A=
 google.golang.org/grpc v1.72.1 h1:HR03wO6eyZ7lknl75XlxABNVLLFc2PAb6mHlYh756mA=
 google.golang.org/grpc v1.72.1/go.mod h1:wH5Aktxcg25y1I3w7H69nHfXdOG3UiadoBtjh3izSDM=
+google.golang.org/grpc v1.72.2 h1:TdbGzwb82ty4OusHWepvFWGLgIbNo1/SUynEN0ssqv8=
+google.golang.org/grpc v1.72.2/go.mod h1:wH5Aktxcg25y1I3w7H69nHfXdOG3UiadoBtjh3izSDM=
 google.golang.org/protobuf v1.36.6 h1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=
 google.golang.org/protobuf v1.36.6/go.mod h1:jduwjTPXsFjZGTmRluh+L6NjiWu7pchiJ2/5YcXBHnY=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

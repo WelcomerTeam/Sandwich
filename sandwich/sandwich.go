@@ -20,7 +20,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "1.0.0"
+const VERSION = "1.0.1"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -295,22 +295,19 @@ func (eventCtx *EventContext) DecodeContent(msg sandwich_daemon.ProducedPayload,
 }
 
 func (eventCtx *EventContext) DecodeExtra(msg sandwich_daemon.ProducedPayload, key string, out interface{}) (ok bool, err error) {
-	val, ok := msg.Extra[key]
-	if ok {
-		valBytes, ok := val.([]byte)
-		if !ok {
-			return false, nil
-		}
-
-		if len(valBytes) == 0 {
-			return false, nil
-		}
-
-		err = json.Unmarshal(valBytes, &out)
-		if err != nil {
-			return true, fmt.Errorf("failed to unmarshal extra: %w", err)
-		}
+	valBytes, ok := msg.Extra[key]
+	if !ok {
+		return false, nil
 	}
 
-	return
+	if len(valBytes) == 0 {
+		return false, nil
+	}
+
+	err = json.Unmarshal(valBytes, &out)
+	if err != nil {
+		return true, fmt.Errorf("failed to unmarshal extra: %w", err)
+	}
+
+	return true, nil
 }
