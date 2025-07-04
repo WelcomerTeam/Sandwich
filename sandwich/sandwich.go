@@ -20,7 +20,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "1.0.1"
+const VERSION = "1.0.2"
 
 var LastRequestTimeout = time.Minute * 60
 
