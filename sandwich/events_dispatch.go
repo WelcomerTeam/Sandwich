@@ -1003,8 +1003,8 @@ func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_daemon.ProducedP
 		return fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	if guildRoleCreatePayload.GuildID != nil {
-		eventCtx.Guild = NewGuild(*guildRoleCreatePayload.GuildID)
+	if !guildRoleCreatePayload.GuildID.IsNil() {
+		eventCtx.Guild = NewGuild(guildRoleCreatePayload.GuildID)
 	}
 
 	eventCtx.EventHandler.EventsMu.RLock()
@@ -1012,7 +1012,7 @@ func OnGuildRoleCreate(eventCtx *EventContext, payload sandwich_daemon.ProducedP
 
 	for _, event := range eventCtx.EventHandler.Events {
 		if f, ok := event.(OnGuildRoleCreateFuncType); ok {
-			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, discord.Role(guildRoleCreatePayload)))
+			eventCtx.Handlers.WrapFuncType(eventCtx, f(eventCtx, discord.Role(guildRoleCreatePayload.Role)))
 		}
 	}
 
