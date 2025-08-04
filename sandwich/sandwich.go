@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"sync"
 	"syscall"
 	"time"
@@ -200,6 +201,9 @@ func (sandwich *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *Ev
 	sandwich.Logger.Error("Recovered panic on event dispatch",
 		"errorValue", errorValue,
 		"type", payload.Type)
+
+	stackTrace := debug.Stack()
+	println(string(stackTrace))
 }
 
 func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName string) (identifier *sandwich_protobuf.SandwichApplication, ok bool, err error) {
