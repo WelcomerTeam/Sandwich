@@ -21,7 +21,7 @@ import (
 )
 
 // VERSION follows semantic versioning.
-const VERSION = "1.0.3"
+const VERSION = "1.0.4"
 
 var LastRequestTimeout = time.Minute * 60
 
@@ -230,15 +230,18 @@ func (sandwich *Sandwich) FetchIdentifier(ctx context.Context, applicationName s
 		}
 
 		sandwich.identifiersMu.Lock()
+
 		sandwich.Identifiers = map[string]*sandwich_protobuf.SandwichApplication{}
 
 		for k := range identifiers.Applications {
 			v := identifiers.Applications[k]
 			sandwich.Identifiers[k] = v
 		}
-		sandwich.identifiersMu.Unlock()
 
 		identifier, ok = sandwich.Identifiers[applicationName]
+
+		sandwich.identifiersMu.Unlock()
+
 		if !ok {
 			return nil, false, ErrInvalidApplication
 		}
