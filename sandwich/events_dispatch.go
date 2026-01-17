@@ -235,10 +235,17 @@ func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.Prod
 	shardID := payload.Metadata.Shard[1]
 
 	channel := h.getWorkerPool(eventCtx, shardID)
-	channel <- WorkerMessage{
+	println("Dispatching to worker pool", "shard_id", shardID)
+	select {
+	case channel <- WorkerMessage{
 		eventCtx: eventCtx,
 		payload:  payload,
+	}:
+		return
+	default:
+		println("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type)
 	}
+	println("Dispatched to worker pool", "shard_id", shardID)
 }
 
 // DispatchType is similar to Dispatch however a custom event name
