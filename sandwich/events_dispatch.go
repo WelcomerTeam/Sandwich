@@ -11,9 +11,18 @@ import (
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
 
+type WorkerMessage struct {
+	eventCtx *EventContext
+	payload  sandwich_daemon.ProducedPayload
+}
+
 type Handlers struct {
 	eventHandlersMu sync.RWMutex
 	EventHandlers   map[string]*EventHandler
+
+	workerPoolMu   sync.RWMutex
+	workerPoolSize int32
+	WorkerPool     map[int32]chan WorkerMessage
 }
 
 // SetupHandler ensures all nullable variables are properly constructed.
@@ -22,6 +31,9 @@ func SetupHandler(handler *Handlers) *Handlers {
 		handler = &Handlers{
 			eventHandlersMu: sync.RWMutex{},
 			EventHandlers:   make(map[string]*EventHandler),
+			workerPoolMu:    sync.RWMutex{},
+			workerPoolSize:  0,
+			WorkerPool:      make(map[int32]chan WorkerMessage),
 		}
 	}
 
@@ -180,10 +192,49 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 	return h.RegisterEvent(eventName, parser, nil)
 }
 
+func (h *Handlers) growWorkerPool(shardCount int32) {
+	h.workerPoolMu.RLock()
+	currentSize := h.workerPoolSize
+	h.workerPoolMu.RUnlock()
+
+	if shardCount <= currentSize {
+		return
+	}
+
+	// Grow and spawn new workers
+
+	h.workerPoolMu.Lock()
+	for i := currentSize; i < shardCount; i++ {
+		if _, exists := h.WorkerPool[i]; exists {
+			continue
+		}
+
+		workerChan := make(chan WorkerMessage, 100)
+		h.WorkerPool[i] = workerChan
+		go h.worker(workerChan)
+	}
+	h.workerPoolSize = int32(len(h.WorkerPool))
+	h.workerPoolMu.Unlock()
+}
+
+func (h *Handlers) worker(workerChan chan WorkerMessage) {
+	for msg := range workerChan {
+		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
+	}
+}
+
 // Dispatch dispatches a payload. All dispatched events will be sent through a goroutine, so
 // no errors are returned.
 func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.ProducedPayload) {
-	go h.DispatchType(eventCtx, payload.Type, payload)
+	shardID := payload.Metadata.Shard[1]
+	shardCount := payload.Metadata.Shard[2]
+
+	h.growWorkerPool(shardCount)
+
+	h.WorkerPool[shardID] <- WorkerMessage{
+		eventCtx: eventCtx,
+		payload:  payload,
+	}
 }
 
 // DispatchType is similar to Dispatch however a custom event name
