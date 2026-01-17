@@ -21,9 +21,8 @@ type Handlers struct {
 	eventHandlersMu sync.RWMutex
 	EventHandlers   map[string]*EventHandler
 
-	workerPoolMu   sync.RWMutex
-	workerPoolSize int32
-	WorkerPool     map[int32]chan WorkerMessage
+	workerPoolMu sync.RWMutex
+	WorkerPool   map[int32]chan WorkerMessage
 }
 
 // SetupHandler ensures all nullable variables are properly constructed.
@@ -33,7 +32,6 @@ func SetupHandler(handler *Handlers) *Handlers {
 			eventHandlersMu: sync.RWMutex{},
 			EventHandlers:   make(map[string]*EventHandler),
 			workerPoolMu:    sync.RWMutex{},
-			workerPoolSize:  0,
 			WorkerPool:      make(map[int32]chan WorkerMessage),
 		}
 	}
@@ -193,28 +191,21 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 	return h.RegisterEvent(eventName, parser, nil)
 }
 
-func (h *Handlers) growWorkerPool(eventCtx *EventContext, shardCount int32) {
+func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan WorkerMessage {
 	h.workerPoolMu.Lock()
 	defer h.workerPoolMu.Unlock()
 
-	currentSize := h.workerPoolSize
-	if shardCount <= currentSize {
-		return
+	channel, ok := h.WorkerPool[shardID]
+	if ok {
+		return channel
 	}
 
-	// Grow and spawn new workers
-	for index := int32(0); index < shardCount; index++ {
-		if _, exists := h.WorkerPool[index]; exists {
-			continue
-		}
+	channel = make(chan WorkerMessage, 100)
 
-		workerChan := make(chan WorkerMessage, 100)
-		h.WorkerPool[index] = workerChan
+	h.WorkerPool[shardID] = channel
+	go h.worker(eventCtx.Logger, channel)
 
-		go h.worker(eventCtx.Logger, workerChan)
-	}
-
-	h.workerPoolSize = int32(len(h.WorkerPool))
+	return channel
 }
 
 func (h *Handlers) worker(l *slog.Logger, workerChan chan WorkerMessage) {
@@ -228,27 +219,11 @@ func (h *Handlers) worker(l *slog.Logger, workerChan chan WorkerMessage) {
 // no errors are returned.
 func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.ProducedPayload) {
 	shardID := payload.Metadata.Shard[1]
-	shardCount := payload.Metadata.Shard[2]
 
-	h.workerPoolMu.RLock()
-	workerChan, exists := h.WorkerPool[shardID]
-	h.workerPoolMu.RUnlock()
-
-	if !exists {
-		h.growWorkerPool(eventCtx, shardCount)
-
-		h.workerPoolMu.RLock()
-		workerChan, exists = h.WorkerPool[shardID]
-		h.workerPoolMu.RUnlock()
-	}
-
-	if exists {
-		workerChan <- WorkerMessage{
-			eventCtx: eventCtx,
-			payload:  payload,
-		}
-	} else {
-		eventCtx.Logger.Error("Failed to dispatch event: no worker channel found", "shard_id", shardID)
+	channel := h.getWorkerPool(eventCtx, shardID)
+	channel <- WorkerMessage{
+		eventCtx: eventCtx,
+		payload:  payload,
 	}
 }
 
