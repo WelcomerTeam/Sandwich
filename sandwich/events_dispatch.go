@@ -222,7 +222,7 @@ func (h *Handlers) growWorkerPool(eventCtx *EventContext, shardCount int32) {
 		workerChan := make(chan WorkerMessage, 100)
 		h.WorkerPool[index] = workerChan
 
-		go h.worker(eventCtx.Logger, index, workerChan)
+		go h.worker(eventCtx.Logger, index)
 	}
 	h.workerPoolSize = int32(len(h.WorkerPool))
 
@@ -231,11 +231,12 @@ func (h *Handlers) growWorkerPool(eventCtx *EventContext, shardCount int32) {
 	h.workerPoolMu.Unlock()
 }
 
-func (h *Handlers) worker(l *slog.Logger, index int32, workerChan chan WorkerMessage) {
+func (h *Handlers) worker(l *slog.Logger, index int32) {
 	l.Info("Started event worker", "worker_index", index)
 	defer l.Info("Stopped event worker", "worker_index", index)
 
-	for msg := range workerChan {
+	for {
+		msg := <-h.WorkerPool[index]
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
 	}
 }
