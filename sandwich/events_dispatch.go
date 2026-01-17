@@ -200,13 +200,10 @@ func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan Wor
 
 	channel, ok := h.WorkerPool[shardID]
 	if ok {
-		println("[getworkerpool] Returning existing worker pool for shard", shardID, channel)
 		return channel
 	}
 
 	channel = make(chan WorkerMessage, 1024)
-
-	println("[getworkerpool] Creating worker pool for shard", shardID, channel)
 
 	h.WorkerPool[shardID] = channel
 	go h.worker(eventCtx.Logger, shardID, channel)
