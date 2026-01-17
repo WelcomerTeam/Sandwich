@@ -192,34 +192,40 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 }
 
 func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan WorkerMessage {
-	eventCtx.Logger.Debug("Fetching worker pool", "shard_id", shardID)
+	println("Fetching worker pool", "shard_id", shardID)
 
 	h.workerPoolMu.Lock()
 	defer h.workerPoolMu.Unlock()
 
 	channel, ok := h.WorkerPool[shardID]
 	if ok {
-		eventCtx.Logger.Debug("Found existing worker pool", "shard_id", shardID)
+		println("Found existing worker pool", "shard_id", shardID)
 
 		return channel
 	}
 
-	eventCtx.Logger.Debug("Creating new worker pool", "shard_id", shardID)
+	println("Creating new worker pool", "shard_id", shardID)
 
 	channel = make(chan WorkerMessage, 100)
 
 	h.WorkerPool[shardID] = channel
 	go h.worker(eventCtx.Logger, channel)
 
-	eventCtx.Logger.Debug("Created new worker pool", "shard_id", shardID)
+	println("Created new worker pool", "shard_id", shardID)
 
 	return channel
 }
 
 func (h *Handlers) worker(l *slog.Logger, workerChan chan WorkerMessage) {
+	println("Starting worker")
+	defer println("Stopping worker")
+
 	for {
+		println("Waiting for worker message")
 		msg := <-workerChan
+		println("Received worker message", "type", msg.payload.Type)
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
+		println("Processed worker message", "type", msg.payload.Type)
 	}
 }
 
