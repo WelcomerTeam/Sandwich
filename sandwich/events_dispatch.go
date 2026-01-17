@@ -25,7 +25,7 @@ type Handlers struct {
 	EventHandlers   map[string]*EventHandler
 
 	WorkerPoolMu sync.RWMutex
-	WorkerPool   map[int32]chan WorkerMessage
+	WorkerPool   map[int32]*ChannelBuffer[WorkerMessage]
 }
 
 // SetupHandler ensures all nullable variables are properly constructed.
@@ -35,7 +35,7 @@ func SetupHandler(handler *Handlers) *Handlers {
 			eventHandlersMu: sync.RWMutex{},
 			EventHandlers:   make(map[string]*EventHandler),
 			WorkerPoolMu:    sync.RWMutex{},
-			WorkerPool:      make(map[int32]chan WorkerMessage),
+			WorkerPool:      make(map[int32]*ChannelBuffer[WorkerMessage]),
 		}
 	}
 
@@ -194,25 +194,25 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 	return h.RegisterEvent(eventName, parser, nil)
 }
 
-func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan WorkerMessage {
+func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) *ChannelBuffer[WorkerMessage] {
 	h.WorkerPoolMu.Lock()
 	defer h.WorkerPoolMu.Unlock()
 
-	channel, ok := h.WorkerPool[shardID]
+	channelBuffer, ok := h.WorkerPool[shardID]
 	if ok {
-		return channel
+		return channelBuffer
 	}
 
-	channel = make(chan WorkerMessage, 1_024_000)
+	channelBuffer = NewChannelBuffer[WorkerMessage]()
 
-	h.WorkerPool[shardID] = channel
-	go h.worker(eventCtx.Logger, shardID, channel)
+	h.WorkerPool[shardID] = channelBuffer
+	go h.worker(eventCtx.Logger, shardID, channelBuffer)
 
-	return h.WorkerPool[shardID]
+	return channelBuffer
 }
 
-func (h *Handlers) worker(l *slog.Logger, shardID int32, workerChan chan WorkerMessage) {
-	for msg := range workerChan {
+func (h *Handlers) worker(l *slog.Logger, shardID int32, channelBuffer *ChannelBuffer[WorkerMessage]) {
+	for msg := range channelBuffer.Out {
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
 	}
 }
@@ -222,24 +222,11 @@ func (h *Handlers) worker(l *slog.Logger, shardID int32, workerChan chan WorkerM
 func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.ProducedPayload) {
 	shardID := payload.Metadata.Shard[1]
 
-	channel := h.getWorkerPool(eventCtx, shardID)
-
-	if !DropFullChannelEvents {
-		channel <- WorkerMessage{
-			eventCtx: eventCtx,
-			payload:  payload,
-		}
-	} else {
-		select {
-		case channel <- WorkerMessage{
-			eventCtx: eventCtx,
-			payload:  payload,
-		}:
-			return
-		default:
-			eventCtx.Logger.Warn("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type, "channel", channel)
-		}
-	}
+	channelBuffer := h.getWorkerPool(eventCtx, shardID)
+	channelBuffer.Push(WorkerMessage{
+		eventCtx: eventCtx,
+		payload:  payload,
+	})
 }
 
 // DispatchType is similar to Dispatch however a custom event name
