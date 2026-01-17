@@ -203,7 +203,7 @@ func (h *Handlers) growWorkerPool(eventCtx *EventContext, shardCount int32) {
 	}
 
 	// Grow and spawn new workers
-	for index := currentSize; index < shardCount; index++ {
+	for index := int32(0); index < shardCount; index++ {
 		if _, exists := h.WorkerPool[index]; exists {
 			continue
 		}
