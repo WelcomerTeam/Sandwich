@@ -209,23 +209,23 @@ func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan Wor
 	channel = make(chan WorkerMessage, 100)
 
 	h.WorkerPool[shardID] = channel
-	go h.worker(eventCtx.Logger, channel)
+	go h.worker(eventCtx.Logger, shardID, channel)
 
 	println("Created new worker pool", "shard_id", shardID)
 
 	return channel
 }
 
-func (h *Handlers) worker(l *slog.Logger, workerChan chan WorkerMessage) {
-	println("Starting worker")
-	defer println("Stopping worker")
+func (h *Handlers) worker(l *slog.Logger, shardID int32, workerChan chan WorkerMessage) {
+	println("Starting worker", shardID)
+	defer println("Stopping worker", shardID)
 
 	for {
-		println("Waiting for worker message")
+		println("Waiting for worker message", shardID)
 		msg := <-workerChan
-		println("Received worker message", "type", msg.payload.Type)
+		println("Received worker message", "type", msg.payload.Type, shardID)
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
-		println("Processed worker message", "type", msg.payload.Type)
+		println("Processed worker message", "type", msg.payload.Type, shardID)
 	}
 }
 
