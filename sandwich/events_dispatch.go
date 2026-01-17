@@ -203,7 +203,7 @@ func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan Wor
 		return channel
 	}
 
-	channel = make(chan WorkerMessage, 1024000)
+	channel = make(chan WorkerMessage, 1_024_000)
 
 	h.WorkerPool[shardID] = channel
 	go h.worker(eventCtx.Logger, shardID, channel)
