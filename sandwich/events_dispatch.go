@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"sync"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	sandwich_daemon "github.com/WelcomerTeam/Sandwich-Daemon"
 	sandwich_protobuf "github.com/WelcomerTeam/Sandwich-Daemon/proto"
 )
+
+var DropFullChannelEvents = os.Getenv("SANDWICH_DROP_FULL_CHANNEL_EVENTS") == "true"
 
 type WorkerMessage struct {
 	eventCtx *EventContext
@@ -192,40 +195,26 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 }
 
 func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan WorkerMessage {
-	println("Fetching worker pool", "shard_id", shardID)
-
 	h.workerPoolMu.Lock()
 	defer h.workerPoolMu.Unlock()
 
 	channel, ok := h.WorkerPool[shardID]
 	if ok {
-		println("Found existing worker pool", "shard_id", shardID)
-
 		return channel
 	}
 
-	println("Creating new worker pool", "shard_id", shardID)
-
-	channel = make(chan WorkerMessage, 100)
+	channel = make(chan WorkerMessage, 1024)
 
 	h.WorkerPool[shardID] = channel
 	go h.worker(eventCtx.Logger, shardID, channel)
-
-	println("Created new worker pool", "shard_id", shardID)
 
 	return channel
 }
 
 func (h *Handlers) worker(l *slog.Logger, shardID int32, workerChan chan WorkerMessage) {
-	println("Starting worker", shardID)
-	defer println("Stopping worker", shardID)
-
 	for {
-		println("Waiting for worker message", shardID)
 		msg := <-workerChan
-		println("Received worker message", "type", msg.payload.Type, shardID)
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
-		println("Processed worker message", "type", msg.payload.Type, shardID)
 	}
 }
 
@@ -235,17 +224,23 @@ func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.Prod
 	shardID := payload.Metadata.Shard[1]
 
 	channel := h.getWorkerPool(eventCtx, shardID)
-	println("Dispatching to worker pool", "shard_id", shardID)
-	select {
-	case channel <- WorkerMessage{
-		eventCtx: eventCtx,
-		payload:  payload,
-	}:
-		return
-	default:
-		println("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type)
+
+	if !DropFullChannelEvents {
+		channel <- WorkerMessage{
+			eventCtx: eventCtx,
+			payload:  payload,
+		}
+	} else {
+		select {
+		case channel <- WorkerMessage{
+			eventCtx: eventCtx,
+			payload:  payload,
+		}:
+			return
+		default:
+			eventCtx.Logger.Warn("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type)
+		}
 	}
-	println("Dispatched to worker pool", "shard_id", shardID)
 }
 
 // DispatchType is similar to Dispatch however a custom event name
