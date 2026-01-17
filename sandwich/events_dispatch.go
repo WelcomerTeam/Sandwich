@@ -24,7 +24,7 @@ type Handlers struct {
 	eventHandlersMu sync.RWMutex
 	EventHandlers   map[string]*EventHandler
 
-	workerPoolMu sync.RWMutex
+	WorkerPoolMu sync.RWMutex
 	WorkerPool   map[int32]chan WorkerMessage
 }
 
@@ -34,7 +34,7 @@ func SetupHandler(handler *Handlers) *Handlers {
 		handler = &Handlers{
 			eventHandlersMu: sync.RWMutex{},
 			EventHandlers:   make(map[string]*EventHandler),
-			workerPoolMu:    sync.RWMutex{},
+			WorkerPoolMu:    sync.RWMutex{},
 			WorkerPool:      make(map[int32]chan WorkerMessage),
 		}
 	}
@@ -195,8 +195,8 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 }
 
 func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan WorkerMessage {
-	h.workerPoolMu.Lock()
-	defer h.workerPoolMu.Unlock()
+	h.WorkerPoolMu.Lock()
+	defer h.WorkerPoolMu.Unlock()
 
 	channel, ok := h.WorkerPool[shardID]
 	if ok {
