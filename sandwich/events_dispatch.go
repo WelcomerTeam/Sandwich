@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -192,32 +193,48 @@ func (h *Handlers) RegisterEventHandler(eventName string, parser EventParser) *E
 	return h.RegisterEvent(eventName, parser, nil)
 }
 
-func (h *Handlers) growWorkerPool(shardCount int32) {
+func (h *Handlers) growWorkerPool(eventCtx *EventContext, shardCount int32) {
+	eventCtx.Logger.Debug("Growing worker pool", "desired_size", shardCount)
+
 	h.workerPoolMu.RLock()
 	currentSize := h.workerPoolSize
 	h.workerPoolMu.RUnlock()
 
 	if shardCount <= currentSize {
+		eventCtx.Logger.Debug("No need to grow worker pool", "current_size", currentSize, "desired_size", shardCount)
+
 		return
 	}
+
+	eventCtx.Logger.Debug("Growing worker pool", "current_size", currentSize, "desired_size", shardCount)
 
 	// Grow and spawn new workers
 
 	h.workerPoolMu.Lock()
-	for i := currentSize; i < shardCount; i++ {
-		if _, exists := h.WorkerPool[i]; exists {
+
+	eventCtx.Logger.Debug("Spawning new workers", "from", currentSize, "to", shardCount)
+
+	for index := currentSize; index < shardCount; index++ {
+		if _, exists := h.WorkerPool[index]; exists {
 			continue
 		}
 
 		workerChan := make(chan WorkerMessage, 100)
-		h.WorkerPool[i] = workerChan
-		go h.worker(workerChan)
+		h.WorkerPool[index] = workerChan
+
+		go h.worker(eventCtx.Logger, index, workerChan)
 	}
 	h.workerPoolSize = int32(len(h.WorkerPool))
+
+	eventCtx.Logger.Debug("Finished spawning new workers", "new_size", h.workerPoolSize)
+
 	h.workerPoolMu.Unlock()
 }
 
-func (h *Handlers) worker(workerChan chan WorkerMessage) {
+func (h *Handlers) worker(l *slog.Logger, index int32, workerChan chan WorkerMessage) {
+	l.Info("Started event worker", "worker_index", index)
+	defer l.Info("Stopped event worker", "worker_index", index)
+
 	for msg := range workerChan {
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
 	}
@@ -229,7 +246,7 @@ func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.Prod
 	shardID := payload.Metadata.Shard[1]
 	shardCount := payload.Metadata.Shard[2]
 
-	h.growWorkerPool(shardCount)
+	h.growWorkerPool(eventCtx, shardCount)
 
 	h.WorkerPool[shardID] <- WorkerMessage{
 		eventCtx: eventCtx,
