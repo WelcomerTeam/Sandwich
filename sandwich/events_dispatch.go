@@ -200,20 +200,22 @@ func (h *Handlers) getWorkerPool(eventCtx *EventContext, shardID int32) chan Wor
 
 	channel, ok := h.WorkerPool[shardID]
 	if ok {
+		println("[getworkerpool] Returning existing worker pool for shard", shardID, channel)
 		return channel
 	}
 
 	channel = make(chan WorkerMessage, 1024)
 
+	println("[getworkerpool] Creating worker pool for shard", shardID, channel)
+
 	h.WorkerPool[shardID] = channel
 	go h.worker(eventCtx.Logger, shardID, channel)
 
-	return channel
+	return h.WorkerPool[shardID]
 }
 
 func (h *Handlers) worker(l *slog.Logger, shardID int32, workerChan chan WorkerMessage) {
-	for {
-		msg := <-workerChan
+	for msg := range workerChan {
 		h.DispatchType(msg.eventCtx, msg.payload.Type, msg.payload)
 	}
 }
@@ -238,7 +240,7 @@ func (h *Handlers) Dispatch(eventCtx *EventContext, payload sandwich_daemon.Prod
 		}:
 			return
 		default:
-			eventCtx.Logger.Warn("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type)
+			eventCtx.Logger.Warn("Worker pool full, dropping event", "shard_id", shardID, "type", payload.Type, "channel", channel)
 		}
 	}
 }
