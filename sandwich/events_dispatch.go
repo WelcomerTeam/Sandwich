@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"maps"
 	"os"
 	"sync"
 	"time"
@@ -134,9 +135,7 @@ func newSandwichHandlers() *Handlers {
 		eventCtx.Sandwich.identifiersMu.Lock()
 		eventCtx.Sandwich.Identifiers = map[string]*sandwich_protobuf.SandwichApplication{}
 
-		for k, v := range identifiers.GetApplications() {
-			eventCtx.Sandwich.Identifiers[k] = v
-		}
+		maps.Copy(eventCtx.Sandwich.Identifiers, identifiers.GetApplications())
 		eventCtx.Sandwich.identifiersMu.Unlock()
 
 		return nil
@@ -149,7 +148,7 @@ type EventHandler struct {
 	eventName string
 
 	EventsMu sync.RWMutex
-	Events   []interface{}
+	Events   []any
 
 	Parser EventParser
 
@@ -160,7 +159,7 @@ type EventParser func(eventCtx *EventContext, payload sandwich_daemon.ProducedPa
 
 // Discord Events.
 
-func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event interface{}) *EventHandler {
+func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event any) *EventHandler {
 	h.eventHandlersMu.Lock()
 	defer h.eventHandlersMu.Unlock()
 
@@ -169,7 +168,7 @@ func (h *Handlers) RegisterEvent(eventName string, parser EventParser, event int
 		eventHandler := &EventHandler{
 			eventName: eventName,
 			EventsMu:  sync.RWMutex{},
-			Events:    make([]interface{}, 0),
+			Events:    make([]any, 0),
 			Parser:    parser,
 			_handlers: h,
 		}

@@ -197,7 +197,7 @@ func (sandwich *Sandwich) RegisterBot(identifier string, bot *Bot) {
 	sandwich.botsMu.Unlock()
 }
 
-func (sandwich *Sandwich) RecoverEventPanic(errorValue interface{}, eventCtx *EventContext, payload *sandwich_daemon.ProducedPayload) {
+func (sandwich *Sandwich) RecoverEventPanic(errorValue any, eventCtx *EventContext, payload *sandwich_daemon.ProducedPayload) {
 	sandwich.Logger.Error("Recovered panic on event dispatch",
 		"errorValue", errorValue,
 		"type", payload.Type)
@@ -292,7 +292,7 @@ func (eventCtx *EventContext) Trace() sandwich_daemon.Trace {
 	return nil
 }
 
-func (eventCtx *EventContext) DecodeContent(msg sandwich_daemon.ProducedPayload, out interface{}) error {
+func (eventCtx *EventContext) DecodeContent(msg sandwich_daemon.ProducedPayload, out any) error {
 	err := json.Unmarshal(msg.Data, &out)
 	if err != nil {
 		return errors.Errorf("failed to unmarshal gateway payload: %v", err)
@@ -301,7 +301,7 @@ func (eventCtx *EventContext) DecodeContent(msg sandwich_daemon.ProducedPayload,
 	return nil
 }
 
-func (eventCtx *EventContext) DecodeExtra(msg sandwich_daemon.ProducedPayload, key string, out interface{}) (ok bool, err error) {
+func (eventCtx *EventContext) DecodeExtra(msg sandwich_daemon.ProducedPayload, key string, out any) (ok bool, err error) {
 	valBytes, ok := msg.Extra[key]
 	if !ok {
 		return false, nil
